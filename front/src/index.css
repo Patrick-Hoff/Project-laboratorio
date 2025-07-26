@@ -1,0 +1,12 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body, #root {
+  background-color: #f7f8fa; /* quase branco com toque quente */
+  color: #333;
+  font-family: Arial, sans-serif;
+  min-height: 100vh;
+}
