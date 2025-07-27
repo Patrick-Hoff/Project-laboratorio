@@ -206,47 +206,6 @@ function Atendimento() {
 }
 
 
-    // async function addExames() {
-    //     axios.get('http://localhost:8081/exames')
-    //         .then((res) => {
-    //             const exames = res.data.data; // array de exames vindo da API
-
-    //             // Procurar o exame que bate com o código digitado (exameBusca.cod)
-    //             const exameEncontrado = exames.find(e => e.cod === exameBusca.cod || e.nome === exameBusca.nome);
-
-
-    //             if (exameEncontrado) {
-    //                 // Verifica se exame já foi adicionado no estado
-    //                 const jaAdicionado = exameAdicionado.some(e => e.cod === exameEncontrado.cod || e.nome === exameBusca.nome);
-
-    //                 if (!jaAdicionado) {
-    //                     // Adiciona o exame ao estado, criando um novo array
-    //                     setExameAdicionado(prev => [...prev, exameEncontrado]);
-
-    //                     const postExames = {
-    //                         atendimento_id: id,
-    //                         exames_id: exameEncontrado.id,
-    //                         resultado: 'pendente'
-    //                     }
-
-    //                     axios.post('http://localhost:8081/exames_atendimento/add', postExames)
-    //                     setExameBusca({ cod: '', nome: '' })
-    //                     carregarExamesPaciente()
-
-    //                     console.log(err)
-
-    //                 }
-    //             } else {
-    //                 toast.error('Exame não existente')
-    //             }
-    //         })
-    //         .catch(err => {
-    //             console.error('Erro ao buscar exames:', err);
-    //         });
-
-    // }
-
-
     useEffect(() => {
 
         const fetchSugestoes = async () => {
