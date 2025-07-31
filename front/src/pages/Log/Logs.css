@@ -1,0 +1,67 @@
+.logsContainer {
+  max-width: 900px;
+  margin: 40px auto;
+  padding: 20px;
+  background: #fdfdfd;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  font-family: Arial, sans-serif;
+}
+
+.logsTitle {
+  font-size: 24px;
+  margin-bottom: 30px;
+  text-align: center;
+  color: #333;
+}
+
+.filtersSection {
+  display: flex;
+  gap: 20px;
+  align-items: flex-end;
+  margin-bottom: 30px;
+  flex-wrap: wrap;
+}
+
+.dateFilter,
+.operationFilter {
+  display: flex;
+  flex-direction: column;
+}
+
+.dateFilter label,
+.operationFilter label {
+  margin-bottom: 5px;
+  font-weight: 500;
+  color: #555;
+}
+
+.dateFilter input[type="date"],
+.operationFilter select {
+  padding: 6px 10px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
+.searchButton {
+  padding: 8px 16px;
+  background-color: #1976d2;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.searchButton:hover {
+  background-color: #125ba1;
+}
+
+.logsContent {
+  min-height: 200px;
+  background: #f8f8f8;
+  padding: 15px;
+  border-radius: 6px;
+  border: 1px solid #e0e0e0;
+}

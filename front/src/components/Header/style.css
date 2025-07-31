@@ -6,7 +6,8 @@
 
 .header nav ul {
   display: flex;
-  justify-content: flex-start; /* alinhado à esquerda */
+  justify-content: flex-start;
+  /* alinhado à esquerda */
   align-items: center;
   gap: 2rem;
   list-style: none;
@@ -31,12 +32,14 @@
   bottom: 0;
   width: 0%;
   height: 2px;
-  background-color: #007bff; /* Azul bonito no underline */
+  background-color: #007bff;
+  /* Azul bonito no underline */
   transition: width 0.3s ease;
 }
 
 .header nav ul li a:hover {
-  color: #007bff; /* Azul no texto ao passar o mouse */
+  color: #007bff;
+  /* Azul no texto ao passar o mouse */
 }
 
 .header nav ul li a:hover::after {
@@ -48,4 +51,28 @@
     flex-direction: column;
     gap: 1rem;
   }
+}
+
+.containerLink {
+  position: relative;
+}
+
+.linkLog {
+  display: flex;
+  flex-direction: column;
+  display: none;
+  position: absolute;
+  top: 100%;
+  left: 0;
+  background: white;
+  border: 1px solid #ccc;
+  padding: 10px;
+  z-index: 1000;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+  border-radius: 4px;
+  
+}
+
+.containerLink:hover .linkLog {
+  display: block;
 }

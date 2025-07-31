@@ -18,6 +18,13 @@ function Header() {
           <li>
             <Link to="/exames">Exames</Link>
           </li>
+            <li className='containerLink'>
+              <Link >Logs</Link>
+              <div className='linkLog'>
+                <Link to="/search-logs/pacientes">Pacientes</Link>
+                <Link to="/search-logs/exames">Exames</Link>
+              </div>
+            </li>
         </ul>
       </nav>
     </header>
