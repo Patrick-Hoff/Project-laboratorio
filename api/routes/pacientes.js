@@ -2,21 +2,25 @@ import express from 'express'
 import { getPacientes,
     addPacientes,
     updatePaciente,
-    deletePaciente
+    deletePaciente,
+    logPaciente
  } from '../controllers/pacientes.js'
 
 const router = express.Router()
 
-// Buscar todos exames
+// Buscar todos pacientes
 router.get('/', getPacientes)
 
-// Criar atendimento
-router.post('/',addPacientes)
+// Cadastrar paciente
+router.post('/', addPacientes)
 
-// Atualizar atendimento pelo ID
+// Atualizar paciente pelo ID
 router.put('/:id/edit', updatePaciente)
 
 // Deletar atendimento pelo ID
 router.delete('/:id/remove', deletePaciente)
+
+// Buscar todos os logs de pacientes
+router.get('/log', logPaciente)
 
 export default router
