@@ -12,10 +12,6 @@ CREATE TABLE IF NOT EXISTS `atendimentos` (
   KEY `paciente_id` (`paciente_id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=49 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
---
--- Extraindo dados da tabela `atendimentos`
---
--- --------------------------------------------------------
 
 --
 -- Estrutura da tabela `exames`
@@ -61,6 +57,38 @@ CREATE TABLE IF NOT EXISTS `pacientes` (
   `idade` varchar(10) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=MyISAM AUTO_INCREMENT=13 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+--
+-- Estrutura da tabela `logexame`
+--
+
+CREATE TABLE IF NOT EXISTS `logexame` (
+  `id_log` int NOT NULL AUTO_INCREMENT,
+  `id_exame` int NOT NULL,
+  `cod` varchar(5) DEFAULT NULL,
+  `exame` varchar(50) DEFAULT NULL,
+  `data_alteracao` datetime DEFAULT CURRENT_TIMESTAMP,
+  `tipo_alteracao` varchar(20) DEFAULT NULL,
+  PRIMARY KEY (`id_log`)
+) ENGINE=MyISAM DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Estrutura da tabela `logpaciente`
+--
+
+CREATE TABLE IF NOT EXISTS `logpaciente` (
+  `id_log` int NOT NULL AUTO_INCREMENT,
+  `id_paciente` int NOT NULL,
+  `idade` varchar(10) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
+  `paciente` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
+  `data_alteracao` datetime DEFAULT CURRENT_TIMESTAMP,
+  `tipo_alteracao` varchar(20) DEFAULT NULL,
+  PRIMARY KEY (`id_log`)
+) ENGINE=MyISAM DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+
 
 --
 -- Restrições para despejos de tabelas
