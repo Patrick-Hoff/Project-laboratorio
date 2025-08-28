@@ -6,7 +6,6 @@ import { IoIosAddCircle } from "react-icons/io";
 import 'bootstrap/dist/css/bootstrap.min.css';
 import { ToastContainer, toast } from 'react-toastify';
 import { FaArrowRight, FaArrowLeft } from "react-icons/fa";
-import './styles.css'
 
 import Button from 'react-bootstrap/Button';
 import Modal from 'react-bootstrap/Modal';
@@ -14,6 +13,9 @@ import Form from 'react-bootstrap/Form';
 
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
+
+import '../../styles/shared.css'
+
 
 function Pacientes() {
 
@@ -126,7 +128,7 @@ function Pacientes() {
                 <button onClick={() => setModalShow(true)}><IoIosAddCircle /></button>
             </div>
 
-            <table className="tabela-pacientes">
+            <table className="tabela-container">
                 <thead>
                     <tr>
                         <th>ID</th>

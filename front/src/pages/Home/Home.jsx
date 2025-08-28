@@ -3,7 +3,8 @@ import axios from 'axios'
 import { BiSolidCommentEdit } from "react-icons/bi";
 import { FaArrowRight, FaArrowLeft } from "react-icons/fa";
 import { Link, useNavigate } from 'react-router-dom';
-import './style.css'
+
+import '../../styles/shared.css'
 
 function Home() {
     const [atendimento, setAtendimento] = useState([])
@@ -57,7 +58,7 @@ function Home() {
                 Total {total}
             </span>
             <div className="grid">
-                <table className="tabela-atendimento">
+                <table className="tabela-container">
                     <thead>
                         <tr>
                             <th>ID</th>

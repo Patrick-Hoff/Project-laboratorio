@@ -1,14 +1,18 @@
-import { BrowserRouter } from 'react-router-dom'
-import RoutesApp from './routes/index'
-import Header from './components/Header/Header'
+import { useLocation } from 'react-router-dom';
+import RoutesApp from './routes/index';
+import Header from './components/Header/Header';
 
 function App() {
+  const location = useLocation();
+
+  const isLoginPage = location.pathname === '/login';
+
   return (
-    <BrowserRouter>
-      <Header />
+    <>
+      {!isLoginPage && <Header />}
       <RoutesApp />
-    </BrowserRouter>
-  )
+    </>
+  );
 }
 
-export default App
+export default App;

@@ -1,0 +1,187 @@
+/* ========================
+   CONTAINER E HEADER
+======================== */
+
+.container {
+  padding: 20px;
+  font-family: Arial, sans-serif;
+}
+
+.containerH1 {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.containerH1 h1 {
+  padding: 20px 0;
+}
+
+.containerH1 button {
+  font-size: 1.9rem;
+  color: blue;
+  border: none;
+  background: none;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+}
+
+.containerH1 button:hover {
+  color: rgb(4, 4, 58);
+  font-size: 2rem;
+}
+
+/* ========================
+   TABELA DE ATENDIMENTO
+======================== */
+
+.tabela-container {
+  width: 100%;
+  border-collapse: collapse;
+  background-color: #fff;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  margin-bottom: 20px;
+}
+
+.tabela-container thead {
+  background-color: #007bff;
+  color: #fff;
+}
+
+.tabela-container thead th {
+  padding: 0.75rem 1rem;
+  text-align: left;
+}
+
+.tabela-container tbody td {
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid #ddd;
+}
+
+.tabela-container tbody tr:hover {
+  background-color: #f1f1f1;
+}
+
+/* ========================
+   INPUTS DENTRO DA TABELA
+======================== */
+
+.input-tabela {
+  padding: 0.3rem;
+  font-size: 0.9rem;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  width: 100%;
+  box-sizing: border-box;
+  transition: 0.2s ease;
+}
+
+.input-tabela:focus {
+  outline: none;
+  border-color: #007bff;
+  box-shadow: 0 0 5px rgba(0, 123, 255, 0.7);
+}
+
+.input-id {
+  width: 60px;
+  text-align: center;
+}
+
+.input-cod {
+  width: 100px;
+}
+
+.input-nome {
+  width: 180px;
+}
+
+/* ========================
+   ÍCONES DE AÇÕES
+======================== */
+
+.icon {
+  display: flex;
+  gap: 1rem;
+  font-size: 1.5rem;
+  color: #007bff;
+  cursor: pointer;
+}
+
+.icon span:hover {
+  color: #0056b3;
+}
+
+/* ========================
+   PAGINAÇÃO
+======================== */
+
+.pagination {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 15px;
+  margin-top: 20px;
+}
+
+.arrow {
+  font-size: 28px;
+  color: black;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+.arrow:hover {
+  color: #3498db;
+}
+
+.arrow.disabled {
+  color: #aaa;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+/* ========================
+   RESPONSIVIDADE
+======================== */
+
+@media (max-width: 768px) {
+  .input-id,
+  .input-cod,
+  .input-nome {
+    width: 100%;
+  }
+
+  .tabela-container {
+    font-size: 0.85rem;
+  }
+
+  .tabela-container thead {
+    display: none;
+  }
+
+  .tabela-container tbody tr {
+    display: block;
+    margin-bottom: 10px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 10px;
+  }
+
+  .tabela-container tbody td {
+    display: flex;
+    justify-content: space-between;
+    padding: 10px;
+    border: none;
+  }
+
+  .tabela-container tbody td::before {
+    content: attr(data-label);
+    font-weight: bold;
+    color: #555;
+  }
+}

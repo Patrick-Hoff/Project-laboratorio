@@ -168,42 +168,42 @@ function Atendimento() {
 
 
     async function addExames(exameSelecionado) {
-    try {
-        const res = await axios.get('http://localhost:8081/exames');
-        const exames = res.data.data;
+        try {
+            const res = await axios.get('http://localhost:8081/exames');
+            const exames = res.data.data;
 
-        // Busca o exame dentro da resposta da API (com base no cod ou nome)
-        const exameEncontrado = exames.find(e =>
-            e.cod === exameSelecionado.cod || e.nome === exameSelecionado.nome
-        );
-
-        if (exameEncontrado) {
-            const jaAdicionado = exameAdicionado.some(e =>
-                e.cod === exameEncontrado.cod || e.nome === exameEncontrado.nome
+            // Busca o exame dentro da resposta da API (com base no cod ou nome)
+            const exameEncontrado = exames.find(e =>
+                e.cod === exameSelecionado.cod || e.nome === exameSelecionado.nome
             );
 
-            if (!jaAdicionado) {
-                setExameAdicionado(prev => [...prev, exameEncontrado]);
+            if (exameEncontrado) {
+                const jaAdicionado = exameAdicionado.some(e =>
+                    e.cod === exameEncontrado.cod || e.nome === exameEncontrado.nome
+                );
 
-                const postExames = {
-                    atendimento_id: id,
-                    exames_id: exameEncontrado.id,
-                    resultado: 'pendente'
-                };
+                if (!jaAdicionado) {
+                    setExameAdicionado(prev => [...prev, exameEncontrado]);
 
-                await axios.post('http://localhost:8081/exames_atendimento/add', postExames);
-                setExameBusca({ cod: '', nome: '' });
-                carregarExamesPaciente();
+                    const postExames = {
+                        atendimento_id: id,
+                        exames_id: exameEncontrado.id,
+                        resultado: 'pendente'
+                    };
+
+                    await axios.post('http://localhost:8081/exames_atendimento/add', postExames);
+                    setExameBusca({ cod: '', nome: '' });
+                    carregarExamesPaciente();
+                } else {
+                    toast.info('Exame já foi adicionado.');
+                }
             } else {
-                toast.info('Exame já foi adicionado.');
+                toast.error('Exame não existente.');
             }
-        } else {
-            toast.error('Exame não existente.');
+        } catch (err) {
+            console.error('Erro ao buscar ou adicionar exame:', err);
         }
-    } catch (err) {
-        console.error('Erro ao buscar ou adicionar exame:', err);
     }
-}
 
 
     useEffect(() => {
@@ -281,6 +281,7 @@ function Atendimento() {
 
     return (
         <div className="container">
+
             <div className='title-btn'>
                 <h1 className="titulo">
 

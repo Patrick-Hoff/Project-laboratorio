@@ -5,12 +5,13 @@ import { FaDeleteLeft } from "react-icons/fa6";
 import { IoIosAddCircle } from "react-icons/io";
 import { FaArrowRight, FaArrowLeft } from "react-icons/fa";
 import 'bootstrap/dist/css/bootstrap.min.css';
-import './styles.css';
 import { ToastContainer, toast } from 'react-toastify';
 
 import Button from 'react-bootstrap/Button';
 import Modal from 'react-bootstrap/Modal';
 import Form from 'react-bootstrap/Form';
+
+import '../../styles/shared.css'
 
 function Exames() {
     const [exames, setExames] = useState([]);
@@ -139,7 +140,7 @@ function Exames() {
             </div>
 
             <div className="grid">
-                <table className="tabela-atendimento">
+                <table className="tabela-container">
                     <thead>
                         <tr>
                             <th>ID</th>
