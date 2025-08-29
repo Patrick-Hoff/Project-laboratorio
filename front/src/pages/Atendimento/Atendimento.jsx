@@ -400,6 +400,7 @@ function Atendimento() {
                         <tr>
                             <th>Código</th>
                             <th>Nome do Exame</th>
+                            <th>Valor</th>
                             <th>Edit</th>
                         </tr>
                     </thead>
@@ -408,6 +409,7 @@ function Atendimento() {
                             <tr key={exame.id_primary}>
                                 <td>{exame.cod_exame}</td>
                                 <td>{exame.nome_exame}</td>
+                                <td>{exame.valor}</td>
                                 <td className='icon iconRemove'>
                                     <span>
                                         <FaDeleteLeft onClick={() => handleDelete(exame.id_primary)} />

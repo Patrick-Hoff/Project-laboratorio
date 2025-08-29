@@ -39,11 +39,12 @@ export const getExames = (req, res) => {
 
 // Criar novo exame
 export const addExame = (req, res) => {
-    const q = 'INSERT INTO exames(`cod`, `nome`) VALUES (?)'
+    const q = 'INSERT INTO exames(`cod`, `nome`, `valor`) VALUES (?)'
 
     const values = [
         req.body.cod,
         req.body.nome,
+        req.body.valor,
     ]
 
     db.query(q, [values], (err, result) => {
@@ -56,21 +57,22 @@ export const addExame = (req, res) => {
         const insertId = result.insertId;
 
         const logQuery = `
-            INSERT INTO logexame (id_exame, cod, exame, tipo_alteracao)
-            VALUES (?, ?, ?, 'Insert')
+            INSERT INTO logexame (id_exame, cod, exame, valor, tipo_alteracao)
+            VALUES (?, ?, ?, ?, 'Insert')
         `
 
         const logValues = [
             insertId,
             req.body.cod,
             req.body.nome,
+            req.body.valor,
         ]
 
         db.query(logQuery, logValues, (logErr) => {
             if (logErr) {
                 console.error('Erro ao registrar log do atendimento.')
             }
-            return res.status(200).json('Exame criado com sucesso e exame registrado')
+            return res.status(200).json('Exame criado com sucesso e log registrado')
 
         })
 
@@ -96,8 +98,8 @@ export const updateExame = (req, res) => {
         const oldExame = selectResult[0];
 
         // 2. Atualizar o exame
-        const updateQuery = 'UPDATE exames SET `cod` = ?, `nome` = ? WHERE `id` = ?';
-        const values = [req.body.cod, req.body.nome, exameId];
+        const updateQuery = 'UPDATE exames SET `cod` = ?, `nome` = ?, `valor` = ? WHERE `id` = ?';
+        const values = [req.body.cod, req.body.nome, req.body.valor, exameId];
 
         db.query(updateQuery, values, (updateErr) => {
             if (updateErr) {

@@ -4,12 +4,12 @@ import { db } from '../db.js'
 export const getExamesAtendimento = (req, res) => {
     const q = `
    
-
     SELECT 
     exames_atendimento.id AS id_primary,
 	exames_atendimento.exames_id AS id_exame,
     exames.cod AS cod_exame,
-    exames.nome AS nome_exame
+    exames.nome AS nome_exame,
+    exames.valor AS valor
     FROM exames_atendimento
 INNER JOIN exames ON exames.id = exames_atendimento.exames_id
     WHERE atendimento_id = ?;

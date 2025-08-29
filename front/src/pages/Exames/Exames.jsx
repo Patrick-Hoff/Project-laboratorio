@@ -19,6 +19,7 @@ function Exames() {
     const [cod, setCod] = useState('')
     const [nome, setNome] = useState('')
     const [edit, setEdit] = useState([])
+    const [valor, setValor] = useState()
 
     const [searchId, setSearchId] = useState('')
     const [searchCod, setSearchCod] = useState('')
@@ -71,9 +72,9 @@ function Exames() {
 
         const exame = {
             cod: cod,
-            nome: nome
+            nome: nome,
+            valor: valor
         }
-        console.log(exame)
 
         if (edit.id) {
 
@@ -87,11 +88,11 @@ function Exames() {
         } else {
             axios.post('http://localhost:8081/exames', exame)
                 .then(() => {
-                    console.log()
                     setModalShow(false)
+                    getExames()
                     setCod('')
                     setNome('')
-                    getExames()
+                    valor('')
                     exame()
                     toast.success('Exame criado com sucesso!')
                 }).catch((err) => {
@@ -100,7 +101,6 @@ function Exames() {
                     }
                 })
         }
-
 
     }
 
@@ -121,10 +121,11 @@ function Exames() {
         setEdit({})
     }
 
-    function handleEdit(id, cod, nome) {
-        setEdit({ id, cod, nome });
+    function handleEdit(id, cod, nome, valor) {
+        setEdit({ id, cod, nome, valor });
         setCod(cod);
         setNome(nome);
+        setValor(valor)
         setModalShow(true);
     }
 
@@ -186,7 +187,7 @@ function Exames() {
                                     <td>{item.nome}</td>
                                     <td className="icon">
                                         <span>
-                                            <BiSolidCommentEdit onClick={() => handleEdit(item.id, item.cod, item.nome)} />
+                                            <BiSolidCommentEdit onClick={() => handleEdit(item.id, item.cod, item.nome, item.valor)} />
                                         </span>
                                         <span>
                                             <FaDeleteLeft onClick={() => handleDelete(item.id)} />
@@ -252,6 +253,16 @@ function Exames() {
                                 required
                                 onChange={(e) => setNome(e.target.value)}
                                 value={nome}
+                            />
+                        </Form.Group>
+                        <Form.Group className="mb-3" controlId="formGroupPrice">
+                            <Form.Label>Valor</Form.Label>
+                            <Form.Control
+                                type="text"
+                                name="valor"
+                                placeholder="Valor"
+                                onChange={(e) => setValor(e.target.value)}
+                                value={valor}
                             />
                         </Form.Group>
                         <Modal.Footer>
