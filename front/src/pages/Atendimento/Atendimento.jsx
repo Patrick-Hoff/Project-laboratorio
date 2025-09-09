@@ -1,16 +1,25 @@
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
+
 import { FaSearch } from 'react-icons/fa';
-import Modal from 'react-bootstrap/Modal';
-import Button from 'react-bootstrap/Button';
 import { ToastContainer, toast } from 'react-toastify';
 import { FaArrowRight, FaArrowLeft } from "react-icons/fa";
 import { FaDeleteLeft } from "react-icons/fa6";
+
+import Modal from 'react-bootstrap/Modal';
+import Button from 'react-bootstrap/Button';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import './styles.css';
 
+import { formatarParaBRL, createCurrencyChangeHandler } from '../../utils/formatters';
+
+
 function Atendimento() {
+    const [errorPayment, setErrorPayment] = useState('')
+
+    const [displayValor, setDisplayValor] = useState('' || 'R$ 0,00')
+
     const [pacienteOriginal, setPacienteOriginal] = useState(null)
     const [paciente, setPaciente] = useState({ id: '', nome: '', idade: '', nascimento: '' });
     const [pacientes, setPacientes] = useState([]);
@@ -18,6 +27,13 @@ function Atendimento() {
     const [atendimentoId, setAtendimentoId] = useState();
     const [exameBusca, setExameBusca] = useState({ cod: '', nome: '' });
     const [exameAdicionado, setExameAdicionado] = useState([])
+
+    const [formaPagamento, setFormaPagamento] = useState('');
+    const [valorTotal, setValorTotal] = useState(0);
+    const [quantoPagar, setQuantoPagar] = useState(0)
+    const [totalPago, setTotalPago] = useState(0)
+    const quantoFaltaPagar = valorTotal - totalPago;
+
 
     const [searchId, setSearchId] = useState('')
     const [searchNome, setSearchNome] = useState('')
@@ -29,13 +45,13 @@ function Atendimento() {
     const [mostrarSugestoes, setMostrarSugestoes] = useState(false)
 
 
+
     const { id } = useParams()
     const navigate = useNavigate()
     useEffect(() => {
         const infoAtendimento = async (p) => {
             try {
                 const res = await axios.get(`http://localhost:8081/atendimentos/${id}/exames`);
-
                 // Checagem extra se data[0] existe
                 if (res.data && res.data.length > 0) {
                     const dados = res.data[0];
@@ -95,7 +111,14 @@ function Atendimento() {
         try {
 
             const res = await axios.get(`http://localhost:8081/exames_atendimento/${id}`)
+            const valorAtendimento = res.data.data;
             setExameAdicionado(res.data.data)
+
+            if (valorAtendimento.length > 0) {
+                setValorTotal(parseFloat(valorAtendimento[0].valor_total));
+            } else {
+                setValorTotal(0);
+            }
         } catch (err) {
             console.log(err)
         }
@@ -188,7 +211,7 @@ function Atendimento() {
                     const postExames = {
                         atendimento_id: id,
                         exames_id: exameEncontrado.id,
-                        resultado: 'pendente'
+                        resultado: 'pendente',
                     };
 
                     await axios.post('http://localhost:8081/exames_atendimento/add', postExames);
@@ -248,17 +271,17 @@ function Atendimento() {
 
 
     function handleDelete(id_primary) {
-        axios.delete(`http://localhost:8081/exames_atendimento/${id_primary}`)
+        axios.delete(`http://localhost:8081/exames_atendimento/${id_primary}/atendimento/${id}`)
             .then(() => {
                 toast.success('Exame deletado com sucesso!')
                 carregarExamesPaciente()
             }).catch((error) => {
                 toast.error('Não foi possivel excluir o exame!')
+                console.log(error)
             })
     }
 
     function handleDeleteAtendimento(id_att) {
-        console.log(id_att)
         axios.delete(`http://localhost:8081/atendimentos/${id_att}/remove`)
             .then(() => {
                 navigate('/')
@@ -270,7 +293,6 @@ function Atendimento() {
     }
 
 
-
     useEffect(() => {
         setPage(1)
     }, [searchId, searchNome])
@@ -279,146 +301,274 @@ function Atendimento() {
         if (modalShow) carregarPacientes();
     }, [modalShow, page, searchId, searchNome]);
 
+
+
+    // Pagamento
+    const handlePayment = async () => {
+        try {
+            const values = {
+                metodo: formaPagamento,
+                valor: quantoPagar
+            };
+
+            if (quantoPagar > quantoFaltaPagar) {
+                // Caso o valor pago seja maior que o devido, não realiza o pagamento
+                setErrorPayment('Valor incorreto.')
+            } else {
+                setErrorPayment('')
+                // Se o valor pago for válido, realiza o pagamento
+                const res = await axios.post(
+                    `http://localhost:8081/pagamentos/realizar_pagamento/atendimentoid/${id}`,
+                    values
+                );
+                getPayment(); // Atualiza os pagamentos
+                setFormaPagamento("");
+                setQuantoPagar("");
+                setDisplayValor("R$ 0,00")
+                toast.success('Pagamento realizado com sucesso!')
+            }
+
+        } catch (err) {
+            console.log('Erro ao realizar pagamento:', err); console.log(quantoPagar)
+        }
+    };
+
+    const getPayment = async () => {
+        await axios.get(`http://localhost:8081/pagamentos/info_pagamentos/${id}`)
+            .then((res) => {
+                setTotalPago(res.data.valorPago[0].valor_pago || '0.00');
+            }).catch((err) => {
+                console.log(err)
+            })
+    }
+
+
+    useEffect(() => {
+        getPayment()
+    }, [])
+
+
+    // Função exportada para realizar o pagamento do atendimento corretamente
+    const handleChange = createCurrencyChangeHandler(setQuantoPagar, setDisplayValor);
+
+
     return (
-        <div className="container">
+        <div className="container container-atendimento">
 
-            <div className='title-btn'>
-                <h1 className="titulo">
+            <div className='lado-esquerdo'>
 
-                    {atendimentoId ? 'Atendimento' : 'Cadastro de Atendimento'}
+                <div className='title-btn'>
+                    <h1 className="titulo">
 
-                </h1>
+                        {atendimentoId ? 'Atendimento' : 'Cadastro de Atendimento'}
 
-                <button disabled={!id} className='remove' onClick={() => handleDeleteAtendimento(id)}>Apagar atendimento</button>
+                    </h1>
+
+                    <button disabled={!id} className='remove' onClick={() => handleDeleteAtendimento(id)}>Apagar atendimento</button>
+                </div>
+
+                <form className="form-atendimento" onSubmit={handleSubmit}>
+                    <div className="linha-nome-id">
+                        <input
+                            type="text"
+                            name="id"
+                            placeholder="ID do Atendimento"
+                            className="input-id"
+                            readOnly
+                            value={atendimentoId || ''}
+                        />
+                        <input
+                            type="text"
+                            name="nomePaciente"
+                            placeholder="Nome do Paciente"
+                            className="input-nome"
+                            value={paciente.nome}
+                            readOnly
+                        />
+                        <FaSearch className="search" onClick={() => setModalShow(true)} />
+                    </div>
+
+                    <div className="linha-idade-data">
+                        <input
+                            type="number"
+                            name="idade"
+                            placeholder="Idade"
+                            className="input-idade"
+                            value={paciente.idade}
+                            readOnly
+                        />
+                        <input
+                            type="date"
+                            name="nascimento"
+                            placeholder="Data de Nascimento"
+                            className="input-data"
+                            value={paciente.nascimento}
+                            readOnly
+                        />
+                    </div>
+
+                    <button
+                        type="submit"
+                        className="btn-submit"
+                        disabled={
+                            (!atendimentoId && !paciente.id) ||
+                            (atendimentoId && JSON.stringify(paciente) === JSON.stringify(pacienteOriginal))
+                        }
+                    >
+                        {atendimentoId ? 'Atualizar atendimento' : 'Criar atendimento'}
+                    </button>
+
+                </form>
+
+
+
+
+                <h2 className="subtitulo">Adicionar Exame</h2>
+                <form className="filtro-exames">
+                    <input
+                        type="text"
+                        disabled={!id}
+                        placeholder="Código do exame"
+                        value={exameBusca.cod}
+                        onChange={(e) => setExameBusca({ ...exameBusca, cod: e.target.value })}
+                        className="input-filtro-codigo"
+                    />
+                    <input
+                        type="text"
+                        disabled={!id}
+                        placeholder="Nome do exame"
+                        value={exameBusca.nome}
+                        onChange={(e) => setExameBusca({ ...exameBusca, nome: e.target.value })}
+                        className="input-filtro-nome"
+                    />
+
+                    <Button
+                        variant="secondary"
+                        onClick={() => addExames(exameBusca)}
+                        disabled={!id}
+                    >
+                        Adicionar
+                    </Button>
+
+                </form>
+                <>
+                    {mostrarSugestoes && sugestoes.length > 0 && (
+                        <div className="dropdown-sugestoes">
+                            {sugestoes.map((sugestao) => (
+                                <div
+                                    key={sugestao.id}
+                                    className="item-sugestao"
+                                    onClick={() => {
+                                        setExameBusca({ cod: sugestao.cod, nome: sugestao.nome });
+                                        addExames(sugestao);
+                                        setMostrarSugestoes(false);
+                                    }}
+                                >
+                                    {sugestao.cod} - {sugestao.nome}
+                                </div>
+                            ))}
+                        </div>
+                    )}
+                </>
+
+                <div>
+                    <table className="tabela-exames">
+                        <thead>
+                            <tr>
+                                <th>Código</th>
+                                <th>Nome do Exame</th>
+                                <th>Valor</th>
+                                <th>Edit</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {exameAdicionado.map((exame) => (
+                                <tr key={exame.id_primary}>
+                                    <td>{exame.cod_exame}</td>
+                                    <td>{exame.nome_exame}</td>
+                                    <td>{formatarParaBRL(exame.valor)}</td>
+                                    <td className='icon iconRemove'>
+                                        <span>
+                                            <FaDeleteLeft onClick={() => handleDelete(exame.id_primary)} />
+                                        </span>
+                                    </td>
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
+                </div>
             </div>
 
-            <form className="form-atendimento" onSubmit={handleSubmit}>
-                <div className="linha-nome-id">
-                    <input
-                        type="text"
-                        name="id"
-                        placeholder="ID do Atendimento"
-                        className="input-id"
-                        readOnly
-                        value={atendimentoId || ''}
-                    />
-                    <input
-                        type="text"
-                        name="nomePaciente"
-                        placeholder="Nome do Paciente"
-                        className="input-nome"
-                        value={paciente.nome}
-                        readOnly
-                    />
-                    <FaSearch className="search" onClick={() => setModalShow(true)} />
-                </div>
+            <div className="pagamento-container">
+                <h2>Pagamento</h2>
 
-                <div className="linha-idade-data">
+                {/* Valor Total */}
+                <div className="form-group">
+                    <label htmlFor="valorTotal">Valor Total</label>
                     <input
-                        type="number"
-                        name="idade"
-                        placeholder="Idade"
-                        className="input-idade"
-                        value={paciente.idade}
+                        type="text"
+                        id="valorTotal"
+                        value={formatarParaBRL(valorTotal)}
                         readOnly
                     />
+                </div>
+                <div className='form-group'>
+                    <label htmlFor='A pagar'>Valor pago</label>
                     <input
-                        type="date"
-                        name="nascimento"
-                        placeholder="Data de Nascimento"
-                        className="input-data"
-                        value={paciente.nascimento}
+                        type="text"
+                        id="A pagar"
+                        value={formatarParaBRL(totalPago)}
                         readOnly
                     />
                 </div>
 
-                <button
-                    type="submit"
-                    className="btn-submit"
-                    disabled={
-                        (!atendimentoId && !paciente.id) ||
-                        (atendimentoId && JSON.stringify(paciente) === JSON.stringify(pacienteOriginal))
-                    }
-                >
-                    {atendimentoId ? 'Atualizar atendimento' : 'Criar atendimento'}
-                </button>
+                {/* Valor a Pagar Até o Momento */}
+                <div className="form-group">
+                    <label htmlFor="valorPago">Valor a Pagar Até o Momento</label>
+                    <input
+                        type="text"
+                        id="valorPago"
+                        value={formatarParaBRL(quantoFaltaPagar)}
+                        readOnly
+                    />
+                </div>
 
-            </form>
+                <div className="form-group">
+                    <label htmlFor="quantoPagar">Quanto Irá Pagar</label>
+                    <input
+                        type="text"
+                        id="quantoPagar"
+                        placeholder="Digite o valor a pagar"
+                        value={displayValor}
+                        onChange={handleChange}
+                    />
+                    <span id="error">{errorPayment}</span>
+                </div>
 
-
-            <h2 className="subtitulo">Adicionar Exame</h2>
-            <form className="filtro-exames">
-                <input
-                    type="text"
-                    disabled={!id}
-                    placeholder="Código do exame"
-                    value={exameBusca.cod}
-                    onChange={(e) => setExameBusca({ ...exameBusca, cod: e.target.value })}
-                    className="input-filtro-codigo"
-                />
-                <input
-                    type="text"
-                    disabled={!id}
-                    placeholder="Nome do exame"
-                    value={exameBusca.nome}
-                    onChange={(e) => setExameBusca({ ...exameBusca, nome: e.target.value })}
-                    className="input-filtro-nome"
-                />
-
-                <Button
-                    variant="secondary"
-                    onClick={() => addExames(exameBusca)}
-                    disabled={!id}
-                >
-                    Adicionar
-                </Button>
-
-            </form>
-            <>
-                {mostrarSugestoes && sugestoes.length > 0 && (
-                    <div className="dropdown-sugestoes">
-                        {sugestoes.map((sugestao) => (
-                            <div
-                                key={sugestao.id}
-                                className="item-sugestao"
-                                onClick={() => {
-                                    setExameBusca({ cod: sugestao.cod, nome: sugestao.nome });
-                                    addExames(sugestao);
-                                    setMostrarSugestoes(false);
-                                }}
-                            >
-                                {sugestao.cod} - {sugestao.nome}
-                            </div>
-                        ))}
-                    </div>
-                )}
-            </>
-
-            <div>
-                <table className="tabela-exames">
-                    <thead>
-                        <tr>
-                            <th>Código</th>
-                            <th>Nome do Exame</th>
-                            <th>Valor</th>
-                            <th>Edit</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {exameAdicionado.map((exame) => (
-                            <tr key={exame.id_primary}>
-                                <td>{exame.cod_exame}</td>
-                                <td>{exame.nome_exame}</td>
-                                <td>{exame.valor}</td>
-                                <td className='icon iconRemove'>
-                                    <span>
-                                        <FaDeleteLeft onClick={() => handleDelete(exame.id_primary)} />
-                                    </span>
-                                </td>
-                            </tr>
-                        ))}
-                    </tbody>
-                </table>
+                {/* Forma de Pagamento */}
+                <div className="form-group">
+                    <label htmlFor="formaPagamento">Forma de Pagamento</label>
+                    <select
+                        id="formaPagamento"
+                        onChange={(e) => setFormaPagamento(e.target.value)}
+                        value={formaPagamento}
+                    >
+                        <option value="" disabled>Selecione</option>
+                        <option value="dinheiro">Dinheiro</option>
+                        <option value="cartao">Cartão</option>
+                        <option value="pix">Pix</option>
+                        <option value="boleto">Boleto</option>
+                    </select>
+                </div>
+                <div className="botao-baixa">
+                    <button
+                        className="btn-baixa"
+                        disabled={!formaPagamento || exameAdicionado.length === 0 || quantoPagar <= 0}
+                        onClick={() => handlePayment()}
+                    >
+                        Dar Baixa no Pagamento
+                    </button>
+                </div>
             </div>
 
 
@@ -488,7 +638,14 @@ function Atendimento() {
                 </Modal.Body>
             </Modal>
 
-            <ToastContainer />
+            <ToastContainer
+                autoClose={3000}
+                hideProgressBar={true}
+                closeOnClick={true}
+                pauseOnHover={true}
+                draggable={true}
+                limit={3}
+            />
         </div>
     );
 }

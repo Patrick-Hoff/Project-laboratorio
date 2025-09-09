@@ -129,11 +129,6 @@ export const searchUsers = (req, res) => {
     });
 };
 
-
-
-
-
-
 export const getCurrentUser = (req, res) => {
     const token = req.cookies.token;
     if (!token) return res.status(401).json({ error: 'Não autenticado' });
@@ -162,24 +157,6 @@ export const getCurrentUser = (req, res) => {
 }
 
 
-
-// export const getCurrentUser = (req, res) => {
-//     const token = req.cookies.token
-//     if (!token) return res.status(401).json({ error: 'Não autenticado' })
-
-//     try {
-//         const decoded = jwt.verify(token, JWT_SECRET)
-//         const q = 'SELECT id, name, email, isAdmin FROM users WHERE id = ?'
-//         db.query(q, [decoded.id], (err, results) => {
-//             if (err) return res.status(500).json({ error: 'Erro no banco' })
-//             if (results.length === 0) return res.status(404).json({ error: 'Usuário não encontrado' })
-//             res.json(results[0])
-//         })
-//     } catch {
-//         res.status(401).json({ error: 'Token inválido' })
-//     }
-// }
-
 export const logoutSistem = (req, res) => {
     res.clearCookie('token', {
         httpOnly: true,
@@ -189,13 +166,6 @@ export const logoutSistem = (req, res) => {
     })
     res.json({ message: 'Logout realizado com sucesso' })
 }
-
-
-
-
-
-
-
 
 
 

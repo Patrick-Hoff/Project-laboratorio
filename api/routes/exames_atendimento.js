@@ -17,7 +17,7 @@ router.post('/add',addExameAtendimento)
 router.put('/:id', updateExameAtendimento)
 
 // Deletar atendimento pelo ID
-router.delete('/:id', deleteExameAtendimento)
+router.delete('/:id/atendimento/:att', deleteExameAtendimento)
 
 
 export default router

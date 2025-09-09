@@ -41,10 +41,10 @@ function Form() {
                     <div className="input-group">
                         <label htmlFor="username">E-mail</label>
                         <input
-                            type="text"
-                            name="username"
-                            id="username"
-                            placeholder=""
+                            type="email"
+                            name="email"
+                            id="email"
+                            placeholder="E-mail"
                             onChange={(e) => setEmail(e.target.value)}
                             value={email}
                         />
@@ -55,13 +55,10 @@ function Form() {
                             type="password"
                             name="password"
                             id="password"
-                            placeholder=""
+                            placeholder="password"
                             onChange={(e) => setPassword(e.target.value)}
                             value={password}
                         />
-                        <div className="forgot">
-                            <a href="#" rel="noopener noreferrer">Esqueceu a senha ?</a>
-                        </div>
                     </div>
                     <button className="sign">Entrar</button>
                 </form>

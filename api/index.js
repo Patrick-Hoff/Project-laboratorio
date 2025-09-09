@@ -6,6 +6,7 @@ import exames_atendimentoRoutes from './routes/exames_atendimento.js'
 import examesRoutes from './routes/exames.js'
 import atendimentosRoutes from './routes/atendimentos.js'
 import usuariosRoutes from './routes/usuarios.js'
+import pagamentosRoutes from './routes/pagamentos.js'
 import dotenv from 'dotenv'
 import path from 'path'
 import { fileURLToPath } from 'url'  // 👈 Adicionado
@@ -48,6 +49,7 @@ app.use('/exames_atendimento', exames_atendimentoRoutes)
 app.use('/exames', examesRoutes)
 app.use('/atendimentos', atendimentosRoutes)
 app.use('/usuarios', usuariosRoutes)
+app.use('/pagamentos', pagamentosRoutes)
 
 app.listen(8081, () => {
     console.log('Servidor rodando na porta 8081!')

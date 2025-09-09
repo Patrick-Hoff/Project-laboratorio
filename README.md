@@ -4,7 +4,12 @@ Este projeto é um sistema completo de laboratório, onde é possível:
 
 * Cadastrar pacientes
 * Cadastrar exames
+* Visualizar logs de exames e pacientes por data (necessario admin)
 * Criar atendimentos selecionando pacientes e os exames relacionados
+* Visualizar o valor total do atendimento e realizar o pagamento de diferentes formas
+* Visualizar meu login e alterar nome e avatar
+* Alterar email, senha e acesso de administrador de diversos usuários (necessario admin)
+
 
 ---
 
@@ -39,6 +44,8 @@ Este projeto é um sistema completo de laboratório, onde é possível:
 ```
 api/
 ├── controllers/
+├── public/
+│   └── uploads/
 ├── routes/
 ├── db.js
 ├── index.js
@@ -53,9 +60,10 @@ front/
 ├── src/
 │   ├── components/
 │   ├── pages/
-│   ├── routes
-│   ├── App.jsx
+│   ├── routes/
+│   ├── utils/
 │   ├── index.css
+│   ├── App.jsx
 │   └── main.jsx
 ├── index.html
 └── package.json
@@ -114,6 +122,7 @@ Frontend rodando em: `http://localhost:5173`
 
 ---
 
+
 ## 📌 Funcionalidades
 
 ### Pacientes
@@ -131,6 +140,14 @@ Frontend rodando em: `http://localhost:5173`
 * Seleção de um paciente existente
 * Adição de múltiplos exames ao atendimento
 * Armazenamento da relação paciente + exames
+* Baixa de pagamento diretamente pelo atendimento (controle financeiro)
+
+### Administrador
+
+* Cadastrar novos usuários
+* Alterar informações de usuários
+* Visualizar log de paciente e exame, incluindo adicionar, atualizar e deletar
+
 
 ---
 
@@ -173,6 +190,17 @@ PUT    /exames-atendimento/:id       -> Atualizar exame do atendimento
 DELETE /exames-atendimento/:id       -> Remover exame do atendimento
 ```
 
+### Usuários
+
+```
+POST   /auth/register                -> Cadastrar novo usuário
+POST   /auth/login                   -> Realizar login
+GET    /auth/user                    -> Obter dados do usuário logado
+PUT    /usuarios/:id/edit            -> Atualizar dados do usuário
+GET    /usuarios/search              -> Buscar usuários com filtros (id, nome, email)
+POST   /auth/logout                  -> Logout do sistema
+POST   /usuarios/upload              -> Enviar/atualizar imagem de perfil
+```
 
 ---
 
@@ -182,12 +210,15 @@ DELETE /exames-atendimento/:id       -> Remover exame do atendimento
 * Tela de cadastro de pacientes
 * Tela de cadastro de exames
 * Tela de criação de atendimento
+* Tela de log de exames e pacientes
+* Tela do meu usuário
+* Tela de todos usuários (admin)
 
 ---
 
 ## ✅ To-Do Futuro
 
-* Autenticação de usuário (Login)
+* ✅ Autenticação de usuário (Login)
 * Exportar resultados de exames em PDF
 * Dashboard de relatórios
 * Validações adicionais e melhorias UX/UI

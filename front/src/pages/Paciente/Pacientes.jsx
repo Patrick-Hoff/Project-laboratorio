@@ -162,7 +162,7 @@ function Pacientes() {
                 <tbody>
                     {pacientes.length > 0 ? (
                         pacientes.map((paciente) => (
-                            <tr key={paciente.id}>
+                            <tr key={paciente.id} onDoubleClick={() => handleEdit(paciente.id, paciente.nome, paciente.idade)}>
                                 <td>{paciente.id}</td>
                                 <td>{paciente.nome}</td>
                                 <td>

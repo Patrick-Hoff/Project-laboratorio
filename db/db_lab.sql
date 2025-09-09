@@ -22,6 +22,7 @@ CREATE TABLE IF NOT EXISTS `exames` (
   `id` int NOT NULL AUTO_INCREMENT,
   `cod` varchar(5) NOT NULL,
   `nome` varchar(30) NOT NULL,
+  `valor` decimal(10,2) DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `cod` (`cod`)
 ) ENGINE=MyISAM AUTO_INCREMENT=10 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
@@ -87,6 +88,39 @@ CREATE TABLE IF NOT EXISTS `logpaciente` (
   `tipo_alteracao` varchar(20) DEFAULT NULL,
   PRIMARY KEY (`id_log`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+
+
+--
+-- Estrutura da tabela `users`
+--
+
+DROP TABLE IF EXISTS `users`;
+CREATE TABLE IF NOT EXISTS `users` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `name` varchar(50) NOT NULL,
+  `email` varchar(100) NOT NULL,
+  `password` text NOT NULL,
+  `isAdmin` varchar(1) DEFAULT NULL,
+  `profileImage` varchar(250) DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=MyISAM AUTO_INCREMENT=14 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+
+--
+-- Estrutura da tabela `pagamentos`
+--
+
+CREATE TABLE IF NOT EXISTS `pagamentos` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `atendimento_id` int NOT NULL,
+  `data_pagamento` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `valor_pago` decimal(10,2) NOT NULL,
+  `metodo_pagamento` enum('Dinheiro','Cartao','Pix','Boleto') NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `fk_pagamento_atendimento` (`atendimento_id`)
+) ENGINE=MyISAM AUTO_INCREMENT=110 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
 
 
 

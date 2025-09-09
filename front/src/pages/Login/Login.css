@@ -89,10 +89,10 @@
 }
 
 .sign {
+    margin-top: 20px;
     display: block;
     width: 100%;
     background-color: #3b82f6;
-    /* botão azul */
     padding: 1rem 0;
     text-align: center;
     color: #ffffff;

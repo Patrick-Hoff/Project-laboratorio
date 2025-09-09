@@ -1,17 +1,21 @@
 import { useEffect, useState } from "react";
 import axios from 'axios';
+
 import { BiSolidCommentEdit } from "react-icons/bi";
 import { FaDeleteLeft } from "react-icons/fa6";
 import { IoIosAddCircle } from "react-icons/io";
 import { FaArrowRight, FaArrowLeft } from "react-icons/fa";
-import 'bootstrap/dist/css/bootstrap.min.css';
-import { ToastContainer, toast } from 'react-toastify';
 
+import { ToastContainer, toast } from 'react-toastify';
 import Button from 'react-bootstrap/Button';
 import Modal from 'react-bootstrap/Modal';
 import Form from 'react-bootstrap/Form';
 
+import 'bootstrap/dist/css/bootstrap.min.css';
 import '../../styles/shared.css'
+
+import { formatarParaBRL, createCurrencyChangeHandler } from '../../utils/formatters';
+
 
 function Exames() {
     const [exames, setExames] = useState([]);
@@ -20,6 +24,7 @@ function Exames() {
     const [nome, setNome] = useState('')
     const [edit, setEdit] = useState([])
     const [valor, setValor] = useState()
+    const [displayValor, setDisplayValor] = useState('' || 'R$ 0,00')
 
     const [searchId, setSearchId] = useState('')
     const [searchCod, setSearchCod] = useState('')
@@ -57,6 +62,17 @@ function Exames() {
     }, [page, searchId, searchCod, searchNome]);
 
 
+    function resetForm() {
+        setModalShow(false)
+        setCod('')
+        setNome('')
+        setValor('')
+        setEdit({})
+        getExames()
+        setCod('')
+        setNome('')
+        setDisplayValor('R$ 0,00')
+    }
 
 
     function nextPage() {
@@ -88,12 +104,7 @@ function Exames() {
         } else {
             axios.post('http://localhost:8081/exames', exame)
                 .then(() => {
-                    setModalShow(false)
-                    getExames()
-                    setCod('')
-                    setNome('')
-                    valor('')
-                    exame()
+                    resetForm()
                     toast.success('Exame criado com sucesso!')
                 }).catch((err) => {
                     if (err.response && err.response.status === 500) {
@@ -114,21 +125,20 @@ function Exames() {
             })
     }
 
-    function resetForm() {
-        setModalShow(false)
-        setCod('')
-        setNome('')
-        setEdit({})
-    }
+
 
     function handleEdit(id, cod, nome, valor) {
         setEdit({ id, cod, nome, valor });
         setCod(cod);
         setNome(nome);
         setValor(valor)
+        setDisplayValor(valor)
         setModalShow(true);
     }
 
+
+    // Função exportada para realizar o cadastro do exame com o valor correto
+    const handleChange = createCurrencyChangeHandler(setValor, setDisplayValor);
 
     const listaParaMostrar = exames;
 
@@ -181,7 +191,7 @@ function Exames() {
                             </tr>
                         ) : listaParaMostrar.length > 0 ? (
                             listaParaMostrar.map((item, index) => (
-                                <tr key={index}>
+                                <tr key={index} onDoubleClick={() => handleEdit(item.id, item.cod, item.nome, item.valor)}>
                                     <td>{item.id}</td>
                                     <td>{item.cod}</td>
                                     <td>{item.nome}</td>
@@ -261,8 +271,8 @@ function Exames() {
                                 type="text"
                                 name="valor"
                                 placeholder="Valor"
-                                onChange={(e) => setValor(e.target.value)}
-                                value={valor}
+                                onChange={handleChange}
+                                value={displayValor}
                             />
                         </Form.Group>
                         <Modal.Footer>
