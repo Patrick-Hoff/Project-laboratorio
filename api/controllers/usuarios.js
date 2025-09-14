@@ -111,6 +111,7 @@ export const searchUsers = (req, res) => {
     const dataQuery = `
         SELECT id, name, email, isAdmin FROM users
         WHERE id LIKE ? AND name LIKE ? AND email LIKE ?
+        ORDER BY id DESC
         LIMIT ? OFFSET ?`;
 
     const likeId = `%${searchId}%`;

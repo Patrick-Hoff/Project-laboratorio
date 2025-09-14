@@ -17,6 +17,7 @@ export const getExames = (req, res) => {
     const dataQuery = `
         SELECT * FROM exames 
         WHERE id LIKE ? AND cod LIKE ? AND nome LIKE ?
+        ORDER BY id DESC
         LIMIT ? OFFSET ?`;
 
     const likeId = `%${searchId}%`;

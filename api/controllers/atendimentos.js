@@ -25,6 +25,7 @@ export const getAtendimentos = (req, res) => {
     FROM atendimentos
     JOIN pacientes ON atendimentos.paciente_id = pacientes.id
         WHERE atendimentos.id LIKE ? AND pacientes.nome LIKE ?
+        ORDER BY atendimento_id DESC
         LIMIT ? OFFSET ?;
         `
 

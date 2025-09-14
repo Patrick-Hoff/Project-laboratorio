@@ -16,6 +16,7 @@ export const getPacientes = (req, res) => {
     const dataQuery = `
         SELECT * FROM pacientes
         WHERE id LIKE ? AND nome LIKE ?
+        ORDER BY id DESC
         LIMIT ? OFFSET ?`;
 
     const likeId = `%${searchId}%`;
