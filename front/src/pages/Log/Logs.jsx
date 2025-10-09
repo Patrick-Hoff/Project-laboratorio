@@ -3,6 +3,8 @@ import './Logs.css';
 import { useParams } from 'react-router-dom';
 import axios from 'axios';
 import { ToastContainer, toast } from 'react-toastify'
+import { formatarData } from '../../utils/formatters';
+
 
 const Logs = () => {
     const { page } = useParams();
@@ -94,7 +96,7 @@ const Logs = () => {
                     <ul>
                         {log.map((item, index) => (
                             <li key={index}>
-                                <strong>Alteração data: </strong> {item.data_alteracao} <br />
+                                <strong>Alteração data: </strong> {formatarData(item.data_alteracao)} <br />
                                 <strong>Ação:</strong> {item.tipo_alteracao} <br />
                                 <strong>ID Paciente:</strong> {item.id_paciente} <br />
                                 <strong>Paciente: </strong> {item.paciente} <br />
@@ -107,7 +109,7 @@ const Logs = () => {
                     <ul>
                         {log.map((item, index) => (
                             <li key={index}>
-                                <strong>Alteração data: </strong> {item.data_alteracao} <br />
+                                <strong>Alteração data: </strong> {formatarData(item.data_alteracao)} <br />
                                 <strong>Ação:</strong> {item.tipo_alteracao} <br />
                                 <strong>ID Exame:</strong> {item.id_exame} <br />
                                 <strong>Cod: </strong> {item.cod} <br />

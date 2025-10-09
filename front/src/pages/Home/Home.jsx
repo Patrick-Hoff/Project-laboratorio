@@ -3,6 +3,7 @@ import axios from 'axios'
 import { BiSolidCommentEdit } from "react-icons/bi";
 import { FaArrowRight, FaArrowLeft } from "react-icons/fa";
 import { Link, useNavigate } from 'react-router-dom';
+import { formatarData } from '../../utils/formatters';
 
 import '../../styles/shared.css'
 
@@ -98,7 +99,7 @@ function Home() {
                                 >
                                     <td>{item.atendimento_id}</td>
                                     <td>{item.nome}</td>
-                                    <td>{item.data_atendimento}</td>
+                                    <td>{formatarData(item.data_atendimento)}</td>
                                     <td className="btnEdit">
                                         <span onClick={() => navigate(`/atendimento/${item.atendimento_id}`)}>
                                             <BiSolidCommentEdit />
