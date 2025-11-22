@@ -1,6 +1,30 @@
 import './style.css';
+import { useEffect, useState } from 'react';
+import axios from 'axios'
 
 const Dashboard = () => {
+
+  const [consultasHoje, setConsultasHoje] = useState()
+  console.log(consultasHoje)
+
+  useEffect(() => {
+    const carregarDados = async () => {
+      try {
+        const consultas = await axios.get('http://localhost:8081/dashboard')
+        if (consultas.data.quantidade < 10) {
+          setConsultasHoje('0' + consultas.data.quantidade)
+        } else {
+          setConsultasHoje(consultas.data.quantidade)
+        }
+      } catch (err) {
+        console.log(err)
+      }
+    }
+
+    carregarDados()
+  }, [])
+
+
   return (
     <div className="dashboard-layout">
       <main className="main-content">
@@ -9,7 +33,7 @@ const Dashboard = () => {
         <div className="cards-container">
           <div className="info-card">
             <p className="card-title">Consultas Hoje</p>
-            <h2>12</h2>
+            <h2>{consultasHoje}</h2>
           </div>
           <div className="info-card">
             <p className="card-title">Exames Pendentes</p>
