@@ -5,17 +5,18 @@ import axios from 'axios'
 const Dashboard = () => {
 
   const [consultasHoje, setConsultasHoje] = useState()
-  console.log(consultasHoje)
+  const [faturamentoHoje, setFaturamentoHoje] = useState()
 
   useEffect(() => {
     const carregarDados = async () => {
       try {
-        const consultas = await axios.get('http://localhost:8081/dashboard')
-        if (consultas.data.quantidade < 10) {
-          setConsultasHoje('0' + consultas.data.quantidade)
+        const data = await axios.get('http://localhost:8081/dashboard')
+        if (data.data.quantidade_atendimentos < 10) {
+          setConsultasHoje('0' + data.data.quantidade_atendimentos)
         } else {
-          setConsultasHoje(consultas.data.quantidade)
+          setConsultasHoje(data.data.quantidade_atendimentos)
         }
+        setFaturamentoHoje(data.data.faturamento)
       } catch (err) {
         console.log(err)
       }
@@ -44,8 +45,8 @@ const Dashboard = () => {
             <h2>25</h2>
           </div>
           <div className="info-card">
-            <p className="card-title">Faturamento</p>
-            <h2>R$ 15.200,00</h2>
+            <p className="card-title">Faturamento do dia</p>
+            <h2>R$ {faturamentoHoje}</h2>
           </div>
         </div>
 

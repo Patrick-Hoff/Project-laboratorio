@@ -14,7 +14,18 @@ export const consultas_hoje = (req, res) => {
                 return res.status(500).json({ error: 'Erro interno no servidor' });
             }
 
-            res.status(200).json({quantidade: data.length});
+            // Quantidade de atendimentos
+            const quantidade_atendimentos = data.length;
+
+            // Soma dos valores (se houver um campo 'valor_total' em cada atendimento)
+            const faturamento = data.reduce((acc, item) => {
+                return acc + (item.valor_total || 0);
+            }, 0);
+
+            res.status(200).json({
+                quantidade_atendimentos: quantidade_atendimentos,
+                faturamento
+            });
         });
 
     } catch (error) {
