@@ -1,35 +1,38 @@
-import { db } from '../db.js'
+import { db } from '../db.js';
 
 export const consultas_hoje = (req, res) => {
     try {
         const q = `
-        SELECT *
-        FROM atendimentos
-        WHERE data_atendimento >= CURRENT_DATE()
-          AND data_atendimento < CURRENT_DATE() + INTERVAL 1 DAY;
+            SELECT 
+                (SELECT COUNT(*) 
+                 FROM atendimentos 
+                 WHERE data_atendimento >= CURRENT_DATE()
+                   AND data_atendimento < CURRENT_DATE() + INTERVAL 1 DAY
+                ) AS quantidade_atendimentos,
+
+                (SELECT COALESCE(SUM(valor_total), 0)
+                 FROM atendimentos 
+                 WHERE data_atendimento >= CURRENT_DATE()
+                   AND data_atendimento < CURRENT_DATE() + INTERVAL 1 DAY
+                ) AS faturamento,
+
+                (SELECT COUNT(*) 
+                 FROM pacientes 
+                 WHERE data >= CURRENT_DATE()
+                   AND data < CURRENT_DATE() + INTERVAL 1 DAY
+                ) AS pacientes_criados;
         `;
 
-        db.query(q, (err, data) => {
+        db.query(q, (err, result) => {
             if (err) {
                 return res.status(500).json({ error: 'Erro interno no servidor' });
             }
 
-            // Quantidade de atendimentos
-            const quantidade_atendimentos = data.length;
-
-            // Soma dos valores (se houver um campo 'valor_total' em cada atendimento)
-            const faturamento = data.reduce((acc, item) => {
-                return acc + (item.valor_total || 0);
-            }, 0);
-
-            res.status(200).json({
-                quantidade_atendimentos: quantidade_atendimentos,
-                faturamento
-            });
+            return res.status(200).json(result[0]);
         });
 
     } catch (error) {
         console.error(error);
         res.status(500).json({ error: "Erro interno no servidor" });
     }
-}
+};
