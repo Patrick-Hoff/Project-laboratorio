@@ -25,7 +25,8 @@ WHERE exames_atendimento.atendimento_id = ?;
 
 // Criar novo registro de exame em um atendimento
 export const addExameAtendimento = (req, res) => {
-    const { atendimento_id, exames_id, resultado } = req.body;
+    const { atendimento_id, resultado } = req.body;
+    const exames_id = parseInt(req.body.exames_id);
 
     const getExameValor = 'SELECT valor FROM exames WHERE id = ?';
     db.query(getExameValor, [exames_id], (err, exameResult) => {
@@ -33,7 +34,7 @@ export const addExameAtendimento = (req, res) => {
             return res.status(404).json({ error: 'Exame não encontrado' });
         }
 
-        const valorExame = parseFloat(exameResult[0].valor); // 🔴 GARANTE QUE É NÚMERO
+        const valorExame = parseFloat(exameResult[0].valor) || 0;
 
         const getAtendimentoValor = 'SELECT valor_total FROM atendimentos WHERE id = ?';
         db.query(getAtendimentoValor, [atendimento_id], (err, atendimentoResult) => {
@@ -44,7 +45,6 @@ export const addExameAtendimento = (req, res) => {
             const valorAtual = parseFloat(atendimentoResult[0].valor_total) || 0;
             const novoValor = valorAtual + valorExame;
 
-            // 🔍 Log para debug
             console.log({
                 exame_id: exames_id,
                 valor_exame: valorExame,

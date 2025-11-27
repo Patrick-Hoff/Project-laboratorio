@@ -1,4 +1,6 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useContext } from 'react';
+import { UserContext } from '../../routes/UserContext'
+
 import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 
@@ -16,6 +18,7 @@ import { formatarParaBRL, createCurrencyChangeHandler } from '../../utils/format
 
 
 function Atendimento() {
+
     const [errorPayment, setErrorPayment] = useState('')
 
     const [displayValor, setDisplayValor] = useState('' || 'R$ 0,00')
@@ -45,6 +48,7 @@ function Atendimento() {
     const [mostrarSugestoes, setMostrarSugestoes] = useState(false)
 
 
+    const { userData } = useContext(UserContext);
 
     const { id } = useParams()
     const navigate = useNavigate()
@@ -138,11 +142,11 @@ function Atendimento() {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-
         try {
             if (!id) {
                 const res = await axios.post('http://localhost:8081/atendimentos/add', {
                     paciente_id: paciente.id,
+                    user: userData
                 });
 
                 setAtendimentoId(res.data.insertId);
@@ -155,7 +159,8 @@ function Atendimento() {
 
             } else {
                 const edit = {
-                    paciente_id: paciente.id
+                    paciente_id: paciente.id,
+                    user: userData
                 }
 
                 const res = await axios.put(`http://localhost:8081/atendimentos/${id}/edit`, edit)
@@ -195,38 +200,44 @@ function Atendimento() {
             const res = await axios.get('http://localhost:8081/exames');
             const exames = res.data.data;
 
-            // Busca o exame dentro da resposta da API (com base no cod ou nome)
             const exameEncontrado = exames.find(e =>
-                e.cod === exameSelecionado.cod || e.nome === exameSelecionado.nome
+                (exameSelecionado.cod && e.cod === exameSelecionado.cod) ||
+                (exameSelecionado.nome && e.nome === exameSelecionado.nome)
             );
 
-            if (exameEncontrado) {
-                const jaAdicionado = exameAdicionado.some(e =>
-                    e.cod === exameEncontrado.cod || e.nome === exameEncontrado.nome
-                );
-
-                if (!jaAdicionado) {
-                    setExameAdicionado(prev => [...prev, exameEncontrado]);
-
-                    const postExames = {
-                        atendimento_id: id,
-                        exames_id: exameEncontrado.id,
-                        resultado: 'pendente',
-                    };
-
-                    await axios.post('http://localhost:8081/exames_atendimento/add', postExames);
-                    setExameBusca({ cod: '', nome: '' });
-                    carregarExamesPaciente();
-                } else {
-                    toast.info('Exame já foi adicionado.');
-                }
-            } else {
+            if (!exameEncontrado) {
                 toast.error('Exame não existente.');
+                return;
             }
+
+            const jaAdicionado = exameAdicionado.some(e => e.id === exameEncontrado.id);
+
+            if (jaAdicionado) {
+                toast.info('Exame já foi adicionado.');
+                return;
+            }
+
+            const postExames = {
+                atendimento_id: id,
+                exames_id: exameEncontrado.id,
+                resultado: 'pendente',
+                user: userData
+            };
+
+            await axios.post('http://localhost:8081/exames_atendimento/add', postExames);
+
+            await carregarExamesPaciente();
+
+            setExameBusca({ cod: '', nome: '' });
+
+            toast.success('Exame adicionado com sucesso!');
+
         } catch (err) {
             console.error('Erro ao buscar ou adicionar exame:', err);
+            toast.error('Erro ao adicionar exame.');
         }
     }
+
 
 
     useEffect(() => {

@@ -45,7 +45,7 @@ export const addExame = (req, res) => {
     const values = [
         req.body.cod,
         req.body.nome,
-        req.body.valor,
+        req.body.valor || 0,
     ]
 
     db.query(q, [values], (err, result) => {
@@ -66,12 +66,13 @@ export const addExame = (req, res) => {
             insertId,
             req.body.cod,
             req.body.nome,
-            req.body.valor,
+            req.body.valor || 0,
         ]
 
         db.query(logQuery, logValues, (logErr) => {
             if (logErr) {
-                console.error('Erro ao registrar log do atendimento.')
+                console.error('Erro ao registrar log dos exames.')
+                console.log(logErr)
             }
             return res.status(200).json('Exame criado com sucesso e log registrado')
 
