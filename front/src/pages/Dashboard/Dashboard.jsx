@@ -7,6 +7,7 @@ const Dashboard = () => {
   const [consultasHoje, setConsultasHoje] = useState()
   const [faturamentoHoje, setFaturamentoHoje] = useState()
   const [pacientesCriadosHoje, setPacientesCriadosHoje] = useState()
+  const [examesAtendimento, setExamesAtendimento] = useState()
 
   useEffect(() => {
     const carregarDados = async () => {
@@ -22,6 +23,11 @@ const Dashboard = () => {
         }
         else {
           setPacientesCriadosHoje(data.data.pacientes_criados)
+        }
+        if(data.data.exames_atendimento < 10) {
+          setExamesAtendimento('0' + data.data.exames_atendimento)
+        } else {
+          setExamesAtendimento(data.data.exames_atendimento)
         }
         setFaturamentoHoje(data.data.faturamento)
       } catch (err) {
@@ -44,8 +50,8 @@ const Dashboard = () => {
             <h2>{consultasHoje}</h2>
           </div>
           <div className="info-card">
-            <p className="card-title">Exames Pendentes</p>
-            <h2>8</h2>
+            <p className="card-title">Exames cadastrados</p>
+            <h2>{examesAtendimento}</h2>
           </div>
           <div className="info-card">
             <p className="card-title">Novos Pacientes</p>

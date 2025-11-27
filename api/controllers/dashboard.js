@@ -3,7 +3,7 @@ import { db } from '../db.js';
 export const consultas_hoje = (req, res) => {
     try {
         const q = `
-            SELECT 
+             SELECT 
                 (SELECT COUNT(*) 
                  FROM atendimentos 
                  WHERE data_atendimento >= CURRENT_DATE()
@@ -20,7 +20,13 @@ export const consultas_hoje = (req, res) => {
                  FROM pacientes 
                  WHERE data >= CURRENT_DATE()
                    AND data < CURRENT_DATE() + INTERVAL 1 DAY
-                ) AS pacientes_criados;
+                ) AS pacientes_criados,
+                
+                (SELECT COUNT(*) 
+                 FROM exames_atendimento
+                 WHERE data_realizacao >= CURRENT_DATE()
+                   AND data_realizacao < CURRENT_DATE() + INTERVAL 1 DAY
+                 ) AS exames_atendimento;
         `;
 
         db.query(q, (err, result) => {
