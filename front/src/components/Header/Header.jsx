@@ -44,6 +44,7 @@ function Header() {
         <ul className='navbarLink'>
           <li><Link to="/">Dashboard</Link></li>
           <li><Link to="/agenda">Agendar</Link></li>
+          <li><Link to="/consultas">Consultas</Link></li>
           <div className='containerLink linkRoutine'>
             <FaRegCalendarAlt className='icon icon-setting' onClick={() => toggleMenu('routine')} />
             {menuRotina && (
