@@ -43,6 +43,7 @@ function Header() {
       <nav>
         <ul className='navbarLink'>
           <li><Link to="/">Dashboard</Link></li>
+          <li><Link to="/agenda">Agendar</Link></li>
           <div className='containerLink linkRoutine'>
             <FaRegCalendarAlt className='icon icon-setting' onClick={() => toggleMenu('routine')} />
             {menuRotina && (
@@ -54,6 +55,7 @@ function Header() {
               </div>
             )}
           </div>
+
         </ul>
 
         <ul className='navbarLink'>
