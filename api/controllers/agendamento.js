@@ -19,13 +19,13 @@ export const getAgendamentos = (req, res) => {
     cidade,
     estado,
     cep,
-    DATE_FORMAT(data_consulta, '%Y-%m-%d') AS data_consulta,
+    DATE_FORMAT(data_consulta, '%d-%m-%Y') AS data_consulta,
     horario,
     tipo_consulta,
     retorno,
     observacao
 FROM agendamento;
-;
+        ;
     `
 
         db.query(q, (err, data) => {
