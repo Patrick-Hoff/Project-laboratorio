@@ -141,3 +141,26 @@ WHERE id = ?;
         console.error('Erro interno no servidor')
     }
 }
+
+
+export const deletarDaAgenda = (req, res) => {
+    try {
+
+        const id = req.params.id
+
+        const q = `
+            DELETE FROM agendamento
+            WHERE id = ?;
+        `
+
+        db.query(q, id, (err, result) => {
+            if (err) {
+                return res.status(500).json('Erro interno no servidor')
+            }
+            res.status(200).json('Consulta excluida com sucesso')
+        })
+
+    } catch (error) {
+        console.error('Erro interno no servidor')
+    }
+}
