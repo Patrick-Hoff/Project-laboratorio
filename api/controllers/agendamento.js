@@ -24,7 +24,7 @@ export const getAgendamentos = (req, res) => {
 export const agendarConsulta = (req, res) => {
     try {
 
-        const {nome, sexo, cpf, rg, nascimento, telefone, email, rua, numero, bairro, cidade, estado, cep, data_consulta, horario, tipo_consulta, retorno, observacao } = req.body;
+        const { nome, sexo, cpf, rg, nascimento, telefone, email, rua, numero, bairro, cidade, estado, cep, data_consulta, horario, tipo_consulta, retorno, observacao } = req.body;
 
         const values = [
             nome,
@@ -52,15 +52,89 @@ export const agendarConsulta = (req, res) => {
 (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         `
 
-        if ( !nome || !sexo || !nascimento || !telefone || !cep || !data_consulta || !horario || !tipo_consulta || !retorno ) {
-            return res.status(400).json({error: 'Todos os campos obrigatorios devem preenchidos.'})
+        if (!nome || !sexo || !nascimento || !telefone || !cep || !data_consulta || !horario || !tipo_consulta || !retorno) {
+            return res.status(400).json({ error: 'Todos os campos obrigatorios devem preenchidos.' })
         }
 
         db.query(q, values, (err, data) => {
-            if(err) {
+            if (err) {
                 res.status(500).json('Erro interno no servidor')
             }
             res.status(201).json('Agendamento cadastrado com sucesso')
+        })
+
+    } catch (error) {
+        console.error('Erro interno no servidor')
+    }
+}
+
+
+export const alterarConsulta = (req, res) => {
+    try {
+
+        const id = req.params.id;
+        const { nome, sexo, cpf, rg, nascimento, telefone, email, rua, numero, bairro, cidade, estado, cep, data_consulta, horario, tipo_consulta, retorno, observacao } = req.body;
+
+        const values = [
+            nome,
+            sexo,
+            cpf,
+            rg,
+            nascimento,
+            telefone,
+            email,
+            rua,
+            numero,
+            bairro,
+            cidade,
+            estado,
+            cep,
+            data_consulta,
+            horario,
+            tipo_consulta,
+            retorno,
+            observacao,
+            id
+        ]
+
+        const q = `
+            UPDATE agendamento
+SET 
+    nome = ?,
+    sexo = ?,
+    cpf = ?,
+    rg = ?,
+    nascimento = ?,
+    telefone = ?,
+    email = ?,
+    rua = ?,
+    numero = ?,
+    bairro = ?,
+    cidade = ?,
+    estado = ?,
+    cep = ?,
+    data_consulta = ?,
+    horario = ?,
+    tipo_consulta = ?,
+    retorno = ?,
+    observacao = ?
+WHERE id = ?;
+        `
+
+        if (!nome || !sexo || !nascimento || !telefone || !cep || !data_consulta || !horario || !tipo_consulta || !retorno) {
+            return res.status(400).json({ error: 'Todos os campos obrigatorios devem preenchidos.' })
+        }
+
+        db.query(q, values, (err, result) => {
+            if (err) {
+                return res.status(500).json({ error: 'Erro interno no servidor' })
+            }
+
+            if (result.affectedRows === 0) {
+                return res.status(404).json({ message: 'Consulta não encontrada ou não foi alterada' })
+            }
+
+            res.status(200).json('Alteração realizada com sucesso')
         })
 
     } catch (error) {
