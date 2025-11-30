@@ -1,142 +1,160 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import axios from 'axios'
+import { formatarData } from '../../utils/formatters'
 import "./style.css";
 
 export default function Consultas() {
-    const [consultas, setConsultas] = useState([
-        {
-            id: 1,
-            nome: "João Silva",
-            sexo: "Masculino",
-            cpf: "12345678901",
-            rg: "MG123456",
-            nascimento: "1980-05-10",
-            telefone: "(31) 99999-9999",
-            email: "joao@email.com",
-            rua: "Rua A",
-            numero: 123,
-            bairro: "Centro",
-            cidade: "Belo Horizonte",
-            estado: "MG",
-            cep: 30123456,
-            data_consulta: "2025-12-01",
-            horario: "14:00",
-            tipo_consulta: "Retorno",
-            retorno: "S",
-            observacao: "Trazer exames anteriores"
-        },
-        {
-            id: 2,
-            nome: "Maria Souza",
-            sexo: "Feminino",
-            cpf: "98765432100",
-            rg: "SP987654",
-            nascimento: "1990-09-15",
-            telefone: "(11) 98888-8888",
-            email: "maria@email.com",
-            rua: "Avenida B",
-            numero: 456,
-            bairro: "Jardim",
-            cidade: "São Paulo",
-            estado: "SP",
-            cep: 12345678,
-            data_consulta: "2025-12-02",
-            horario: "09:30",
-            tipo_consulta: "Primeira consulta",
-            retorno: "N",
-            observacao: "Chegar 15 minutos antes"
-        },
-                {
-            id: 1,
-            nome: "João Silva",
-            sexo: "Masculino",
-            cpf: "12345678901",
-            rg: "MG123456",
-            nascimento: "1980-05-10",
-            telefone: "(31) 99999-9999",
-            email: "joao@email.com",
-            rua: "Rua A",
-            numero: 123,
-            bairro: "Centro",
-            cidade: "Belo Horizonte",
-            estado: "MG",
-            cep: 30123456,
-            data_consulta: "2025-12-01",
-            horario: "14:00",
-            tipo_consulta: "Retorno",
-            retorno: "S",
-            observacao: "Trazer exames anteriores"
-        },
-        {
-            id: 2,
-            nome: "Maria Souza",
-            sexo: "Feminino",
-            cpf: "98765432100",
-            rg: "SP987654",
-            nascimento: "1990-09-15",
-            telefone: "(11) 98888-8888",
-            email: "maria@email.com",
-            rua: "Avenida B",
-            numero: 456,
-            bairro: "Jardim",
-            cidade: "São Paulo",
-            estado: "SP",
-            cep: 12345678,
-            data_consulta: "2025-12-02",
-            horario: "09:30",
-            tipo_consulta: "Primeira consulta",
-            retorno: "N",
-            observacao: "Chegar 15 minutos antes"
-        },
-                {
-            id: 1,
-            nome: "João Silva",
-            sexo: "Masculino",
-            cpf: "12345678901",
-            rg: "MG123456",
-            nascimento: "1980-05-10",
-            telefone: "(31) 99999-9999",
-            email: "joao@email.com",
-            rua: "Rua A",
-            numero: 123,
-            bairro: "Centro",
-            cidade: "Belo Horizonte",
-            estado: "MG",
-            cep: 30123456,
-            data_consulta: "2025-12-01",
-            horario: "14:00",
-            tipo_consulta: "Retorno",
-            retorno: "S",
-            observacao: "Trazer exames anteriores"
-        },
-        {
-            id: 2,
-            nome: "Maria Souza",
-            sexo: "Feminino",
-            cpf: "98765432100",
-            rg: "SP987654",
-            nascimento: "1990-09-15",
-            telefone: "(11) 98888-8888",
-            email: "maria@email.com",
-            rua: "Avenida B",
-            numero: 456,
-            bairro: "Jardim",
-            cidade: "São Paulo",
-            estado: "SP",
-            cep: 12345678,
-            data_consulta: "2025-12-02",
-            horario: "09:30",
-            tipo_consulta: "Primeira consulta",
-            retorno: "N",
-            observacao: "Chegar 15 minutos antes"
-        }
-    ]);
-
+    // const [consultas, setConsultas] = useState([
+    //     {
+    //         id: 1,
+    //         nome: "João Silva",
+    //         sexo: "Masculino",
+    //         cpf: "12345678901",
+    //         rg: "MG123456",
+    //         nascimento: "1980-05-10",
+    //         telefone: "(31) 99999-9999",
+    //         email: "joao@email.com",
+    //         rua: "Rua A",
+    //         numero: 123,
+    //         bairro: "Centro",
+    //         cidade: "Belo Horizonte",
+    //         estado: "MG",
+    //         cep: 30123456,
+    //         data_consulta: "2025-12-01",
+    //         horario: "14:00",
+    //         tipo_consulta: "Retorno",
+    //         retorno: "S",
+    //         observacao: "Trazer exames anteriores"
+    //     },
+    //     {
+    //         id: 2,
+    //         nome: "Maria Souza",
+    //         sexo: "Feminino",
+    //         cpf: "98765432100",
+    //         rg: "SP987654",
+    //         nascimento: "1990-09-15",
+    //         telefone: "(11) 98888-8888",
+    //         email: "maria@email.com",
+    //         rua: "Avenida B",
+    //         numero: 456,
+    //         bairro: "Jardim",
+    //         cidade: "São Paulo",
+    //         estado: "SP",
+    //         cep: 12345678,
+    //         data_consulta: "2025-12-02",
+    //         horario: "09:30",
+    //         tipo_consulta: "Primeira consulta",
+    //         retorno: "N",
+    //         observacao: "Chegar 15 minutos antes"
+    //     },
+    //     {
+    //         id: 3,
+    //         nome: "João Silva",
+    //         sexo: "Masculino",
+    //         cpf: "12345678901",
+    //         rg: "MG123456",
+    //         nascimento: "1980-05-10",
+    //         telefone: "(31) 99999-9999",
+    //         email: "joao@email.com",
+    //         rua: "Rua A",
+    //         numero: 123,
+    //         bairro: "Centro",
+    //         cidade: "Belo Horizonte",
+    //         estado: "MG",
+    //         cep: 30123456,
+    //         data_consulta: "2025-12-01",
+    //         horario: "14:00",
+    //         tipo_consulta: "Retorno",
+    //         retorno: "S",
+    //         observacao: "Trazer exames anteriores"
+    //     },
+    //     {
+    //         id: 4,
+    //         nome: "Maria Souza",
+    //         sexo: "Feminino",
+    //         cpf: "98765432100",
+    //         rg: "SP987654",
+    //         nascimento: "1990-09-15",
+    //         telefone: "(11) 98888-8888",
+    //         email: "maria@email.com",
+    //         rua: "Avenida B",
+    //         numero: 456,
+    //         bairro: "Jardim",
+    //         cidade: "São Paulo",
+    //         estado: "SP",
+    //         cep: 12345678,
+    //         data_consulta: "2025-12-02",
+    //         horario: "09:30",
+    //         tipo_consulta: "Primeira consulta",
+    //         retorno: "N",
+    //         observacao: "Chegar 15 minutos antes"
+    //     },
+    //     {
+    //         id: 5,
+    //         nome: "João Silva",
+    //         sexo: "Masculino",
+    //         cpf: "12345678901",
+    //         rg: "MG123456",
+    //         nascimento: "1980-05-10",
+    //         telefone: "(31) 99999-9999",
+    //         email: "joao@email.com",
+    //         rua: "Rua A",
+    //         numero: 123,
+    //         bairro: "Centro",
+    //         cidade: "Belo Horizonte",
+    //         estado: "MG",
+    //         cep: 30123456,
+    //         data_consulta: "2025-12-01",
+    //         horario: "14:00",
+    //         tipo_consulta: "Retorno",
+    //         retorno: "S",
+    //         observacao: "Trazer exames anteriores"
+    //     },
+    //     {
+    //         id: 6,
+    //         nome: "Maria Souza",
+    //         sexo: "Feminino",
+    //         cpf: "98765432100",
+    //         rg: "SP987654",
+    //         nascimento: "1990-09-15",
+    //         telefone: "(11) 98888-8888",
+    //         email: "maria@email.com",
+    //         rua: "Avenida B",
+    //         numero: 456,
+    //         bairro: "Jardim",
+    //         cidade: "São Paulo",
+    //         estado: "SP",
+    //         cep: 12345678,
+    //         data_consulta: "2025-12-02",
+    //         horario: "09:30",
+    //         tipo_consulta: "Primeira consulta",
+    //         retorno: "N",
+    //         observacao: "Chegar 15 minutos antes"
+    //     }
+    // ]);
+    const [consultas, setConsultas] = useState([])
     const [selectedConsulta, setSelectedConsulta] = useState(null);
 
     // Função para edição
     function editarConsulta(id) {
         alert("Função de edição ainda não implementada. ID: " + id);
     }
+
+
+    const getConsultas = async () => {
+        try {
+            const res = await axios.get('http://localhost:8081/agendamento')
+            setConsultas(res.data)
+        } catch (error) {
+            console.error("Erro ao buscar consultas: ", error)
+        }
+    }
+
+    useEffect(() => {
+        getConsultas()
+    }, [])
+
+
 
     return (
         <div className="consultas-container">
