@@ -4,7 +4,28 @@ export const getAgendamentos = (req, res) => {
     try {
 
         const q = `
-        SELECT * FROM agendamento;
+        SELECT
+    id,
+    nome,
+    sexo,
+    cpf,
+    rg,
+    DATE_FORMAT(nascimento, '%Y-%m-%d') AS nascimento,
+    telefone,
+    email,
+    rua,
+    numero,
+    bairro,
+    cidade,
+    estado,
+    cep,
+    DATE_FORMAT(data_consulta, '%Y-%m-%d') AS data_consulta,
+    horario,
+    tipo_consulta,
+    retorno,
+    observacao
+FROM agendamento;
+;
     `
 
         db.query(q, (err, data) => {
