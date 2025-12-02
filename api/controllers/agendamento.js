@@ -31,8 +31,6 @@ FROM agendamento;
         db.query(q, (err, data) => {
             if (err) {
                 res.status(500).json('Erro interno no servidor')
-            } else if (data.length === 0) {
-                res.status(200).json('Nenhum cadastrado encontrado no momento')
             }
             res.status(200).json(data)
         })
