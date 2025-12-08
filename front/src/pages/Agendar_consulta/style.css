@@ -112,6 +112,21 @@
     font-weight: bold;
 }
 
+/* Campo com erro */
+.erro {
+    border-color: #d9534f !important;
+    box-shadow: 0 0 6px rgba(217, 83, 79, 0.4);
+}
+
+/* Mensagem de erro */
+.msg-erro {
+    color: #d9534f;
+    font-size: 14px;
+    margin-top: 5px;
+    font-weight: 600;
+}
+
+
 @media (max-width: 900px) {
     .ag-section-grid {
         grid-template-columns: 1fr;
