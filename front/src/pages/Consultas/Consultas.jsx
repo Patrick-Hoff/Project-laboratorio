@@ -230,7 +230,11 @@ export default function Consultas() {
                             <p><strong>Data:</strong> {selectedConsulta.data_consulta}</p>
                             <p><strong>Horário:</strong> {selectedConsulta.horario}</p>
                             <p><strong>Tipo:</strong> {selectedConsulta.tipo_consulta}</p>
-                            <p><strong>Retorno:</strong> {selectedConsulta.retorno}</p>
+                            <p>
+                                <strong>Retorno:</strong>{" "}
+                                {selectedConsulta.retorno === "S" ? "Sim" : "Não"}
+                            </p>
+
                             <p><strong>Observação:</strong> {selectedConsulta.observacao}</p>
                         </div>
 

@@ -10,7 +10,7 @@ export const getAgendamentos = (req, res) => {
     sexo,
     cpf,
     rg,
-    DATE_FORMAT(nascimento, '%Y-%m-%d') AS nascimento,
+    DATE_FORMAT(nascimento, '%d/%m/%Y') AS nascimento,
     telefone,
     email,
     rua,
