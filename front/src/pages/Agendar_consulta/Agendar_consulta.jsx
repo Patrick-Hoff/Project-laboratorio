@@ -253,8 +253,8 @@ export default function AgendamentoConsulta() {
                                 onChange={e => primeiraVezRef.current = e.target.value}
                             >
                                 <option value="">Selecione</option>
-                                <option value="Sim">Sim</option>
-                                <option value="Nao">Retorno</option>
+                                <option value="S">Sim</option>
+                                <option value="N">Retorno</option>
                             </select>
                             {erros.primeiraVez && <p className="msg-erro">{erros.primeiraVez}</p>}
                         </div>
