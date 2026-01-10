@@ -1,7 +1,18 @@
+-- --------------------------------------------------------
+-- Estrutura da tabela `pacientes`
+-- --------------------------------------------------------
 
---
+DROP TABLE IF EXISTS `pacientes`;
+CREATE TABLE IF NOT EXISTS `pacientes` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `nome` varchar(50) NOT NULL,
+  `idade` varchar(10) NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=MyISAM AUTO_INCREMENT=13 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+-- --------------------------------------------------------
 -- Estrutura da tabela `atendimentos`
---
+-- --------------------------------------------------------
 
 DROP TABLE IF EXISTS `atendimentos`;
 CREATE TABLE IF NOT EXISTS `atendimentos` (
@@ -12,10 +23,9 @@ CREATE TABLE IF NOT EXISTS `atendimentos` (
   KEY `paciente_id` (`paciente_id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=49 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
-
---
+-- --------------------------------------------------------
 -- Estrutura da tabela `exames`
---
+-- --------------------------------------------------------
 
 DROP TABLE IF EXISTS `exames`;
 CREATE TABLE IF NOT EXISTS `exames` (
@@ -27,11 +37,9 @@ CREATE TABLE IF NOT EXISTS `exames` (
   UNIQUE KEY `cod` (`cod`)
 ) ENGINE=MyISAM AUTO_INCREMENT=10 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
---- --------------------------------------------------------
-
---
+-- --------------------------------------------------------
 -- Estrutura da tabela `exames_atendimento`
---
+-- --------------------------------------------------------
 
 DROP TABLE IF EXISTS `exames_atendimento`;
 CREATE TABLE IF NOT EXISTS `exames_atendimento` (
@@ -46,23 +54,10 @@ CREATE TABLE IF NOT EXISTS `exames_atendimento` (
 ) ENGINE=InnoDB AUTO_INCREMENT=42 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 -- --------------------------------------------------------
-
---
--- Estrutura da tabela `pacientes`
---
-
-DROP TABLE IF EXISTS `pacientes`;
-CREATE TABLE IF NOT EXISTS `pacientes` (
-  `id` int NOT NULL AUTO_INCREMENT,
-  `nome` varchar(50) NOT NULL,
-  `idade` varchar(10) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
-  PRIMARY KEY (`id`)
-) ENGINE=MyISAM AUTO_INCREMENT=13 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
-
---
 -- Estrutura da tabela `logexame`
---
+-- --------------------------------------------------------
 
+DROP TABLE IF EXISTS `logexame`;
 CREATE TABLE IF NOT EXISTS `logexame` (
   `id_log` int NOT NULL AUTO_INCREMENT,
   `id_exame` int NOT NULL,
@@ -74,26 +69,23 @@ CREATE TABLE IF NOT EXISTS `logexame` (
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 -- --------------------------------------------------------
-
---
 -- Estrutura da tabela `logpaciente`
---
+-- --------------------------------------------------------
 
+DROP TABLE IF EXISTS `logpaciente`;
 CREATE TABLE IF NOT EXISTS `logpaciente` (
   `id_log` int NOT NULL AUTO_INCREMENT,
   `id_paciente` int NOT NULL,
-  `idade` varchar(10) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
-  `paciente` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
+  `idade` varchar(10) DEFAULT NULL,
+  `paciente` varchar(50) DEFAULT NULL,
   `data_alteracao` datetime DEFAULT CURRENT_TIMESTAMP,
   `tipo_alteracao` varchar(20) DEFAULT NULL,
   PRIMARY KEY (`id_log`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
-
-
---
+-- --------------------------------------------------------
 -- Estrutura da tabela `users`
---
+-- --------------------------------------------------------
 
 DROP TABLE IF EXISTS `users`;
 CREATE TABLE IF NOT EXISTS `users` (
@@ -106,11 +98,11 @@ CREATE TABLE IF NOT EXISTS `users` (
   PRIMARY KEY (`id`)
 ) ENGINE=MyISAM AUTO_INCREMENT=14 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
-
---
+-- --------------------------------------------------------
 -- Estrutura da tabela `pagamentos`
---
+-- --------------------------------------------------------
 
+DROP TABLE IF EXISTS `pagamentos`;
 CREATE TABLE IF NOT EXISTS `pagamentos` (
   `id` int NOT NULL AUTO_INCREMENT,
   `atendimento_id` int NOT NULL,
@@ -121,16 +113,14 @@ CREATE TABLE IF NOT EXISTS `pagamentos` (
   KEY `fk_pagamento_atendimento` (`atendimento_id`)
 ) ENGINE=MyISAM AUTO_INCREMENT=110 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
+-- --------------------------------------------------------
+-- Restrições (Foreign Keys)
+-- --------------------------------------------------------
 
-
-
---
--- Restrições para despejos de tabelas
---
-
---
--- Limitadores para a tabela `exames_atendimento`
---
 ALTER TABLE `exames_atendimento`
-  ADD CONSTRAINT `fk_atendimento` FOREIGN KEY (`atendimento_id`) REFERENCES `atendimentos` (`id`) ON DELETE RESTRICT;
+  ADD CONSTRAINT `fk_atendimento`
+  FOREIGN KEY (`atendimento_id`)
+  REFERENCES `atendimentos` (`id`)
+  ON DELETE RESTRICT;
+
 COMMIT;
