@@ -1,5 +1,6 @@
 import { useLocation } from 'react-router-dom';
 import RoutesApp from './routes/index';
+import { UserProvider } from './routes/UserContext';
 import Header from './components/Header/Header';
 
 function App() {
@@ -10,7 +11,9 @@ function App() {
   return (
     <>
       {!isLoginPage && <Header />}
-      <RoutesApp />
+      <UserProvider>
+        <RoutesApp />
+      </UserProvider>
     </>
   );
 }

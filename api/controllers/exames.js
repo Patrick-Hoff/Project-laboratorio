@@ -59,7 +59,7 @@ export const addExame = (req, res) => {
 
         const logQuery = `
             INSERT INTO logexame (id_exame, cod, exame, valor, tipo_alteracao)
-            VALUES (?, ?, ?, ?, 'Insert')
+            VALUES (?, ?, ?, ?, ?)
         `
 
         const logValues = [
@@ -67,6 +67,7 @@ export const addExame = (req, res) => {
             req.body.cod,
             req.body.nome,
             req.body.valor || 0,
+            'Insert'
         ]
 
         db.query(logQuery, logValues, (logErr) => {
@@ -111,12 +112,12 @@ export const updateExame = (req, res) => {
 
             // 3. Inserir dois logs: "Update - Antes" e "Update - Depois"
             const logQuery = `
-                INSERT INTO logexame (id_exame, cod, exame, tipo_alteracao)
-                VALUES (?, ?, ?, ?)
+                INSERT INTO logexame (id_exame, cod, exame,  valor, tipo_alteracao)
+                VALUES (?, ?, ?, ?, ?)
             `;
 
-            const logAntes = [exameId, oldExame.cod, oldExame.nome, 'Update - Antes'];
-            const logDepois = [exameId, req.body.cod, req.body.nome, 'Update - Depois'];
+            const logAntes = [exameId, oldExame.cod, oldExame.nome, oldExame.valor, 'Update - Antes'];
+            const logDepois = [exameId, req.body.cod, req.body.nome, req.body.valor, 'Update - Depois'];
 
             // Inserir o log "antes"
             db.query(logQuery, logAntes, (logErr1) => {
@@ -167,14 +168,15 @@ export const deleteExame = (req, res) => {
 
             // 3. Registrar o log da exclusão
             const logQuery = `
-                INSERT INTO logexame (id_exame, cod, exame, tipo_alteracao)
-                VALUES (?, ?, ?, 'Delete')
+                INSERT INTO logexame (id_exame, cod, exame, valor, tipo_alteracao)
+                VALUES (?, ?, ?, ?, 'Delete')
             `;
 
             const logValues = [
                 exame.id,
                 exame.cod,
                 exame.nome,
+                exame.valor
             ];
 
             db.query(logQuery, logValues, (logErr) => {

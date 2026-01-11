@@ -3,7 +3,7 @@ import './Logs.css';
 import { useParams } from 'react-router-dom';
 import axios from 'axios';
 import { ToastContainer, toast } from 'react-toastify'
-import { formatarData } from '../../utils/formatters';
+import { formatarData, formatarParaBRL } from '../../utils/formatters';
 
 
 const Logs = () => {
@@ -17,7 +17,7 @@ const Logs = () => {
     async function searchLog(e) {
         e.preventDefault();
 
-        if (!dataInicio ||!dataFinal) {
+        if (!dataInicio || !dataFinal) {
             toast.info('Adicione uma data no filtro')
             return;
         }
@@ -113,7 +113,8 @@ const Logs = () => {
                                 <strong>Ação:</strong> {item.tipo_alteracao} <br />
                                 <strong>ID Exame:</strong> {item.id_exame} <br />
                                 <strong>Cod: </strong> {item.cod} <br />
-                                <strong>Exame: </strong> {item.exame}
+                                <strong>Exame: </strong> {item.exame} <br />
+                                <strong>Valor: </strong> {formatarParaBRL(item.valor)}
                                 <hr />
                             </li>
                         ))}
