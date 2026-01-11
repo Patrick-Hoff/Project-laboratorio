@@ -114,6 +114,21 @@ CREATE TABLE IF NOT EXISTS `pagamentos` (
 ) ENGINE=MyISAM AUTO_INCREMENT=110 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 -- --------------------------------------------------------
+-- Estrutura da tabela `agendamento`
+-- --------------------------------------------------------
+
+DROP TABLE IF EXISTS `agendamento`;
+CREATE TABLE IF NOT EXISTS `agendamento` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `paciente_id` int NOT NULL,
+  `data_agendada` datetime NOT NULL,
+  `status` varchar(20) NOT NULL DEFAULT 'Pendente',
+  PRIMARY KEY (`id`),
+  KEY `fk_agendamento_paciente` (`paciente_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+
+-- --------------------------------------------------------
 -- Restrições (Foreign Keys)
 -- --------------------------------------------------------
 
