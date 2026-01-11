@@ -8,11 +8,14 @@ const Dashboard = () => {
   const [faturamentoHoje, setFaturamentoHoje] = useState()
   const [pacientesCriadosHoje, setPacientesCriadosHoje] = useState()
   const [examesAtendimento, setExamesAtendimento] = useState()
+  const [agendamento, setAgendamento] = useState()
 
   useEffect(() => {
     const carregarDados = async () => {
       try {
         const data = await axios.get('http://localhost:8081/dashboard')
+        const data_consulta = await axios.get('http://localhost:8081/agendamento')
+        console.log(data_consulta.data)
         if (data.data.quantidade_atendimentos < 10) {
           setConsultasHoje('0' + data.data.quantidade_atendimentos)
         } else {
