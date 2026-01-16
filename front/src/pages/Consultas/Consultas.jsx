@@ -1,3 +1,4 @@
+import { useLocation } from 'react-router-dom'
 import React, { useState, useEffect } from "react";
 import axios from 'axios'
 import { formatarData } from '../../utils/formatters'
@@ -135,6 +136,9 @@ export default function Consultas() {
     const [consultas, setConsultas] = useState([])
     const [selectedConsulta, setSelectedConsulta] = useState(null);
 
+    const location = useLocation();
+    const messageSucess = location.state?.mensagem;
+
     // Função para edição
     function editarConsulta(id) {
         alert("Função de edição ainda não implementada. ID: " + id);
@@ -158,6 +162,11 @@ export default function Consultas() {
 
     return (
         <div className="consultas-container">
+            {messageSucess && (
+                <p style={{color: "green"}}>
+                    {messageSucess}
+                </p>
+            )}
             <h1 className="consultas-title">Consultas Agendadas</h1>
 
             {/* GRID DE CONSULTAS */}

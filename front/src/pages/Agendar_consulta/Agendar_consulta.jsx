@@ -1,4 +1,5 @@
 import './style.css';
+import { useNavigate } from 'react-router-dom'
 import React, { useState, useRef } from 'react';
 import axios from 'axios';
 import { InputMask } from 'primereact/inputmask';
@@ -25,7 +26,9 @@ export default function AgendamentoConsulta() {
     const observacoesRef = useRef("");
 
     const [erros, setErros] = useState({});
-    const [mensagemSucesso, setMensagemSucesso] = useState("");
+
+    const navigate = useNavigate();
+    const [loading, setLoading] = useState(false)
 
 
     const validar = () => {
@@ -56,7 +59,6 @@ export default function AgendamentoConsulta() {
     const handleSubmit = async (e) => {
         e.preventDefault()
         if (!validar()) {
-            setMensagemSucesso("");
             return;
         }
 
@@ -82,9 +84,29 @@ export default function AgendamentoConsulta() {
         };
 
 
+        try {
+            const response = await axios.post("http://localhost:8081/agendamento", data);
+            setErros({});
+            setLoading(true)
+            setTimeout(() => {
+                navigate("/consultas", {
+                    state: {
+                        mensagem: "Cadastro agendado com sucesso!",
+                        tipo: "Sucesso",
+                    },
+                });
+            }, 1500);
 
-        await axios.post("http://localhost:8081/agendamento", data);
-        setMensagemSucesso("Consulta agendada com sucesso!");
+        } catch (err) {
+            console.error(err);
+
+            if (err.response) {
+                alert("Erro ao agendar: " + err.response.data.message || err.response.data);
+            } else {
+                alert("Erro na requisição: " + err.message);
+            }
+        }
+
 
     };
 
@@ -269,12 +291,10 @@ export default function AgendamentoConsulta() {
                     </div>
                 </div>
 
-                <button type="submit" className="ag-botao-agendar">Agendar Consulta</button>
+                <button type="submit" className="ag-botao-agendar" disabled={loading}>
+                    {loading ? "Salvando" : "Agendar Consulta"}
+                </button>
             </form>
-
-            {mensagemSucesso && (
-                <p className="ag-mensagem-sucesso">{mensagemSucesso}</p>
-            )}
         </div>
     );
 }
