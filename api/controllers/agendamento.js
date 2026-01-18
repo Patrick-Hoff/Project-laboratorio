@@ -19,7 +19,7 @@ export const getAgendamentos = (req, res) => {
             cidade,
             estado,
             cep,
-            DATE_FORMAT(data_consulta, '%d-%m-%Y') AS data_consulta,
+            DATE_FORMAT(data_consulta, '%d/%m/%Y') AS data_consulta,
             horario,
             tipo_consulta,
             retorno,
