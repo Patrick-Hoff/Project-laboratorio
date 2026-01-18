@@ -4,7 +4,7 @@ export const getAgendamentos = (req, res) => {
     const { id } = req.query;
 
     let q = `
-        SELECT
+          SELECT
             id,
             nome,
             sexo,
@@ -20,7 +20,7 @@ export const getAgendamentos = (req, res) => {
             estado,
             cep,
             DATE_FORMAT(data_consulta, '%d/%m/%Y') AS data_consulta,
-            horario,
+            DATE_FORMAT(horario, '%H:%i') AS horario,
             tipo_consulta,
             retorno,
             observacao
