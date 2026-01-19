@@ -41,6 +41,12 @@ export default function Consultas() {
     }, [location.state])
 
 
+    const limitarTexto = (texto, limite = 20) => {
+        if(!texto) return "";
+        return texto.length > limite
+        ? texto.slice(0, limite) + "..."
+        : texto
+    }
 
     return (
         <div className="consultas-container">
@@ -60,7 +66,7 @@ export default function Consultas() {
                         onDoubleClick={() => setSelectedConsulta(consulta)}
                     >
                         <div className="consultas-card-header">
-                            <h3>{consulta.nome}</h3>
+                            <h3>{limitarTexto(consulta.nome)}</h3>
                             <span className="consultas-tag">{consulta.tipo_consulta}</span>
                         </div>
 
