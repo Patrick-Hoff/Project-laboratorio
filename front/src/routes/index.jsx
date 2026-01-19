@@ -24,6 +24,7 @@ function RoutesApp() {
             <Route path='/pacientes' element={<ProtectedRoute><Pacientes /></ProtectedRoute>} />
             <Route path='/exames' element={<ProtectedRoute><Exames /></ProtectedRoute>} />
             <Route path='/Agenda' element={<ProtectedRoute><Agendar_consulta /></ProtectedRoute>} />
+            <Route path='/Agenda/:id' element={<ProtectedRoute><Agendar_consulta /></ProtectedRoute>} />
             <Route path='/consultas' element={<ProtectedRoute><Consultas /></ProtectedRoute>} />
             <Route path='/login' element={<Login />} />
             <Route path='/meu-usuario' element={<ProtectedRoute><MyUser /></ProtectedRoute>} />
