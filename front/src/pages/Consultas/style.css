@@ -1,4 +1,3 @@
-/* --- CONTAINER GERAL --- */
 .consultas-container {
     padding: 30px;
     min-height: 100vh;
@@ -14,14 +13,12 @@
     color: #2c3e50;
 }
 
-/* --- GRID --- */
 .consultas-grid {
     display: grid;
     gap: 25px;
     grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
 }
 
-/* --- CARD --- */
 .consultas-card {
     background: #fff;
     border-radius: 14px;
@@ -37,7 +34,6 @@
     box-shadow: 0 6px 16px rgba(0, 0, 0, 0.18);
 }
 
-/* --- HEADER DO CARD --- */
 .consultas-card-header {
     display: flex;
     justify-content: space-between;
@@ -51,7 +47,6 @@
     width: 70%;
 }
 
-/* TAG COLORIDA */
 .consultas-tag {
     background: #3498db;
     padding: 4px 10px;
@@ -61,14 +56,12 @@
     font-weight: bold;
 }
 
-/* INFO DO CARD */
 .consultas-card-info-block p {
     margin: 6px 0;
     font-size: 0.95rem;
     color: #555;
 }
 
-/* --- AÇÕES --- */
 .consultas-card-actions {
     margin-top: 18px;
     display: flex;
@@ -150,7 +143,6 @@
     background: #c0392b;
 }
 
-/* --- ANIMAÇÕES --- */
 @keyframes fadeIn {
     from {
         opacity: 0;
@@ -171,4 +163,95 @@
         transform: scale(1);
         opacity: 1;
     }
+}
+
+
+.consultas-filtros {
+    display: grid;
+    grid-template-columns: 1.5fr 1fr 1fr 1fr auto;
+    gap: 16px;
+    background: #ffffff;
+    padding: 20px;
+    border-radius: 12px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.06);
+    margin-bottom: 24px;
+    align-items: end;
+}
+
+.filtro-grupo {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    font-size: 0.85rem;
+    color: #555;
+}
+
+.filtro-grupo input,
+.filtro-grupo select {
+    padding: 10px 12px;
+    border-radius: 8px;
+    border: 1px solid #ddd;
+    font-size: 0.9rem;
+    outline: none;
+    transition: border 0.2s;
+}
+
+.filtro-grupo input:focus,
+.filtro-grupo select:focus {
+    border-color: #4f46e5;
+}
+
+.filtro-grupo.checkbox {
+    justify-content: center;
+}
+
+.filtro-grupo.checkbox label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+}
+
+.btn-filtrar {
+    height: 42px;
+    padding: 0 18px;
+    border-radius: 8px;
+    border: none;
+    background: #4f46e5;
+    color: #fff;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.btn-filtrar:hover {
+    background: #4338ca;
+}
+
+.consultas-paginacao {
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+    margin-top: 24px;
+}
+
+.pagina-btn {
+    min-width: 36px;
+    height: 36px;
+    border-radius: 8px;
+    border: 1px solid #ddd;
+    background: #fff;
+    cursor: pointer;
+    font-size: 0.9rem;
+    transition: all 0.2s;
+}
+
+.pagina-btn:hover {
+    background: #f3f4f6;
+}
+
+.pagina-btn.ativo {
+    background: #4f46e5;
+    color: #fff;
+    border-color: #4f46e5;
 }
