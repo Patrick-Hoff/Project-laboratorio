@@ -50,7 +50,7 @@ export default function AgendamentoConsulta() {
         if (id) {
             axios.get(`http://localhost:8081/agendamento?id=${id}`)
                 .then(res => {
-                    const consulta = res.data;
+                    const consulta = res.data.data;
                     console.log(consulta);
 
                     const mapBackend = {
