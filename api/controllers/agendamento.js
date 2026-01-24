@@ -189,9 +189,9 @@ export const agendarConsulta = (req, res) => {
 
         db.query(q, values, (err, data) => {
             if (err) {
-                res.status(500).json('Erro interno no servidor')
+                return res.status(500).json('Erro interno no servidor')
             }
-            res.status(201).json('Agendamento cadastrado com sucesso')
+            return res.status(201).json('Agendamento cadastrado com sucesso')
         })
 
     } catch (error) {
