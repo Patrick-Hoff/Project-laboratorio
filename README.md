@@ -4,11 +4,18 @@ Este projeto é um sistema completo de laboratório, onde é possível:
 
 * Cadastrar pacientes
 * Cadastrar exames
-* Visualizar logs de exames e pacientes por data (necessario admin)
+* Visualizar logs de exames e pacientes por data (somente administrador)
 * Criar atendimentos selecionando pacientes e os exames relacionados
 * Visualizar o valor total do atendimento e realizar o pagamento de diferentes formas
 * Visualizar meu login e alterar nome e avatar
-* Alterar email, senha e acesso de administrador de diversos usuários (necessario admin)
+* Alterar email, senha e acesso de administrador de diversos usuários (somente administrador)
+* Agendar consultas, editar consultas e visualizar consultas agendadas
+* Dashboard do laboratório para visualizar:
+  * Quantidade de consultas no dia
+  * Exames cadastrados nos atendimentos do dia
+  * Novos pacientes cadastrados no dia
+  * Faturamento do dia
+  * Listagem de novas consultas marcadas para o dia
 
 
 ---
@@ -34,6 +41,7 @@ Este projeto é um sistema completo de laboratório, onde é possível:
 * Bootstrap / React Bootstrap
 * Flowbite React
 * date-fns
+* PrimeReact (InputMask)
 
 ---
 
@@ -105,7 +113,7 @@ const connection = mysql.createConnection({
 ```bash
 cd api
 npm install
-index.js nodemon
+nodemon index.js
 ```
 
 Servidor rodando em: `http://localhost:8081`
@@ -141,6 +149,14 @@ Frontend rodando em: `http://localhost:5173`
 * Adição de múltiplos exames ao atendimento
 * Armazenamento da relação paciente + exames
 * Baixa de pagamento diretamente pelo atendimento (controle financeiro)
+
+### Agendamentos
+
+* Criar novos agendamentos de consultas
+* Editar consultas agendadas
+* Visualizar lista de consultas agendadas
+* Página dedicada para visualização de todos os agendamentos
+* Exclusão de agendamentos (em desenvolvimento)
 
 ### Administrador
 
@@ -190,6 +206,15 @@ PUT    /exames-atendimento/:id       -> Atualizar exame do atendimento
 DELETE /exames-atendimento/:id       -> Remover exame do atendimento
 ```
 
+### Pagamento no atendimento
+
+```
+POST  /pagamentos/realizar_pagamento/atendimentoid=?/:id
+-> Realizar pagamento
+GET   /pagamentos/info_pagamentos/:id
+-> Informações de pagamento realizado no atendimento
+```
+
 ### Usuários
 
 ```
@@ -202,15 +227,31 @@ POST   /auth/logout                  -> Logout do sistema
 POST   /usuarios/upload              -> Enviar/atualizar imagem de perfil
 ```
 
+### Agendamento
+
+```
+GET    /agendamento                  -> Buscar agendamentos
+POST   /agendamento                  -> Agendar consulta
+PUT    /agendamento/:id              -> Alterar consulta
+DELETE /agendamento/:id              -> Remover da agenda
+```
+
+### Dashboard
+
+```
+GET    /dashboard                    -> Dashboard do relatorio diário
+```
+
 ---
 
 ## 📸 Telas do Sistema (Frontend)
 
-* Home com navegação entre módulos
+* Dashboard com informações da agenda do dia
+* Tela de listagem de atendimentos
 * Tela de cadastro de pacientes
 * Tela de cadastro de exames
 * Tela de criação de atendimento
-* Tela de log de exames e pacientes
+* Tela de log de exames e pacientes (admin)
 * Tela do meu usuário
 * Tela de todos usuários (admin)
 
@@ -220,7 +261,7 @@ POST   /usuarios/upload              -> Enviar/atualizar imagem de perfil
 
 * ✅ Autenticação de usuário (Login)
 * Exportar resultados de exames em PDF
-* Dashboard de relatórios
+* ✅ Dashboard de relatórios
 * Validações adicionais e melhorias UX/UI
 
 ---
