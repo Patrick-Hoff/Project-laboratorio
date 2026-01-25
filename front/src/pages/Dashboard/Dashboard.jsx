@@ -8,11 +8,14 @@ const Dashboard = () => {
   const [faturamentoHoje, setFaturamentoHoje] = useState()
   const [pacientesCriadosHoje, setPacientesCriadosHoje] = useState()
   const [examesAtendimento, setExamesAtendimento] = useState()
+  const [agendamento, setAgendamento] = useState([])
 
   useEffect(() => {
     const carregarDados = async () => {
       try {
         const data = await axios.get('http://localhost:8081/dashboard')
+        const data_consulta = await axios.get('http://localhost:8081/agendamento?proximos=true')
+        setAgendamento(data_consulta.data.data)
         if (data.data.quantidade_atendimentos < 10) {
           setConsultasHoje('0' + data.data.quantidade_atendimentos)
         } else {
@@ -24,7 +27,7 @@ const Dashboard = () => {
         else {
           setPacientesCriadosHoje(data.data.pacientes_criados)
         }
-        if(data.data.exames_atendimento < 10) {
+        if (data.data.exames_atendimento < 10) {
           setExamesAtendimento('0' + data.data.exames_atendimento)
         } else {
           setExamesAtendimento(data.data.exames_atendimento)
@@ -42,7 +45,7 @@ const Dashboard = () => {
   return (
     <div className="dashboard-layout">
       <main className="main-content">
-        <h1 className="page-title">Visão Geral - Em desenvolvimento</h1>
+        <h1 className="page-title">Dashboard Laboratório</h1>
 
         <div className="cards-container">
           <div className="info-card">
@@ -71,30 +74,26 @@ const Dashboard = () => {
                 <th>Paciente</th>
                 <th>Data</th>
                 <th>Horário</th>
-                <th>Médico</th>
               </tr>
             </thead>
+
             <tbody>
-              <tr>
-                <td>Ana Souza</td>
-                <td>26/08/2025</td>
-                <td>14:00</td>
-                <td>Dra. Paula</td>
-              </tr>
-              <tr>
-                <td>João Lima</td>
-                <td>26/08/2025</td>
-                <td>15:30</td>
-                <td>Dr. Marcos</td>
-              </tr>
-              <tr>
-                <td>Maria Clara</td>
-                <td>26/08/2025</td>
-                <td>16:00</td>
-                <td>Dra. Fernanda</td>
-              </tr>
+              {agendamento.length > 0 ? (
+                agendamento.map(item => (
+                  <tr key={item.id}>
+                    <td>{item.nome}</td>
+                    <td>{item.data_consulta}</td>
+                    <td>{item.horario}</td>
+                  </tr>
+                ))
+              ) : (
+                <tr>
+                  <td colSpan="3">Nenhum agendamento encontrado</td>
+                </tr>
+              )}
             </tbody>
           </table>
+
         </div>
       </main>
     </div>
