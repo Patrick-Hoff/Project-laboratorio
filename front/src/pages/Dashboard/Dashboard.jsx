@@ -45,7 +45,7 @@ const Dashboard = () => {
   return (
     <div className="dashboard-layout">
       <main className="main-content">
-        <h1 className="page-title">Visão Geral - Em desenvolvimento</h1>
+        <h1 className="page-title">Dashboard Laboratório</h1>
 
         <div className="cards-container">
           <div className="info-card">
