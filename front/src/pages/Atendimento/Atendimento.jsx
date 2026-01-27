@@ -52,47 +52,6 @@ function Atendimento() {
 
     const { id } = useParams()
     const navigate = useNavigate()
-    useEffect(() => {
-        const infoAtendimento = async (p) => {
-            try {
-                const res = await axios.get(`http://localhost:8081/atendimentos/${id}/exames`);
-                // Checagem extra se data[0] existe
-                if (res.data && res.data.length > 0) {
-                    const dados = res.data[0];
-
-                    setPacienteOriginal({
-                        id: id,
-                        nome: dados.nome_paciente,
-                        idade: calcularIdade(dados.idade),
-                        nascimento: dados.idade || '',
-                    });
-
-                    setPaciente({
-                        id: id,
-                        nome: dados.nome_paciente,
-                        idade: calcularIdade(dados.idade),
-                        nascimento: dados.idade || '',
-                    });
-                    setAtendimentoId(id);
-                } else {
-                    setPaciente({ id: '', nome: '', idade: '', nascimento: '' });
-                    setAtendimentoId(undefined);
-                }
-            } catch (err) {
-                console.error(err);
-            }
-        };
-
-        if (id) {
-            infoAtendimento();
-        } else {
-            // Resetar tudo ao criar novo atendimento
-            setPaciente({ id: '', nome: '', idade: '', nascimento: '' });
-            setAtendimentoId(undefined);
-            setExameAdicionado([]);
-        }
-    }, [id]);
-
 
     const carregarPacientes = async () => {
         try {
@@ -113,24 +72,47 @@ function Atendimento() {
 
     const carregarExamesPaciente = async () => {
         try {
+            if (!id) return;
 
-            const res = await axios.get(`http://localhost:8081/exames_atendimento/${id}`)
-            const valorAtendimento = res.data.data;
-            setExameAdicionado(res.data.data)
+            const res = await axios.get(`http://localhost:8081/exames_atendimento/${id}`);
 
-            if (valorAtendimento.length > 0) {
-                setValorTotal(parseFloat(valorAtendimento[0].valor_total));
+            const pacienteData = res.data.paciente;
+            const examesData = res.data.exames || [];
+            const atendimentoData = res.data.atendimento;
+
+            if (pacienteData) {
+                setPacienteOriginal({
+                    id: pacienteData.id,
+                    nome: pacienteData.nome,
+                    idade: calcularIdade(pacienteData.idade),
+                    nascimento: pacienteData.idade
+                });
+
+                setPaciente({
+                    id: pacienteData.id,
+                    nome: pacienteData.nome,
+                    idade: calcularIdade(pacienteData.idade),
+                    nascimento: pacienteData.idade
+                });
+
+                setAtendimentoId(atendimentoData.id);
             } else {
-                setValorTotal(0);
+                setPaciente({ id: '', nome: '', idade: '', nascimento: '' });
+                setAtendimentoId(undefined);
             }
+
+            setExameAdicionado(examesData);
+            setValorTotal(atendimentoData?.valor_total ?? 0);
+
         } catch (err) {
-            console.log(err)
+            console.error(err);
         }
-    }
+    };
 
     useEffect(() => {
-        carregarExamesPaciente()
-    }, [id])
+        carregarExamesPaciente();
+    }, [id]);
+
 
     function nextPage() {
         setPage(prev => prev + 1)

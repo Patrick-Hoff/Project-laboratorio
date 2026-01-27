@@ -2,26 +2,61 @@ import { db } from '../db.js'
 
 // Buscar todos os registros de exames_atendimento
 export const getExamesAtendimento = (req, res) => {
-    const q = `
-   SELECT 
-    exames_atendimento.id AS id_primary,
-    exames_atendimento.exames_id AS id_exame,
-    atendimentos.valor_total AS valor_total,
-    exames.cod AS cod_exame,
-    exames.nome AS nome_exame,
-    exames.valor AS valor
-FROM exames_atendimento
-INNER JOIN exames ON exames.id = exames_atendimento.exames_id
-INNER JOIN atendimentos ON atendimentos.id = exames_atendimento.atendimento_id
-WHERE exames_atendimento.atendimento_id = ?;
-;
-    `
+    const atendimentoId = req.params.id;
 
-    db.query(q, [req.params.id], (err, data) => {
-        if (err) return res.status(500).json(err)
-        return res.status(200).json({ data })
-    })
-}
+    const q_paciente_atendimento = `
+        SELECT 
+            p.id AS paciente_id,
+            p.nome AS nome_paciente,
+            p.idade,
+            a.id AS atendimento_id,
+            a.valor_total
+        FROM atendimentos a
+        JOIN pacientes p ON p.id = a.paciente_id
+        WHERE a.id = ?;
+    `;
+
+    const q_exames = `
+        SELECT 
+            ea.id AS id_primary,
+            ea.exames_id AS id_exame,
+            e.cod AS cod_exame,
+            e.nome AS nome_exame,
+            e.valor
+        FROM exames_atendimento ea
+        JOIN exames e ON e.id = ea.exames_id
+        WHERE ea.atendimento_id = ?;
+    `;
+
+    db.query(q_paciente_atendimento, [atendimentoId], (err, pacienteResult) => {
+        if (err) return res.status(500).json(err);
+
+        if (pacienteResult.length === 0) {
+            return res.status(404).json({ message: "Atendimento não encontrado" });
+        }
+
+        const paciente = {
+            id: pacienteResult[0].paciente_id,
+            nome: pacienteResult[0].nome_paciente,
+            idade: pacienteResult[0].idade
+        };
+
+        const atendimento = {
+            id: pacienteResult[0].atendimento_id,
+            valor_total: pacienteResult[0].valor_total
+        };
+
+        db.query(q_exames, [atendimentoId], (err, examesResult) => {
+            if (err) return res.status(500).json(err);
+
+            return res.status(200).json({
+                paciente,
+                atendimento,
+                exames: examesResult
+            });
+        });
+    });
+};
 
 // Criar novo registro de exame em um atendimento
 export const addExameAtendimento = (req, res) => {
