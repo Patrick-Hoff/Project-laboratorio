@@ -194,7 +194,6 @@ GET    /atendimentos                   -> Listar todos os atendimentos
 POST   /atendimentos/add              -> Criar atendimento
 PUT    /atendimentos/:id/edit         -> Atualizar atendimento
 DELETE /atendimentos/:id/remove      -> Remover atendimento
-GET    /atendimentos/:id/exames      -> Listar exames de um atendimento
 ```
 
 ### Exames por Atendimento
