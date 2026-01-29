@@ -87,14 +87,17 @@ function Exames() {
         e.preventDefault()
 
         const exame = {
-            cod: cod,
-            nome: nome,
-            valor: valor
+            cod,
+            nome,
+            valor
         }
 
-        if (edit.id) {
+        if (edit?.id) {
 
-            axios.put(`http://localhost:8081/exames/${edit.id}/edit`, exame)
+            axios.put(`http://localhost:8081/exames/${edit.id}/edit`, exame,
+                { withCredentials: true } // 🔥 ISSO é o essencial
+
+            )
                 .then(() => {
                     toast.success('Exame editado com sucesso!')
                     resetForm()
@@ -102,21 +105,31 @@ function Exames() {
                 })
 
         } else {
-            axios.post('http://localhost:8081/exames', exame)
+
+            axios.post(
+                'http://localhost:8081/exames',
+                exame,
+                { withCredentials: true } // 🔥 ISSO é o essencial
+            )
                 .then(() => {
-                    resetForm()
                     toast.success('Exame criado com sucesso!')
-                }).catch((err) => {
-                    if (err.response && err.response.status === 500) {
-                        toast.error('O código do exame deve ser unico.')
+                    resetForm()
+                    getExames()
+                })
+                .catch((err) => {
+                    if (err.response?.status === 500) {
+                        toast.error('O código do exame deve ser único.')
+                    } else {
+                        toast.error('Erro ao criar exame')
                     }
                 })
         }
-
     }
 
     function handleDelete(id) {
-        axios.delete(`http://localhost:8081/exames/${id}/remove`)
+        axios.delete(`http://localhost:8081/exames/${id}/remove`,
+            { withCredentials: true } // 🔥 ISSO é o essencial
+        )
             .then(() => {
                 toast.success('Exame deletado com sucesso!')
                 getExames()

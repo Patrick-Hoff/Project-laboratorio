@@ -1,26 +1,23 @@
 import express from 'express'
-import { getExames,
+import { verifyToken } from '../middlewares/auth.js'
+import {
+    getExames,
     addExame,
     updateExame,
     deleteExame,
     logExames
- } from '../controllers/exames.js'
+} from '../controllers/exames.js'
 
 const router = express.Router()
 
-// Buscar todos exames
 router.get('/', getExames)
 
-// Criar atendimento
-router.post('/',addExame)
+router.post('/', verifyToken, addExame)
 
-// Atualizar atendimento pelo ID
-router.put('/:id/edit', updateExame)
+router.put('/:id/edit', verifyToken, updateExame)
 
-// Deletar atendimento pelo ID
-router.delete('/:id/remove', deleteExame)
+router.delete('/:id/remove', verifyToken, deleteExame)
 
-// Apresentar o log dos exames
 router.get('/log', logExames)
 
 

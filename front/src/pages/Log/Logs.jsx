@@ -100,7 +100,9 @@ const Logs = () => {
                                 <strong>Ação:</strong> {item.tipo_alteracao} <br />
                                 <strong>ID Paciente:</strong> {item.id_paciente} <br />
                                 <strong>Paciente: </strong> {item.paciente} <br />
-                                <strong>Idade:</strong> {item.idade}
+                                <strong>Idade:</strong> {item.idade} <br />
+                                <strong>ID usuário: </strong> {item.id} <br />
+                                <strong>Usuário: </strong> {item.name}
                                 <hr />
                             </li>
                         ))}
@@ -114,7 +116,9 @@ const Logs = () => {
                                 <strong>ID Exame:</strong> {item.id_exame} <br />
                                 <strong>Cod: </strong> {item.cod} <br />
                                 <strong>Exame: </strong> {item.exame} <br />
-                                <strong>Valor: </strong> {formatarParaBRL(item.valor)}
+                                <strong>Valor: </strong> {formatarParaBRL(item.valor)} <br />
+                                <strong>ID usuário: </strong> {item.id} <br />
+                                <strong>Usuário: </strong> {item.name}
                                 <hr />
                             </li>
                         ))}

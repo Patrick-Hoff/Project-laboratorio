@@ -10,7 +10,7 @@ export const getPacientes = (req, res) => {
     const searchNome = req.query.searchNome || '';
 
     const countQuery = `
-        SELECT COUNT(*) AS total FROM pacientes 
+        SELECT COUNT(*) AS total FROM pacientes
         WHERE id LIKE ? AND nome LIKE ?`;
 
     const dataQuery = `
@@ -36,31 +36,33 @@ export const getPacientes = (req, res) => {
 
 // Criar novo paciente no sistema
 export const addPacientes = (req, res) => {
-    const q = 'INSERT INTO pacientes(`nome`,`idade`) VALUES (?)'
+    const q = 'INSERT INTO pacientes(`nome`,`idade`) VALUES (?, ?)'
 
     const values = [
         req.body.nome,
         req.body.idade,
     ]
 
-    db.query(q, [values], (err, result) => {
+    db.query(q, values, (err, result) => {
         if (err) {
             console.log('Erro ao adicionar novo paciente. ' + err)
             return res.status(500).json(err)
         }
 
-        // Log para criar um novo exame
+        // Log para criar um novo paciente
         const insertId = result.insertId
 
         const logQuery = `
-            INSERT INTO logpaciente (id_paciente, idade, paciente, tipo_alteracao)
-            VALUES (?, ?, ?, 'Insert')
+            INSERT INTO logpaciente (id_paciente, idade, paciente, tipo_alteracao, id_user)
+            VALUES (?, ?, ?, ?, ?)
         `
 
         const logValues = [
             insertId,
             req.body.idade,
             req.body.nome,
+            'Insert',
+            req.userId
         ]
 
         db.query(logQuery, logValues, (logErr) => {
@@ -85,12 +87,12 @@ export const updatePaciente = (req, res) => {
     const selectQuery = 'SELECT * FROM pacientes WHERE id = ?'
     db.query(selectQuery, [pacienteId], (selectErr, selectResult) => {
         if (selectErr) {
-            console.log('Erro ao buscar exame: ' + selectErr)
+            console.log('Erro ao buscar paciente: ' + selectErr)
             return res.status(500).json(selectErr)
         }
 
         if (selectResult.length === 0) {
-            return res.status(404).json('Exame não encontrado.')
+            return res.status(404).json('Paciente não encontrado.')
         }
 
         const oldPaciente = selectResult[0];
@@ -110,12 +112,12 @@ export const updatePaciente = (req, res) => {
             }
 
             const logQuery = `
-                INSERT INTO logpaciente (id_paciente, idade, paciente, tipo_alteracao)
-                VALUES (?, ?, ?, ?)
+                INSERT INTO logpaciente (id_paciente, idade, paciente, tipo_alteracao, id_user)
+                VALUES (?, ?, ?, ?, ?)
             `
 
-            const logAntes = [pacienteId, oldPaciente.idade, oldPaciente.nome, 'Update - Antes']
-            const logDepois = [pacienteId, req.body.idade, req.body.nome, 'Update - Depois']
+            const logAntes = [pacienteId, oldPaciente.idade, oldPaciente.nome, 'Update - Antes', req.userId]
+            const logDepois = [pacienteId, req.body.idade, req.body.nome, 'Update - Depois', req.userId]
 
             // Inserir o log "antes"
             db.query(logQuery, logAntes, (logErr1) => {
@@ -138,21 +140,21 @@ export const updatePaciente = (req, res) => {
 
 // Deletar pacientes
 export const deletePaciente = (req, res) => {
-    const exameId = req.params.id;
+    const pacienteId = req.params.id;
 
     const selectQuery = `SELECT * FROM pacientes WHERE id = ?`
 
-    db.query(selectQuery, [exameId], (selectErr, selectResult) => {
+    db.query(selectQuery, [pacienteId], (selectErr, selectResult) => {
         if (selectErr) {
             console.log('Erro ao buscar paciente: ' + selectErr)
             return res.status(500).json(selectErr)
         }
 
         if (selectResult.length === 0) {
-            return res.status(404).json('Exame não encontrado.')
+            return res.status(404).json('Paciente não encontrado.')
         }
 
-        const exame = selectResult[0];
+        const paciente = selectResult[0];
 
         // Deletar paciente
         const q = 'DELETE FROM pacientes WHERE `id` = ?'
@@ -165,14 +167,16 @@ export const deletePaciente = (req, res) => {
 
             // Registrar o log de exclusão
             const logQuery = `
-                INSERT INTO logpaciente (id_paciente, idade, paciente, tipo_alteracao)
-                VALUES ( ?, ?, ?, 'Delete')
+                INSERT INTO logpaciente (id_paciente, paciente, idade, tipo_alteracao, id_user)
+                VALUES ( ?, ?, ?, ?, ?)
             `
 
             const logValues = [
-                exame.id,
-                exame.nome,
-                exame.idade,
+                paciente.id,
+                paciente.nome,
+                paciente.idade,
+                'Delete',
+                req.userId
             ]
 
             db.query(logQuery, logValues, (logErr) => {
@@ -192,7 +196,19 @@ export const logPaciente = (req, res) => {
     const dataFinal = req.query.dataFinal || null;
     const tipo = req.query.tipo || null;
 
-    let query = 'SELECT * FROM logpaciente';
+    let query = `
+        select
+	logpaciente.id_log,
+    logpaciente.id_paciente,
+    logpaciente.paciente,
+    logpaciente.idade,
+    logpaciente.data_alteracao,
+    logpaciente.tipo_alteracao,
+    users.id,
+    users.name
+    from logpaciente
+INNER JOIN users ON logpaciente.id_user = users.id
+    `;
     let params = [];
     let conditions = [];
 
@@ -219,15 +235,3 @@ export const logPaciente = (req, res) => {
         return res.status(200).json(data);
     });
 };
-
-// export const logPaciente = (req, res) => {
-//     const q = 'SELECT * FROM logpaciente'
-
-//     db.query(q, (err, data) => {
-//         if (err) {
-//             console.log('Erro ao carregar os logs dos pacientes')
-//             return res.status(500).json(err)
-//         }
-//         return res.status(200).json(data)
-//     })
-// }

@@ -40,26 +40,30 @@ export const getExames = (req, res) => {
 
 // Criar novo exame
 export const addExame = (req, res) => {
-    const q = 'INSERT INTO exames(`cod`, `nome`, `valor`) VALUES (?)'
+    const q = `
+        INSERT INTO exames (cod, nome, valor)
+        VALUES (?, ?, ?)
+    `
 
     const values = [
         req.body.cod,
         req.body.nome,
-        req.body.valor || 0,
+        req.body.valor || 0
     ]
 
-    db.query(q, [values], (err, result) => {
+    db.query(q, values, (err, result) => {
         if (err) {
-            console.log('Erro ao adicionar novo exame: ', err)
+            console.error('Erro ao adicionar exame:', err)
             return res.status(500).json(err)
         }
 
-        // Log para criar um novo exame
-        const insertId = result.insertId;
+        const insertId = result.insertId
 
+        // LOG
         const logQuery = `
-            INSERT INTO logexame (id_exame, cod, exame, valor, tipo_alteracao)
-            VALUES (?, ?, ?, ?, ?)
+            INSERT INTO logexame
+            (id_exame, cod, exame, valor, tipo_alteracao, id_user)
+            VALUES (?, ?, ?, ?, ?, ?)
         `
 
         const logValues = [
@@ -67,18 +71,20 @@ export const addExame = (req, res) => {
             req.body.cod,
             req.body.nome,
             req.body.valor || 0,
-            'Insert'
+            'Insert',
+            req.userId
         ]
 
         db.query(logQuery, logValues, (logErr) => {
             if (logErr) {
-                console.error('Erro ao registrar log dos exames.')
-                console.log(logErr)
+                console.error('Erro ao registrar log do exame:', logErr)
             }
-            return res.status(200).json('Exame criado com sucesso e log registrado')
-
         })
 
+        return res.status(201).json({
+            message: 'Exame criado com sucesso',
+            id: insertId
+        })
     })
 }
 
@@ -112,12 +118,12 @@ export const updateExame = (req, res) => {
 
             // 3. Inserir dois logs: "Update - Antes" e "Update - Depois"
             const logQuery = `
-                INSERT INTO logexame (id_exame, cod, exame,  valor, tipo_alteracao)
-                VALUES (?, ?, ?, ?, ?)
+                INSERT INTO logexame (id_exame, cod, exame,  valor, tipo_alteracao, id_user)
+                VALUES (?, ?, ?, ?, ?, ?)
             `;
 
-            const logAntes = [exameId, oldExame.cod, oldExame.nome, oldExame.valor, 'Update - Antes'];
-            const logDepois = [exameId, req.body.cod, req.body.nome, req.body.valor, 'Update - Depois'];
+            const logAntes = [exameId, oldExame.cod, oldExame.nome, oldExame.valor, 'Update - Antes', req.userId];
+            const logDepois = [exameId, req.body.cod, req.body.nome, req.body.valor, 'Update - Depois', req.userId];
 
             // Inserir o log "antes"
             db.query(logQuery, logAntes, (logErr1) => {
@@ -168,15 +174,16 @@ export const deleteExame = (req, res) => {
 
             // 3. Registrar o log da exclusão
             const logQuery = `
-                INSERT INTO logexame (id_exame, cod, exame, valor, tipo_alteracao)
-                VALUES (?, ?, ?, ?, 'Delete')
+                INSERT INTO logexame (id_exame, cod, exame, valor, tipo_alteracao, id_user)
+                VALUES (?, ?, ?, ?, 'Delete', ?)
             `;
 
             const logValues = [
                 exame.id,
                 exame.cod,
                 exame.nome,
-                exame.valor
+                exame.valor,
+                req.userId
             ];
 
             db.query(logQuery, logValues, (logErr) => {
@@ -198,7 +205,20 @@ export const logExames = (req, res) => {
     const dataFinal = req.query.dataFinal || null;
     const tipo = req.query.tipo || null;
 
-    let query = 'SELECT * FROM logexame';
+    // let query = 'SELECT * FROM logexame';
+    let query = `
+    select
+	logexame.id_log,
+    logexame.id_exame,
+    logexame.cod,
+    logexame.exame,
+    logexame.data_alteracao,
+    logexame.tipo_alteracao,
+    logexame.valor,
+    users.id,
+    users.name
+    from logexame
+INNER JOIN users ON logexame.id_user = users.id`
     let params = [];
     let conditions = [];
 
