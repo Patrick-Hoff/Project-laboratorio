@@ -4,6 +4,7 @@ import cookieParser from 'cookie-parser'
 import dotenv from 'dotenv'
 import path from 'path'
 import { fileURLToPath } from 'url'
+import { swaggerUi, swaggerDocument } from './config/swagger.js'
 
 // Rotas
 import pacientesRoutes from './routes/pacientes.js'
@@ -56,6 +57,8 @@ app.use('/usuarios', usuariosRoutes)
 app.use('/pagamentos', pagamentosRoutes)
 app.use('/dashboard', dashboardRoutes)
 app.use('/agendamento', agendamentoRoutes)
+
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument))
 
 // Start
 app.listen(8081, () => {
