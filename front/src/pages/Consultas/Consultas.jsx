@@ -16,6 +16,7 @@ export default function Consultas() {
     const [limit, setLimit] = useState(10)
     const [page, setPage] = useState(1)
     const [total, setTotal] = useState(0)
+    const [modalExcluir, setModalExcluir] = useState(null)
 
     const location = useLocation();
     const [mensagem, setMensagem] = useState("");
@@ -37,6 +38,24 @@ export default function Consultas() {
             console.error("Erro ao buscar consultas: ", error)
         }
     }
+
+    const removeConsulta = async (id) => {
+        try {
+            const res = await axios.delete(`http://localhost:8081/agendamento/${id}`)
+            setMensagem(res.data)
+            getConsultas()
+        } catch (error) {
+            console.error("Erro ao excluir agendamento")
+        }
+    }
+
+    useEffect(() => {
+        if (mensagem.length > 0) {
+            const timer = setTimeout(() => {
+                setMensagem("")
+            }, 3000)
+        }
+    }, [mensagem])
 
     const handleSubmit = (e) => {
         e.preventDefault()
@@ -174,6 +193,12 @@ export default function Consultas() {
                                 >
                                     Ver detalhes
                                 </button>
+                                <button
+                                    className='consultas-btn remove'
+                                    onClick={() => setModalExcluir({ id: consulta.id })}
+                                >
+                                    Excluir
+                                </button>
                             </div>
                         </div>
                     ))
@@ -182,8 +207,35 @@ export default function Consultas() {
                 )}
             </div>
 
-
             {/* MODAL */}
+            {modalExcluir && (
+                <div className="consultas-modal-overlay"
+                    onClick={(e) => {
+                        if (modalExcluir) {
+                            setModalExcluir(null)
+                        }
+                    }}>
+                    <div className="consultas-modal modal-buttons">
+                        <h2 className="consultas-modal-title">Tem certeza que deseja deletar essa consulta ?</h2>
+                        <div>
+                            <button
+                                className='btn-modal btn-cancelar'
+                                onClick={() => setModalExcluir(null)}
+                            >
+                                Cancelar
+                            </button>
+
+                            <button
+                                className='btn-modal btn-excluir'
+                                onClick={() => removeConsulta(modalExcluir.id)}
+                            >
+                                Excluir
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
             {selectedConsulta && (
                 <div
                     className="consultas-modal-overlay"

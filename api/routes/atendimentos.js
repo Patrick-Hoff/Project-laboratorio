@@ -2,9 +2,7 @@ import express from 'express'
 import { getAtendimentos,
     addAtendimento,
     updateAtendimento,
-    deleteAtendimento,
-    getExamesPorAtendimento,
-    // valor_atendimento
+    deleteAtendimento
  } from '../controllers/atendimentos.js'
 
 const router = express.Router()
@@ -20,8 +18,5 @@ router.put('/:id/edit', updateAtendimento)
 
 // Deletar atendimento pelo ID
 router.delete('/:id/remove', deleteAtendimento)
-
-// Exames do atendimento
-router.get('/:id/exames', getExamesPorAtendimento)
 
 export default router

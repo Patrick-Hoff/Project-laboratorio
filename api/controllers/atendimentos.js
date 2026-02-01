@@ -99,34 +99,3 @@ export const deleteAtendimento = (req, res) => {
         return res.status(200).json('Atendimento deletado com sucesso.')
     })
 }
-
-
-// Retornar os exames de um atendimento específico
-export const getExamesPorAtendimento = (req, res) => {
-    const q = `
-SELECT 
-    p.id AS paciente_id,
-    p.nome AS nome_paciente,
-    p.idade,
-
-    ea.exames_id,
-    e.nome AS nome_exame,
-    ea.resultado
-
-FROM atendimentos a
-INNER JOIN pacientes p ON a.paciente_id = p.id
-LEFT JOIN exames_atendimento ea ON ea.atendimento_id = a.id
-LEFT JOIN exames e ON ea.exames_id = e.id
-
-WHERE a.id = ?;
-
-    `
-
-    db.query(q, [req.params.id], (err, data) => {
-        if (err) {
-            console.log('Erro ao buscar exames do atendimento: ', err)
-            return res.status(500).json(err)
-        }
-        return res.status(200).json(data)
-    })
-}
