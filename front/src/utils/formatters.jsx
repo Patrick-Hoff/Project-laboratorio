@@ -14,7 +14,7 @@ export function formatCurrency(raw) {
     const cents = Number.parseInt(numbers || '0', 10) / 100;
     return {
         numero: cents,
-        texto: cents.toLocaleString("pe-BR", {
+        texto: cents.toLocaleString("pt-BR", {
             style: "currency",
             currency: "BRL"
         })
