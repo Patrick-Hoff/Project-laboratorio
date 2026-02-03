@@ -53,12 +53,10 @@ export const realizar_pagamento = (req, res) => {
     });
 };
 
-
-
 // Get
 export const info_pagamentos = (req, res) => {
     const id = req.params.id;
-    const q = `SELECT id, atendimento_id, valor_pago, metodo_pagamento, data_pagamento FROM pagamentos
+    const q = `SELECT id, valor_pago, metodo_pagamento, data_pagamento FROM pagamentos
 WHERE atendimento_id = ?;`
     db.query(q, [id], (err, result) => {
         if (err) {
@@ -72,8 +70,61 @@ WHERE atendimento_id = ?;`
             if (error) {
                 return res.status(400).json('Erro interno no servidor.')
             }
-            res.status(200).json({ result, valorPago })
+
+            const atendimento = `
+                SELECT 
+	pacientes.id AS paciente_id,
+    pacientes.nome AS paciente_nome,
+    DATE_FORMAT(pacientes.idade, '%d/%m/%Y') AS paciente_idade,
+    atendimentos.id AS atendimento_id
+    FROM atendimentos
+    INNER JOIN pacientes ON atendimentos.paciente_id = pacientes.id
+    where atendimentos.id = ?;
+            `
+            db.query(atendimento, [id], (attErr, resultAtendimento) => {
+                if (attErr) {
+                    return res.status(400).json('Erro interno no servidor.')
+                }
+                res.status(200).json({ resultAtendimento, result, valorPago })
+            })
 
         })
     })
-} 
+}
+
+export const atualizar_pagamento = (req, res) => {
+
+    const q = `
+        UPDATE pagamentos
+            SET valor_pago = ?,
+            metodo_pagamento = ?
+        WHERE id = ?;
+    `
+
+    const values = [
+        req.body.valor_pago,
+        req.body.metodo_pagamento,
+        req.params.id
+    ]
+
+    db.query(q, values, (err) => {
+        if (err) return res.status(500).json('Erro interno no servidor.')
+        res.status(200).json('Pagamento atualizado com sucesso.')
+    })
+}
+
+export const delete_pagamento = (req, res) => {
+
+    const id = req.params.id;
+
+    const q = `
+        DELETE FROM pagamentos
+        WHERE id = ?
+    `
+
+    db.query(q, [id], (err) => {
+        if(err) return res.status(500).json('Erro interno no servidor.')
+        return res.status(200).json('Pagamento deletado com sucesso.')
+    })
+
+}

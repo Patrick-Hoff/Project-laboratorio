@@ -3,23 +3,32 @@ import { Navigate } from 'react-router-dom'
 import axios from 'axios'
 
 const ProtectedRoute = ({ children, isAdmin }) => {
-  const [isAuth, setIsAuth] = useState(null)
+  const [user, setUser] = useState(null)
+  const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    axios.get('http://localhost:8081/usuarios/me', { withCredentials: true })
-      .then((res) => {setIsAuth(res.data)})
-      .catch(() => setIsAuth(false))
+    axios.get('http://localhost:8081/usuarios/me', {
+      withCredentials: true
+    })
+      .then(res => {
+        setUser(res.data)
+        setLoading(false)
+      })
+      .catch(() => {
+        setUser(null)
+        setLoading(false)
+      })
   }, [])
 
-  if (isAuth === null) {
+  if (loading) {
     return <div>Carregando...</div>
   }
 
-  if (!isAuth) {
+  if (!user) {
     return <Navigate to="/login" />
   }
 
-  if(isAdmin && isAuth.isAdmin !== 'S') {
+  if (isAdmin && !user.isAdmin) {
     return <Navigate to="/" />
   }
 

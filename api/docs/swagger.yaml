@@ -1,0 +1,1288 @@
+openapi: 3.0.0
+info:
+  title: laboratorio
+  version: 1.0.0
+  description: "API completa para gerenciamento de laboratório, pacientes, exames, atendimentos, usuários e agendamentos."
+servers:
+  - url: "http://localhost:8081"
+paths:
+  # --- Pacientes ---
+  /pacientes:
+    get:
+      summary: Listar pacientes
+      tags:
+        - Paciente
+      responses:
+        "200":
+          description: Lista de pacientes retornada com sucesso
+          content:
+            application/json:
+              example:
+                pacientes:
+                  - id: 1
+                    nome: João Silva
+                    idade: "1995-08-20"
+        "400":
+          description: Requisição inválida
+          content:
+            application/json:
+              example:
+                error: "Parâmetros de consulta inválidos."
+        "500":
+          description: Erro interno
+          content:
+            application/json:
+              example:
+                error: "Erro ao buscar pacientes."
+    post:
+      summary: Criar paciente
+      tags:
+        - Paciente
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                nome:
+                  type: string
+                idade:
+                  type: string
+                  format: date
+            example:
+              nome: Mario
+              idade: "2000-05-05"
+      responses:
+        "201":
+          description: Paciente criado com sucesso
+          content:
+            application/json:
+              example:
+                id: 3
+                nome: Mario
+                idade: "2000-05-05"
+        "400":
+          description: Dados inválidos
+          content:
+            application/json:
+              example:
+                error: "Nome ou idade inválidos."
+        "500":
+          description: Erro interno
+          content:
+            application/json:
+              example:
+                error: "Erro ao criar paciente."
+  /pacientes/{id}/edit:
+    put:
+      summary: Atualizar paciente
+      tags:
+        - Paciente
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+          example: 14
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                nome:
+                  type: string
+                idade:
+                  type: string
+                  format: date
+            example:
+              nome: Alteração
+              idade: "2000-05-10"
+      responses:
+        "200":
+          description: Paciente atualizado com sucesso
+          content:
+            application/json:
+              example:
+                id: 14
+                nome: Alteração
+                idade: "2000-05-10"
+        "400":
+          description: Dados inválidos
+          content:
+            application/json:
+              example:
+                error: "Dados de atualização inválidos."
+        "404":
+          description: Paciente não encontrado
+          content:
+            application/json:
+              example:
+                error: "Paciente não encontrado."
+        "500":
+          description: Erro interno
+          content:
+            application/json:
+              example:
+                error: "Erro ao atualizar paciente."
+  /pacientes/{id}/remove:
+    delete:
+      summary: Remover paciente
+      tags:
+        - Paciente
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+          example: 14
+      responses:
+        "200":
+          description: Paciente removido com sucesso
+          content:
+            application/json:
+              example:
+                message: "Paciente removido."
+        "404":
+          description: Paciente não encontrado
+          content:
+            application/json:
+              example:
+                error: "Paciente não encontrado."
+        "500":
+          description: Erro interno
+          content:
+            application/json:
+              example:
+                error: "Erro ao remover paciente."
+  # --- Exames ---
+  /exames:
+    get:
+      summary: Listar exames
+      tags:
+        - Exame
+      responses:
+        "200":
+          description: Lista de exames retornada
+          content:
+            application/json:
+              example:
+                exames:
+                  - id: 1
+                    cod: DOC
+                    nome: Documentação
+                    valor: 100
+        "500":
+          description: Erro interno
+          content:
+            application/json:
+              example:
+                error: "Erro ao buscar exames."
+    post:
+      summary: Criar exame
+      tags:
+        - Exame
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                cod:
+                  type: string
+                nome:
+                  type: string
+                valor:
+                  type: integer
+            example:
+              cod: DOC
+              nome: Documentação
+              valor: 100
+      responses:
+        "201":
+          description: Exame criado com sucesso
+          content:
+            application/json:
+              example:
+                id: 3
+                cod: DOC
+                nome: Documentação
+                valor: 100
+        "400":
+          description: Dados inválidos
+          content:
+            application/json:
+              example:
+                error: "Código ou valor inválido."
+        "500":
+          description: Erro interno
+          content:
+            application/json:
+              example:
+                error: "Erro ao criar exame."
+  /exames/{id}/edit:
+    put:
+      summary: Atualizar exame
+      tags:
+        - Exame
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+          example: 13
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                cod:
+                  type: string
+                nome:
+                  type: string
+                valor:
+                  type: integer
+            example:
+              cod: DOC1
+              nome: Documentação API
+              valor: 150
+      responses:
+        "200":
+          description: Exame atualizado com sucesso
+          content:
+            application/json:
+              example:
+                id: 13
+                cod: DOC1
+                nome: Documentação API
+                valor: 150
+        "400":
+          description: Dados inválidos
+          content:
+            application/json:
+              example:
+                error: "Dados de atualização inválidos."
+        "404":
+          description: Exame não encontrado
+          content:
+            application/json:
+              example:
+                error: "Exame não encontrado."
+        "500":
+          description: Erro interno
+          content:
+            application/json:
+              example:
+                error: "Erro ao atualizar exame."
+  /exames/{id}/remove:
+    delete:
+      summary: Remover exame
+      tags:
+        - Exame
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+          example: 27
+      responses:
+        "200":
+          description: Exame removido com sucesso
+          content:
+            application/json:
+              example:
+                message: "Exame removido."
+        "404":
+          description: Exame não encontrado
+          content:
+            application/json:
+              example:
+                error: "Exame não encontrado."
+        "500":
+          description: Erro interno
+          content:
+            application/json:
+              example:
+                error: "Erro ao remover exame."
+  # --- Atendimentos ---
+  /atendimentos:
+    get:
+      summary: Listar atendimentos
+      tags:
+        - Atendimento
+      responses:
+        "200":
+          description: Lista de atendimentos retornada
+          content:
+            application/json:
+              example:
+                atendimentos:
+                  - id: 50
+                    paciente_id: 18
+                    data: "2026-02-10"
+        "500":
+          description: Erro interno
+          content:
+            application/json:
+              example:
+                error: "Erro ao buscar atendimentos."
+  /atendimentos/add:
+    post:
+      summary: Criar atendimento
+      tags:
+        - Atendimento
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                paciente_id:
+                  type: integer
+            example:
+              paciente_id: 18
+      responses:
+        "201":
+          description: Atendimento criado com sucesso
+          content:
+            application/json:
+              example:
+                id: 52
+                paciente_id: 18
+        "400":
+          description: Dados inválidos
+          content:
+            application/json:
+              example:
+                error: "Paciente inválido."
+        "500":
+          description: Erro interno
+          content:
+            application/json:
+              example:
+                error: "Erro ao criar atendimento."
+  /atendimentos/{id}/edit:
+    put:
+      summary: Atualizar atendimento
+      tags:
+        - Atendimento
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+          example: 50
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                paciente_id:
+                  type: integer
+            example:
+              paciente_id: 15
+      responses:
+        "200":
+          description: Atendimento atualizado com sucesso
+          content:
+            application/json:
+              example:
+                id: 50
+                paciente_id: 15
+        "400":
+          description: Dados inválidos
+          content:
+            application/json:
+              example:
+                error: "Dados de atualização inválidos."
+        "404":
+          description: Atendimento não encontrado
+          content:
+            application/json:
+              example:
+                error: "Atendimento não encontrado."
+        "500":
+          description: Erro interno
+          content:
+            application/json:
+              example:
+                error: "Erro ao atualizar atendimento."
+  /atendimentos/{id}/remove:
+    delete:
+      summary: Remover atendimento
+      tags:
+        - Atendimento
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+          example: 58
+      responses:
+        "200":
+          description: Atendimento removido com sucesso
+          content:
+            application/json:
+              example:
+                message: "Atendimento removido."
+        "404":
+          description: Atendimento não encontrado
+          content:
+            application/json:
+              example:
+                error: "Atendimento não encontrado."
+        "500":
+          description: Erro interno
+          content:
+            application/json:
+              example:
+                error: "Erro ao remover atendimento."
+  # --- Exames por Atendimento ---
+  /exames_atendimento/{id}:
+    get:
+      summary: Listar exames de um atendimento
+      tags:
+        - Exames_atendimento
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+          example: 57
+      responses:
+        "200":
+          description: Lista de exames do atendimento
+          content:
+            application/json:
+              example:
+                exames:
+                  - id: 29
+                    atendimento_id: 57
+                    resultado: Pendente
+        "404":
+          description: Atendimento não encontrado
+          content:
+            application/json:
+              example:
+                error: "Atendimento não encontrado."
+        "500":
+          description: Erro interno
+          content:
+            application/json:
+              example:
+                error: "Erro ao buscar exames do atendimento."
+    put:
+      summary: Atualizar resultado do exame no atendimento
+      tags:
+        - Exames_atendimento
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+          example: 57
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                atendimento_id:
+                  type: integer
+                exames_id:
+                  type: integer
+                resultado:
+                  type: string
+            example:
+              atendimento_id: 57
+              exames_id: 29
+              resultado: "Resultado atualizado"
+      responses:
+        "200":
+          description: Resultado do exame atualizado
+          content:
+            application/json:
+              example:
+                message: "Resultado atualizado."
+        "400":
+          description: Dados inválidos
+          content:
+            application/json:
+              example:
+                error: "Dados inválidos."
+        "404":
+          description: Exame ou atendimento não encontrado
+          content:
+            application/json:
+              example:
+                error: "Exame ou atendimento não encontrado."
+        "500":
+          description: Erro interno
+          content:
+            application/json:
+              example:
+                error: "Erro ao atualizar resultado."
+  /exames_atendimento/add:
+    post:
+      summary: Adicionar exame a atendimento
+      tags:
+        - Exames_atendimento
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                atendimento_id:
+                  type: integer
+                exames_id:
+                  type: integer
+                resultado:
+                  type: string
+            example:
+              atendimento_id: 57
+              exames_id: 29
+              resultado: "Pendente"
+      responses:
+        "201":
+          description: Exame adicionado ao atendimento com sucesso
+          content:
+            application/json:
+              example:
+                message: "Exame adicionado ao atendimento."
+        "400":
+          description: Dados inválidos
+          content:
+            application/json:
+              example:
+                error: "Dados inválidos para adicionar exame."
+        "404":
+          description: Atendimento ou exame não encontrado
+          content:
+            application/json:
+              example:
+                error: "Atendimento ou exame não encontrado."
+        "500":
+          description: Erro interno
+          content:
+            application/json:
+              example:
+                error: "Erro ao adicionar exame ao atendimento."
+  /exames_atendimento/{id}/atendimento/{att}:
+    delete:
+      summary: Remover exame de atendimento
+      tags:
+        - Exames_atendimento
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+          example: 64
+        - name: att
+          in: path
+          required: true
+          schema:
+            type: integer
+          example: 57
+      responses:
+        "200":
+          description: Exame removido do atendimento
+          content:
+            application/json:
+              example:
+                message: "Exame removido do atendimento."
+        "404":
+          description: Exame ou atendimento não encontrado
+          content:
+            application/json:
+              example:
+                error: "Exame ou atendimento não encontrado."
+        "500":
+          description: Erro interno
+          content:
+            application/json:
+              example:
+                error: "Erro ao remover exame do atendimento."
+  # --- Pagamentos ---
+  /pagamentos/info_pagamentos/{id}:
+    get:
+      summary: Visualizar pagamento do atendimento
+      tags:
+        - Pagamento_no_atendimento
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+          example: 57
+      responses:
+        "200":
+          description: Pagamento retornado com sucesso
+          content:
+            application/json:
+              example:
+                atendimento_id: 57
+                total: 250
+                status: "Pendente"
+        "404":
+          description: Atendimento não encontrado
+          content:
+            application/json:
+              example:
+                error: "Atendimento não encontrado."
+        "500":
+          description: Erro interno
+          content:
+            application/json:
+              example:
+                error: "Erro ao consultar pagamento."
+
+  /pagamentos/realizar_pagamento/atendimentoid/{id}:
+    post:
+      summary: Realizar pagamento de atendimento
+      tags:
+        - Pagamento_no_atendimento
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+          description: ID do atendimento
+          example: 57
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                metodo:
+                  type: string
+                  description: Método de pagamento (Dinheiro, Cartao, Pix e Boleto)
+                valor:
+                  type: number
+                  description: Valor do pagamento
+              required:
+                - metodo
+                - valor
+            example:
+              metodo: "Cartão"
+              valor: 150
+      responses:
+        "200":
+          description: Pagamento realizado com sucesso
+          content:
+            application/json:
+              example:
+                message: "Pagamento realizado."
+                atendimento_id: 57
+                status: "Pago"
+        "400":
+          description: Pagamento inválido
+          content:
+            application/json:
+              example:
+                error: "Informações incorretas enviadas para o servidor."
+        "404":
+          description: Atendimento não encontrado
+          content:
+            application/json:
+              example:
+                error: "Atendimento não encontrado."
+        "500":
+          description: Erro interno
+          content:
+            application/json:
+              example:
+                error: "Erro ao processar pagamento."
+  # --- Usuários ---
+  /usuarios/register:
+    post:
+      summary: Criar usuário
+      tags:
+        - Usuarios
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                email:
+                  type: string
+                  format: email
+                password:
+                  type: string
+                isAdmin:
+                  type: string
+            example:
+              name: Médico Fabio
+              email: fabio@gmail.com
+              password: "123"
+              isAdmin: S
+      responses:
+        "201":
+          description: Usuário criado com sucesso
+          content:
+            application/json:
+              example:
+                id: 17
+                name: Médico Fabio
+                email: fabio@gmail.com
+                isAdmin: S
+        "400":
+          description: Dados inválidos
+          content:
+            application/json:
+              example:
+                error: "Dados inválidos para criação de usuário."
+        "500":
+          description: Erro interno
+          content:
+            application/json:
+              example:
+                error: "Erro ao criar usuário."
+  /usuarios/login:
+    post:
+      summary: Login do usuário
+      tags:
+        - Usuarios
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                  format: email
+                password:
+                  type: string
+            example:
+              email: admin@admin.com
+              password: "123"
+      responses:
+        "200":
+          description: Login realizado com sucesso
+          content:
+            application/json:
+              example:
+                token: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+        "400":
+          description: Dados inválidos
+          content:
+            application/json:
+              example:
+                error: "Email ou senha inválidos."
+        "500":
+          description: Erro interno
+          content:
+            application/json:
+              example:
+                error: "Erro ao processar login."
+  /usuarios/me:
+    get:
+      summary: Retornar usuário logado
+      tags:
+        - Usuarios
+      responses:
+        "200":
+          description: Usuário logado retornado
+          content:
+            application/json:
+              example:
+                id: 17
+                name: Fabio
+                email: fabio@gmail.com
+                isAdmin: S
+        "401":
+          description: Usuário não autenticado
+          content:
+            application/json:
+              example:
+                error: "Token inválido ou ausente."
+        "500":
+          description: Erro interno
+          content:
+            application/json:
+              example:
+                error: "Erro ao buscar usuário."
+  "/usuarios/edit/{id}":
+    put:
+      summary: Atualizar usuário
+      tags:
+        - Usuarios
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+          example: 17
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                email:
+                  type: string
+                  format: email
+                password:
+                  type: string
+                isAdmin:
+                  type: string
+            example:
+              name: Fabio Santos
+              email: fabio@gmail.com
+              password: "12345"
+              isAdmin: N
+      responses:
+        "200":
+          description: Usuário atualizado com sucesso
+          content:
+            application/json:
+              example:
+                id: 17
+                name: Fabio Santos
+                email: fabio@gmail.com
+                isAdmin: N
+        "400":
+          description: Dados inválidos
+          content:
+            application/json:
+              example:
+                error: "Dados de atualização inválidos."
+        "404":
+          description: Usuário não encontrado
+          content:
+            application/json:
+              example:
+                error: "Usuário não encontrado."
+        "500":
+          description: Erro interno
+          content:
+            application/json:
+              example:
+                error: "Erro ao atualizar usuário."
+  /usuarios/searchUsers:
+    get:
+      summary: Buscar usuários
+      tags:
+        - Usuarios
+      parameters:
+        - name: page
+          in: query
+          schema:
+            type: integer
+          example: 1
+        - name: limit
+          in: query
+          schema:
+            type: integer
+          example: 5
+        - name: searchId
+          in: query
+          schema:
+            type: integer
+          example: 17
+        - name: searchName
+          in: query
+          schema:
+            type: string
+          example: Fabio
+        - name: searchEmail
+          in: query
+          schema:
+            type: string
+          example: fabio@gmail.com
+      responses:
+        "200":
+          description: Usuários retornados com sucesso
+          content:
+            application/json:
+              example:
+                usuarios:
+                  - id: 17
+                    name: Fabio
+                    email: fabio@gmail.com
+                    isAdmin: S
+        "500":
+          description: Erro interno
+          content:
+            application/json:
+              example:
+                error: "Erro ao buscar usuários."
+  /usuarios/logout:
+    post:
+      summary: Logout do usuário
+      tags:
+        - Usuarios
+      responses:
+        "200":
+          description: Logout realizado com sucesso
+          content:
+            application/json:
+              example:
+                message: "Logout realizado."
+        "500":
+          description: Erro interno
+          content:
+            application/json:
+              example:
+                error: "Erro ao realizar logout."
+  /usuarios/upload:
+    post:
+      summary: Upload de imagem do usuário
+      tags:
+        - Usuarios
+      responses:
+        "200":
+          description: Imagem enviada com sucesso
+          content:
+            application/json:
+              example:
+                message: "Imagem enviada com sucesso."
+        "400":
+          description: Arquivo inválido
+          content:
+            application/json:
+              example:
+                error: "Arquivo inválido."
+        "500":
+          description: Erro interno
+          content:
+            application/json:
+              example:
+                error: "Erro ao enviar imagem."
+  # --- Agendamento ---
+  /agendamento:
+    get:
+      summary: Listar agendamentos
+      tags:
+        - Agendamento
+      parameters:
+        - name: nome
+          in: query
+          schema:
+            type: string
+          example: Vitor
+          description: Nome do paciente
+        - name: proximos
+          in: query
+          schema:
+            type: boolean
+          example: true
+          description: Retorna apenas consultas futuras
+        - name: data
+          in: query
+          schema:
+            type: string
+          example: "2026-01-25"
+          description: Filtra por data
+        - name: orderDir
+          in: query
+          schema:
+            type: string
+          example: ASC
+          description: Ordenação crescente
+        - name: limit
+          in: query
+          schema:
+            type: integer
+          example: 10
+          description: Total de agendamentos por página
+        - name: page
+          in: query
+          schema:
+            type: integer
+          example: 1
+          description: Página atual
+      responses:
+        "200":
+          description: Lista de agendamentos retornada
+          content:
+            application/json:
+              example:
+                agendamentos:
+                  - id: 37
+                    nome: João Silva
+                    data_consulta: "2026-02-10"
+                    horario: "14:30:00"
+                    tipo_consulta: Retorno
+        "400":
+          description: Parâmetros inválidos
+          content:
+            application/json:
+              example:
+                error: "Parâmetros de busca inválidos."
+        "500":
+          description: Erro interno
+          content:
+            application/json:
+              example:
+                error: "Erro ao buscar agendamentos."
+    post:
+      summary: Criar agendamento
+      tags:
+        - Agendamento
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                nome:
+                  type: string
+                sexo:
+                  type: string
+                cpf:
+                  type: string
+                rg:
+                  type: string
+                nascimento:
+                  type: string
+                  format: date
+                telefone:
+                  type: string
+                email:
+                  type: string
+                  format: email
+                rua:
+                  type: string
+                numero:
+                  type: string
+                bairro:
+                  type: string
+                cidade:
+                  type: string
+                estado:
+                  type: string
+                cep:
+                  type: string
+                data_consulta:
+                  type: string
+                  format: date
+                horario:
+                  type: string
+                  format: time
+                tipo_consulta:
+                  type: string
+                retorno:
+                  type: string
+                observacao:
+                  type: string
+            example:
+              nome: João Silva
+              sexo: Masculino
+              cpf: 123.456.789-00
+              rg: 45.678.912-3
+              nascimento: "1995-08-20"
+              telefone: (11) 98888-7777
+              email: joao.silva@email.com
+              rua: Rua das Flores
+              numero: "120"
+              bairro: Centro
+              cidade: São Paulo
+              estado: SP
+              cep: 01010-000
+              data_consulta: "2026-02-10"
+              horario: "14:30:00"
+              tipo_consulta: Retorno
+              retorno: "N"
+              observacao: Paciente sem queixas no momento
+      responses:
+        "201":
+          description: Agendamento criado com sucesso
+          content:
+            application/json:
+              example:
+                id: 37
+                nome: João Silva
+                data_consulta: "2026-02-10"
+                horario: "14:30:00"
+        "400":
+          description: Dados inválidos
+          content:
+            application/json:
+              example:
+                error: "Dados inválidos para criar agendamento."
+        "500":
+          description: Erro interno
+          content:
+            application/json:
+              example:
+                error: "Erro ao criar agendamento."
+  /agendamento/{id}:
+    put:
+      summary: Atualizar agendamento
+      tags:
+        - Agendamento
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+          example: 37
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                nome:
+                  type: string
+                sexo:
+                  type: string
+                cpf:
+                  type: string
+                rg:
+                  type: string
+                nascimento:
+                  type: string
+                  format: date
+                telefone:
+                  type: string
+                email:
+                  type: string
+                  format: email
+                rua:
+                  type: string
+                numero:
+                  type: string
+                bairro:
+                  type: string
+                cidade:
+                  type: string
+                estado:
+                  type: string
+                cep:
+                  type: string
+                data_consulta:
+                  type: string
+                  format: date
+                horario:
+                  type: string
+                  format: time
+                tipo_consulta:
+                  type: string
+                retorno:
+                  type: string
+                observacao:
+                  type: string
+            example:
+              nome: João Silva
+              sexo: Masculino
+              cpf: 123.456.789-00
+              rg: 45.678.912-3
+              nascimento: "1995-08-20"
+              telefone: (11) 98888-7777
+              email: joao.silva@email.com
+              rua: Rua das Flores
+              numero: "120"
+              bairro: Centro
+              cidade: Osasco
+              estado: SP
+              cep: 01010-000
+              data_consulta: "2026-02-10"
+              horario: "14:30:00"
+              tipo_consulta: Retorno
+              retorno: "N"
+              observacao: Paciente sem queixas no momento
+      responses:
+        "200":
+          description: Agendamento atualizado com sucesso
+          content:
+            application/json:
+              example:
+                id: 37
+                nome: João Silva
+                cidade: Osasco
+        "400":
+          description: Dados inválidos
+          content:
+            application/json:
+              example:
+                error: "Dados inválidos para atualização."
+        "404":
+          description: Agendamento não encontrado
+          content:
+            application/json:
+              example:
+                error: "Agendamento não encontrado."
+        "500":
+          description: Erro interno
+          content:
+            application/json:
+              example:
+                error: "Erro ao atualizar agendamento."
+    delete:
+      summary: Remover agendamento
+      tags:
+        - Agendamento
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+          example: 37
+      responses:
+        "200":
+          description: Agendamento removido com sucesso
+          content:
+            application/json:
+              example:
+                message: "Agendamento removido."
+        "404":
+          description: Agendamento não encontrado
+          content:
+            application/json:
+              example:
+                error: "Agendamento não encontrado."
+        "500":
+          description: Erro interno
+          content:
+            application/json:
+              example:
+                error: "Erro ao remover agendamento."
+  # --- Dashboard ---
+  /dashboard:
+    get:
+      summary: Informações do dashboard
+      tags:
+        - Dashboard
+      responses:
+        "200":
+          description: Dados do dashboard retornados com sucesso
+          content:
+            application/json:
+              example:
+                total_pacientes: 120
+                total_exames: 350
+                total_atendimentos: 75
+                total_pagamentos: 50000
+        "500":
+          description: Erro interno
+          content:
+            application/json:
+              example:
+                error: "Erro ao carregar dados do dashboard."

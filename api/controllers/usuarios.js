@@ -60,27 +60,37 @@ export const updateUser = (req, res) => {
     });
 };
 
-// Login
+// Usuarios
 export const loginUser = (req, res) => {
     const { email, password } = req.body
 
     const q = 'SELECT * FROM users WHERE email = ?'
+
     db.query(q, [email], async (err, results) => {
-        if (err) return res.status(500).json({ error: 'Erro no banco de dados' })
-        if (results.length === 0) return res.status(401).json({ error: 'Email ou senha incorretos' })
+        if (err) return res.status(500).json({ error: 'Erro no banco' })
+        if (results.length === 0) {
+            return res.status(401).json({ error: 'Email ou senha incorretos' })
+        }
 
         const user = results[0]
-
         const match = await bcrypt.compare(password, user.password)
-        if (!match) return res.status(401).json({ error: 'Email ou senha incorretos' })
 
-        const token = jwt.sign({ id: user.id, isAdmin: user.isAdmin }, JWT_SECRET, { expiresIn: '1h' })
+        if (!match) {
+            return res.status(401).json({ error: 'Email ou senha incorretos' })
+        }
+
+        const token = jwt.sign(
+            { id: user.id, isAdmin: user.isAdmin },
+            process.env.JWT_SECRET,
+            { expiresIn: '1h' }
+        )
 
         res.cookie('token', token, {
             httpOnly: true,
             secure: process.env.NODE_ENV === 'production',
-            sameSite: 'strict',
-            maxAge: 3600000,
+            sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
+            maxAge: 60 * 60 * 1000,
+            path: '/'
         })
 
         res.status(200).json({
@@ -89,10 +99,12 @@ export const loginUser = (req, res) => {
                 id: user.id,
                 name: user.name,
                 email: user.email,
-            },
+                isAdmin: user.isAdmin
+            }
         })
     })
 }
+
 
 // Busca com filtro
 export const searchUsers = (req, res) => {
@@ -131,31 +143,36 @@ export const searchUsers = (req, res) => {
 };
 
 export const getCurrentUser = (req, res) => {
-    const token = req.cookies.token;
-    if (!token) return res.status(401).json({ error: 'Não autenticado' });
+    const q = `
+        SELECT id, name, email, isAdmin, profileImage
+        FROM users
+        WHERE id = ?
+    `
 
-    try {
-        const decoded = jwt.verify(token, JWT_SECRET);
-        const q = 'SELECT id, name, email, isAdmin, profileImage FROM users WHERE id = ?';
-        db.query(q, [decoded.id], (err, results) => {
-            if (err) return res.status(500).json({ error: 'Erro no banco' });
-            if (results.length === 0) return res.status(404).json({ error: 'Usuário não encontrado' });
+    db.query(q, [req.userId], (err, results) => {
+        if (err) {
+            console.error(err)
+            return res.status(500).json({ error: 'Erro no banco de dados' })
+        }
 
-            const user = results[0];
-            const avatarUrl = user.profileImage ? `http://localhost:8081/uploads/${user.profileImage}` : null;
+        if (results.length === 0) {
+            return res.status(404).json({ error: 'Usuário não encontrado' })
+        }
 
-            res.json({
-                id: user.id,
-                name: user.name,
-                email: user.email,
-                isAdmin: user.isAdmin,
-                avatar: avatarUrl
-            });
-        });
-    } catch {
-        res.status(401).json({ error: 'Token inválido' });
-    }
+        const user = results[0]
+
+        res.status(200).json({
+            id: user.id,
+            name: user.name,
+            email: user.email,
+            isAdmin: user.isAdmin,
+            avatar: user.profileImage
+                ? `http://localhost:8081/uploads/${user.profileImage}`
+                : null
+        })
+    })
 }
+
 
 
 export const logoutSistem = (req, res) => {

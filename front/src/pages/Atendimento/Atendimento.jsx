@@ -1,13 +1,13 @@
 import { useEffect, useState, useContext } from 'react';
 import { UserContext } from '../../routes/UserContext'
 
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, Link } from 'react-router-dom';
 import axios from 'axios';
 
 import { FaSearch } from 'react-icons/fa';
 import { ToastContainer, toast } from 'react-toastify';
 import { FaArrowRight, FaArrowLeft } from "react-icons/fa";
-import { FaDeleteLeft } from "react-icons/fa6";
+import { FaDeleteLeft, FaFileInvoiceDollar } from "react-icons/fa6";
 
 import Modal from 'react-bootstrap/Modal';
 import Button from 'react-bootstrap/Button';
@@ -415,8 +415,14 @@ function Atendimento() {
 
 
 
-
-                <h2 className="subtitulo">Adicionar Exame</h2>
+                <div className="container-headbar">
+                    <h2 className="subtitulo">Adicionar Exame</h2>
+                    <div className="listbar">
+                        <Link to={`/financeiro/${id}`}>
+                            <FaFileInvoiceDollar id="icon-dolar" />
+                        </Link>
+                    </div>
+                </div>
                 <form className="filtro-exames">
                     <input
                         type="text"

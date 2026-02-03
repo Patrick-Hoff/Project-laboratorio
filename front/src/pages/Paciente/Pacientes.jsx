@@ -76,7 +76,9 @@ function Pacientes() {
 
         if (edit.id) {
 
-            axios.put(`http://localhost:8081/pacientes/${edit.id}/edit`, paciente)
+            axios.put(`http://localhost:8081/pacientes/${edit.id}/edit`, paciente, 
+                {withCredentials: true}
+            )
                 .then(() => {
                     toast.success('Paciente editado com sucesso!')
                     resetForm()
@@ -85,7 +87,9 @@ function Pacientes() {
 
         } else {
 
-            axios.post('http://localhost:8081/pacientes', paciente)
+            axios.post('http://localhost:8081/pacientes', paciente, 
+                {withCredentials: true}
+            )
                 .then(() => {
                     toast.success('Paciente cadastrado com sucesso!')
                     getPacientes()
@@ -99,7 +103,9 @@ function Pacientes() {
 
     function handleDelete(id) {
 
-        axios.delete(`http://localhost:8081/pacientes/${id}/remove`)
+        axios.delete(`http://localhost:8081/pacientes/${id}/remove`, 
+            {withCredentials: true}
+        )
             .then(() => {
                 toast.success('Paciente deletado com sucesso!')
                 getPacientes()

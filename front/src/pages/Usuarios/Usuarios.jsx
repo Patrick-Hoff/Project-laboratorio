@@ -35,7 +35,7 @@ function Usuarios() {
                     searchId,
                     searchName,
                     searchEmail
-                }
+                },
             });
             setUsuarios(res.data.data);
             setTotal(res.data.total);
@@ -71,7 +71,9 @@ function Usuarios() {
         };
 
         if (edit.id) {
-            axios.put(`http://localhost:8081/usuarios/edit/${edit.id}`, usuario)
+            axios.put(`http://localhost:8081/usuarios/edit/${edit.id}`, usuario,
+                { withCredentials: true }
+            )
                 .then(() => {
                     toast.success('Usuário editado com sucesso!');
                     resetForm();
@@ -82,7 +84,9 @@ function Usuarios() {
                     console.error(error);
                 });
         } else {
-            axios.post('http://localhost:8081/usuarios/register', usuario)
+            axios.post('http://localhost:8081/usuarios/register', usuario,
+                { withCredentials: true }
+            )
                 .then(() => {
                     toast.success('Usuário cadastrado com sucesso!');
                     getUsuarios();

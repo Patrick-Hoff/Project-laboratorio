@@ -3,6 +3,7 @@ import path from 'path'
 import multer from 'multer'
 import fs from 'fs'
 import { fileURLToPath } from 'url'
+import { verifyToken } from '../middlewares/auth.js'
 import {
     registerUser,
     loginUser,
@@ -10,14 +11,14 @@ import {
     getCurrentUser,
     logoutSistem,
     updateUser,
-    uploadUserImage // Função para lidar com o upload da imagem
+    uploadUserImage
 } from '../controllers/usuarios.js'
 
-// Workaround para __dirname em ES Modules
+// Resolver __dirname (ES Modules)
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
 
-// Garante que a pasta de upload existe
+// Pasta de uploads
 const uploadDir = path.join(__dirname, '..', 'public/uploads')
 if (!fs.existsSync(uploadDir)) {
     fs.mkdirSync(uploadDir, { recursive: true })
@@ -36,18 +37,19 @@ const storage = multer.diskStorage({
 
 const upload = multer({ storage })
 
-// Criando o router
 const router = express.Router()
 
-// Rota de upload da imagem
-router.post('/upload', upload.single('imagem'), uploadUserImage)
+// 🔒 UPLOAD (somente usuário logado)
+router.post('/upload', verifyToken, upload.single('imagem'), uploadUserImage)
 
-// Outras rotas
+// Públicas
 router.post('/register', registerUser)
 router.post('/login', loginUser)
+
+// 🔒 Protegidas
+router.get('/me', verifyToken, getCurrentUser)
+router.post('/logout', verifyToken, logoutSistem)
+router.put('/edit/:id', verifyToken, updateUser)
 router.get('/searchUsers', searchUsers)
-router.get('/me', getCurrentUser)
-router.post('/logout', logoutSistem)
-router.put('/edit/:id', updateUser)
 
 export default router

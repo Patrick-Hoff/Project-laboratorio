@@ -12,6 +12,7 @@ import Dashboard from '../pages/Dashboard/Dashboard'
 import Agendar_consulta from '../pages/Agendar_consulta/Agendar_consulta'
 import Consultas from '../pages/Consultas/Consultas'
 import ProtectedRoute from './ProtectedRoute'
+import AtendimentoFinanceiro from '../pages/AtendimentoFinanceiro/AtendimentoFinanceiro'
 
 
 function RoutesApp() {
@@ -30,6 +31,7 @@ function RoutesApp() {
             <Route path='/meu-usuario' element={<ProtectedRoute><MyUser /></ProtectedRoute>} />
             <Route path='/search-logs/:page' element={<ProtectedRoute isAdmin='S'><Logs /></ProtectedRoute>} />
             <Route path='/Users' element={<ProtectedRoute isAdmin='S'><Usuarios /></ProtectedRoute>} />
+            <Route path='/Financeiro/:id' element={<ProtectedRoute isAdmin='S'><AtendimentoFinanceiro /></ProtectedRoute>} />
         </Routes>
     )
 }

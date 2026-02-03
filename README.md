@@ -169,6 +169,9 @@ Frontend rodando em: `http://localhost:5173`
 
 ## 📬 API Endpoints
 
+> A documentação completa da API também está disponível via Swagger:  
+> [Abrir documentação Swagger](http://localhost:8081/api-docs)
+
 ### Pacientes
 
 ```
