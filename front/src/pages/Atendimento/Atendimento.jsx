@@ -304,25 +304,19 @@ function Atendimento() {
                 valor: quantoPagar
             };
 
-            if (quantoPagar > quantoFaltaPagar) {
-                // Caso o valor pago seja maior que o devido, não realiza o pagamento
-                setErrorPayment('Valor incorreto.')
-            } else {
-                setErrorPayment('')
-                // Se o valor pago for válido, realiza o pagamento
-                const res = await axios.post(
-                    `http://localhost:8081/pagamentos/realizar_pagamento/atendimentoid/${id}`,
-                    values
-                );
-                getPayment(); // Atualiza os pagamentos
-                setFormaPagamento("");
-                setQuantoPagar("");
-                setDisplayValor("R$ 0,00")
-                toast.success('Pagamento realizado com sucesso!')
-            }
+            setErrorPayment('')
+            const res = await axios.post(
+                `http://localhost:8081/pagamentos/realizar_pagamento/atendimentoid/${id}`,
+                values
+            );
+            getPayment();
+            setFormaPagamento("");
+            setQuantoPagar("");
+            setDisplayValor("R$ 0,00")
+            toast.success('Pagamento realizado com sucesso!')
 
         } catch (err) {
-            console.log('Erro ao realizar pagamento:', err); console.log(quantoPagar)
+            setErrorPayment(err.response.data.erro)
         }
     };
 
