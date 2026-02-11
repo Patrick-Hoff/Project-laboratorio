@@ -14,10 +14,10 @@ import Modal from 'react-bootstrap/Modal'
 import Form from 'react-bootstrap/Form'
 
 import '../../styles/shared.css'
+import './Medico.css'
 
 function Medico() {
 
-    // ================= STATES =================
     const [medicos, setMedicos] = useState([])
 
     const [nome, setNome] = useState('')
@@ -26,6 +26,11 @@ function Medico() {
 
     const [edit, setEdit] = useState({})
     const [modalShow, setModalShow] = useState(false)
+    const [modalExcluir, setModalExcluir] = useState({
+        show: false,
+        id: null
+    })
+
 
     const [page, setPage] = useState(1)
     const [total, setTotal] = useState(0)
@@ -35,7 +40,29 @@ function Medico() {
 
     const limit = 5
 
-    // ================= FUNÇÕES =================
+
+    const getMedicos = async () => {
+        try {
+
+            const params = new URLSearchParams({
+                nome: searchNome,
+                crm: searchCrm,
+                page,
+                limit
+            })
+
+            const res = await axios.get(`http://localhost:8081/medicos?${params}`)
+            setMedicos(res.data.data)
+            setTotal(res.data.total)
+        } catch (err) {
+            console.log(err)
+        }
+    }
+
+    useEffect(() => {
+        getMedicos()
+    }, [page, searchNome, searchCrm])
+
 
     const resetForm = () => {
         setModalShow(false)
@@ -53,25 +80,44 @@ function Medico() {
         setModalShow(true)
     }
 
-    const handleDelete = (id) => {
-        if (!window.confirm('Deseja realmente excluir este médico?')) return
+    const handleDelete = async (id) => {
 
-        // Aqui depois entra o axios.delete
-        toast.success('Médico removido com sucesso!')
+        try {
+            await axios.delete(`http://localhost:8081/medicos/${modalExcluir.id}`)
+            toast.success('Médico removido com sucesso!')
+            setModalExcluir({ show: false, id: null })
+            getMedicos()
+        } catch (err) {
+            console.log(err)
+        }
     }
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault()
 
-        if (edit.id) {
-            // axios.put(...)
-            toast.success('Médico atualizado com sucesso!')
-        } else {
-            // axios.post(...)
-            toast.success('Médico cadastrado com sucesso!')
+        const data = {
+            nome: nome,
+            crm: crm,
+            estado: estado
         }
 
+        if (edit.id) {
+            try {
+                await axios.put(`http://localhost:8081/medicos/${edit.id}`, data)
+                toast.success('Médico atualizado com sucesso!')
+            } catch (err) {
+                console.log(err)
+            }
+        } else {
+            try {
+                axios.post(`http://localhost:8081/medicos`, data)
+                toast.success('Médico criado com sucesso')
+            } catch (err) {
+                console.log(err)
+            }
+        }
         resetForm()
+        getMedicos()
     }
 
     const nextPage = () => {
@@ -86,18 +132,6 @@ function Medico() {
         }
     }
 
-    // ================= MOCK (TEMPORÁRIO) =================
-    useEffect(() => {
-        const dadosMock = [
-            { id: 1, nome: 'Flávio Santos', crm: '12345', estado: 'SP' },
-            { id: 2, nome: 'Ana Paula', crm: '67890', estado: 'RJ' }
-        ]
-
-        setMedicos(dadosMock)
-        setTotal(dadosMock.length)
-    }, [page, searchNome, searchCrm])
-
-    // ================= RENDER =================
     return (
         <div className="container">
             <div className="containerH1">
@@ -133,6 +167,7 @@ function Medico() {
                                 className="input-tabela"
                                 placeholder="CRM"
                                 value={searchCrm}
+                                maxLength="20"
                                 onChange={(e) => setSearchCrm(e.target.value)}
                             />
                         </th>
@@ -154,7 +189,7 @@ function Medico() {
                                         <BiSolidCommentEdit onClick={() => handleEdit(medico)} />
                                     </span>
                                     <span>
-                                        <FaDeleteLeft onClick={() => handleDelete(medico.id)} />
+                                        <FaDeleteLeft onClick={() => setModalExcluir({ show: true, id: medico.id })} />
                                     </span>
                                 </td>
                             </tr>
@@ -169,7 +204,6 @@ function Medico() {
                 </tbody>
             </table>
 
-            {/* PAGINAÇÃO */}
             <div className="pagination">
                 <FaArrowLeft
                     className={`arrow ${page <= 1 ? 'disabled' : ''}`}
@@ -184,7 +218,39 @@ function Medico() {
                 />
             </div>
 
-            {/* MODAL */}
+            {/* Modal delete */}
+            <Modal
+                show={modalExcluir.show}
+                onHide={() => setModalExcluir({ show: false, id: null })}
+                centered
+                className="container_excluir"
+            >
+                <Modal.Body className="buttons_excluir">
+                    <p>Deseja realmente excluir este médico?</p>
+
+                    <div style={{ display: 'flex', gap: '10px', justifyContent: 'center' }}>
+                        <Button
+                            variant="secondary"
+                            size="sm"
+                            onClick={() => setModalExcluir({ show: false, id: null })}
+                        >
+                            Cancelar
+                        </Button>
+
+                        <Button
+                            variant="danger"
+                            size="sm"
+                            onClick={handleDelete}
+                        >
+                            Excluir
+                        </Button>
+
+                    </div>
+                </Modal.Body>
+            </Modal>
+
+
+            {/* Modal edit */}
             <Modal
                 show={modalShow}
                 onHide={resetForm}

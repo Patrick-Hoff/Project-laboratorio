@@ -25,7 +25,7 @@ export const getMedicos = (req, res) => {
         dataParams.push(`%${crm}%`)
     }
 
-    dataQuery += ' ORDER BY nome ASC LIMIT ? OFFSET ?'
+    dataQuery += ' ORDER BY id ASC LIMIT ? OFFSET ?'
     dataParams.push(safeLimit, offset)
 
     db.query(dataQuery, dataParams, (err, results) => {
