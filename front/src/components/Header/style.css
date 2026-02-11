@@ -1,141 +1,161 @@
-/* Estilo principal do header */
+/* ================= HEADER ================= */
 .header {
-  background-color: #eaeaea;
-  padding: 1rem 2rem;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+  background: #f8f9fa;
+  padding: 0.8rem 2rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
 }
 
-/* Navegação dentro do header */
-.header nav {
+/* ================= NAV ================= */
+.nav {
   display: flex;
+  align-items: center;
   justify-content: space-between;
-  align-items: center;
 }
 
-/* Lista de links principal */
-.header nav ul {
+/* ================= ÁREAS ================= */
+.nav-left,
+.nav-center,
+.nav-right {
   display: flex;
   align-items: center;
-  gap: 2rem;
+  gap: 1.8rem;
   list-style: none;
   margin: 0;
   padding: 0;
 }
 
-/* Estilo dos links */
-.header nav ul li a {
+/* ================= LINKS ================= */
+.nav a {
   color: #222;
   text-decoration: none;
   font-weight: 600;
-  font-size: 1.1rem;
+  font-size: 1rem;
   position: relative;
-  padding-bottom: 4px;
-  transition: color 0.3s ease;
 }
 
-/* Underline animado ao passar o mouse */
-.header nav ul li a::after {
+.nav a::after {
   content: '';
   position: absolute;
   left: 0;
-  bottom: 0;
-  width: 0%;
+  bottom: -4px;
+  width: 0;
   height: 2px;
-  background-color: #007bff;
-  transition: width 0.3s ease;
+  background: #0d6efd;
+  transition: width .3s;
 }
 
-.header nav ul li a:hover {
-  color: #007bff;
+.nav a:hover {
+  color: #0d6efd;
 }
 
-.header nav ul li a:hover::after {
+.nav a:hover::after {
   width: 100%;
 }
 
-/* Submenu que aparece ao clicar no ícone de configuração */
-.linkSearch {
-  position: absolute;
-  top: 100%;
-  right: 0;
-  width: 200px;
-  background: white;
-  border: 1px solid #ccc;
-  padding: 10px;
-  z-index: 1000;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
-  border-radius: 4px;
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
+/* ================= ÍCONES ================= */
+.icon {
+  font-size: 1.9rem;
+  cursor: pointer;
+  color: #333;
+  transition: color .3s;
 }
 
-.routine {
-  left: 0;
+.icon:hover {
+  color: #0d6efd;
 }
 
-/* Container do ícone de configurações */
+/* ================= SUBMENUS ================= */
 .containerLink {
   position: relative;
 }
 
-
-/* Estilo dos ícones no menu superior */
-.icon-setting,
-.icon-logout
-.icon-routine {
-  font-size: 2rem;
-  cursor: pointer;
-  color: #333;
+.linkSearch {
+  position: absolute;
+  top: 120%;
+  right: 0;
+  width: 220px;
+  background: #fff;
+  border-radius: 6px;
+  padding: 0.7rem;
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  z-index: 1000;
 }
 
-.icon-setting:hover,
-.icon-logout:hover
-.icon-routine {
-  color: #007bff;
+/* SUBMENU ROTINA – CORREÇÃO AQUI */
+.routine {
+  left: 0;
+  right: auto;
+  transform: none;
 }
 
-/* Estilo dos itens dentro do submenu */
 .linkSearch li {
   display: flex;
   align-items: center;
-  gap: 8px; /* Espaço entre o ícone e o texto */
-  padding: 6px 4px;
+  gap: 8px;
+  padding: 6px;
+  border-radius: 4px;
+}
+
+.linkSearch li:hover {
+  background: #f1f3f5;
+}
+
+.iconLink {
+  font-size: 1.2rem;
+  color: #555;
+}
+
+/* ================= LOGOUT ================= */
+.logout {
+  display: flex;
+  justify-content: center;
+  font-size: 1.8rem;
+  color: #dc3545;
   cursor: pointer;
 }
 
-.linkSearch li a {
-  color: #222;
-  text-decoration: none;
-  font-weight: 500;
-  font-size: 1rem;
-  flex: 1;
-  transition: color 0.3s ease;
+.logout:hover {
+  color: #b02a37;
 }
 
-.linkSearch li:hover a {
-  color: #007bff;
+.linkSearch.routine li:nth-child(2) {
+  padding-bottom: 10px;
+  border-bottom: 1px solid #e0e0e0;
+  margin-bottom: 10px;
 }
 
-/* Ícone antes do texto no submenu */
-.iconLink {
-  font-size: 1.2rem;
-  color: #555
+.linkSearch.routine li:nth-child(2) {
+  border-bottom: 1px dashed #e6e6e6;
 }
 
-/* Responsividade */
+.linkSearch.routine li:nth-child(2) {
+  margin-bottom: 14px;
+  padding-bottom: 14px;
+}
+
+
+/* ================= RESPONSIVO ================= */
 @media (max-width: 768px) {
-  .header nav {
+  .nav {
     flex-direction: column;
+    gap: 1rem;
     align-items: flex-start;
   }
 
-  .header nav ul {
-    flex-direction: column;
-    gap: 1rem;
+  .nav-left,
+  .nav-center,
+  .nav-right {
+    width: 100%;
+    justify-content: space-between;
   }
 
   .linkSearch {
-    right: 10px; /* Ajuste para telas menores */
+    position: static;
+    box-shadow: none;
+    width: 100%;
+    margin-top: 0.5rem;
   }
 }
