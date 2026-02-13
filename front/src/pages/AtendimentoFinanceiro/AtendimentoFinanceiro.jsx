@@ -10,6 +10,8 @@ export default function AtendimentoFinanceiro() {
     const [modalAjusteAberto, setModalAjusteAberto] = useState(null)
     const [modalExcluirAberto, setModalExcluirAberto] = useState(false);
 
+    const [ errorPayment, setErrorPayment ] = useState('');
+
     const [atendimento, setAtendimento] = useState()
     const [pagamentos, setPagamentos] = useState([])
     const [valorPago, setValorPago] = useState()
@@ -49,6 +51,7 @@ export default function AtendimentoFinanceiro() {
     // Função para salvar ajustes
     const salvarAjuste = async () => {
         try {
+            setErrorPayment('')
             await axios.put(`http://localhost:8081/pagamentos/atualizar_pagamento/${modalAjusteAberto.id}`, {
                 valor_pago: novoValor,
                 metodo_pagamento: formaPagamento
@@ -56,7 +59,7 @@ export default function AtendimentoFinanceiro() {
             getFinanceiro()
             setModalAjusteAberto(null);
         } catch (err) {
-            console.log(err);
+            setErrorPayment(err.response.data.erro)
         }
     }
 
@@ -138,7 +141,9 @@ export default function AtendimentoFinanceiro() {
                 >
                     <div className="financeiro-modal">
                         <h2 className="financeiro-modal-titulo">Ajustar Pagamento</h2>
-
+                        <span className="err">
+                            {errorPayment}
+                        </span>
                         <input
                             className="financeiro-input"
                             type="text"

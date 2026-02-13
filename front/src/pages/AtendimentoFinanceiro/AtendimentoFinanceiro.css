@@ -150,3 +150,7 @@
 .financeiro-modal-acoes button {
   width: 40%;
 }
+
+.err {
+  color: red;
+}

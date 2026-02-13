@@ -1,0 +1,41 @@
+/* ===== MODAL EXCLUIR MÉDICO ===== */
+.container_excluir .modal-dialog {
+    max-width: 300px;      /* largura do modal */
+}
+
+.container_excluir .modal-content {
+    border-radius: 8px;
+}
+
+.container_excluir .modal-body {
+    padding: 20px;
+    text-align: center;
+}
+
+/* Texto de confirmação */
+.container_excluir p {
+    font-size: 0.9rem;
+    margin-bottom: 15px;
+    color: #333;
+}
+
+/* Área dos botões */
+.container_excluir .buttons_excluir {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+/* Botões */
+.container_excluir .btn {
+    padding: 4px 12px;
+    font-size: 0.85rem;
+    min-width: 80px;
+}
+
+/* Espaçamento entre os botões */
+.container_excluir .buttons_excluir > div {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+}
