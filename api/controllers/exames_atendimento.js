@@ -10,9 +10,13 @@ export const getExamesAtendimento = (req, res) => {
             p.nome AS nome_paciente,
             p.idade,
             a.id AS atendimento_id,
-            a.valor_total
+            a.valor_total,
+            m.id AS medico_id,
+            m.nome AS medico,
+            m.crm AS crm
         FROM atendimentos a
-        JOIN pacientes p ON p.id = a.paciente_id
+        INNER JOIN pacientes p ON p.id = a.paciente_id
+        INNER JOIN medicos m ON m.id = a.medico_id
         WHERE a.id = ?;
     `;
 
@@ -46,12 +50,19 @@ export const getExamesAtendimento = (req, res) => {
             valor_total: pacienteResult[0].valor_total
         };
 
+        const medico = {
+            id: pacienteResult[0].medico_id,
+            medico: pacienteResult[0].medico,
+            crm: pacienteResult[0].crm
+        }
+
         db.query(q_exames, [atendimentoId], (err, examesResult) => {
             if (err) return res.status(500).json(err);
 
             return res.status(200).json({
                 paciente,
                 atendimento,
+                medico,
                 exames: examesResult
             });
         });

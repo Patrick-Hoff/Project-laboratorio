@@ -29,6 +29,8 @@ function Atendimento() {
     const [modalShow, setModalShow] = useState(false);
     const [atendimentoId, setAtendimentoId] = useState();
     const [exameBusca, setExameBusca] = useState({ cod: '', nome: '' });
+    const [medicoBusca, setMedicoBusca] = useState({ id: '', crm: '', medico: '' })
+    const [medicoOriginal, setMedicoOriginal] = useState(null)
     const [exameAdicionado, setExameAdicionado] = useState([])
 
     const [formaPagamento, setFormaPagamento] = useState('');
@@ -43,6 +45,9 @@ function Atendimento() {
 
     const [page, setPage] = useState(1)
     const [total, setTotal] = useState(0)
+
+    const [sugestoesMedicos, setSugestoesMedicos] = useState([])
+    const [mostrarSugestoesMedicos, setMostrarSugestoesMedicos] = useState(false)
 
     const [sugestoes, setSugestoes] = useState([])
     const [mostrarSugestoes, setMostrarSugestoes] = useState(false)
@@ -77,6 +82,7 @@ function Atendimento() {
             const res = await axios.get(`http://localhost:8081/exames_atendimento/${id}`);
 
             const pacienteData = res.data.paciente;
+            const medico = res.data.medico
             const examesData = res.data.exames || [];
             const atendimentoData = res.data.atendimento;
 
@@ -101,6 +107,8 @@ function Atendimento() {
                 setAtendimentoId(undefined);
             }
 
+            setMedicoBusca({ id: medico.id, crm: medico.crm, medico: medico.medico })
+            setMedicoOriginal({ id: medico.id, crm: medico.crm, medico: medico.medico })
             setExameAdicionado(examesData);
             setValorTotal(atendimentoData?.valor_total ?? 0);
 
@@ -128,7 +136,8 @@ function Atendimento() {
             if (!id) {
                 const res = await axios.post('http://localhost:8081/atendimentos/add', {
                     paciente_id: paciente.id,
-                    user: userData
+                    user: userData,
+                    medico_id: medicoBusca.id
                 });
 
                 setAtendimentoId(res.data.insertId);
@@ -142,11 +151,13 @@ function Atendimento() {
             } else {
                 const edit = {
                     paciente_id: paciente.id,
-                    user: userData
+                    user: userData,
+                    medico_id: medicoBusca.id
                 }
 
                 const res = await axios.put(`http://localhost:8081/atendimentos/${id}/edit`, edit)
                 toast.success('Atendimento Atualizado com sucesso!')
+                carregarExamesPaciente()
             }
 
         } catch (err) {
@@ -219,6 +230,50 @@ function Atendimento() {
             toast.error('Erro ao adicionar exame.');
         }
     }
+
+
+    useEffect(() => {
+
+        const fetchSugestoesMedicos = async () => {
+
+            if (!medicoBusca.crm && !medicoBusca.medico) {
+                setSugestoesMedicos([])
+                setMostrarSugestoesMedicos(false)
+                return;
+            }
+
+            const params = new URLSearchParams({
+                nome: medicoBusca.medico,
+                crm: medicoBusca.crm,
+                page: 1,
+                limit: 5
+            })
+
+            try {
+                const res = await axios.get(`http://localhost:8081/medicos?${params}`)
+
+                if (
+                    res.data.data.length === 1 &&
+                    res.data.data[0].crm === medicoBusca.crm &&
+                    res.data.data[0].nome === medicoBusca.medico
+                ) {
+                    setMostrarSugestoesMedicos(false)
+                    return
+                }
+
+                setSugestoesMedicos(res.data.data)
+                setMostrarSugestoesMedicos(true)
+
+            } catch (err) {
+                console.log(err)
+            }
+        }
+
+        const timeout = setTimeout(fetchSugestoesMedicos, 600)
+        return () => clearTimeout(timeout)
+
+    }, [medicoBusca.crm, medicoBusca.medico])
+
 
 
 
@@ -394,18 +449,61 @@ function Atendimento() {
                         />
                     </div>
 
-                    <button
-                        type="submit"
-                        className="btn-submit"
-                        disabled={
-                            (!atendimentoId && !paciente.id) ||
-                            (atendimentoId && JSON.stringify(paciente) === JSON.stringify(pacienteOriginal))
-                        }
-                    >
-                        {atendimentoId ? 'Atualizar atendimento' : 'Criar atendimento'}
-                    </button>
-
+                    <div className='linha-medico-button'>
+                        <label
+                            htmlFor="medico"
+                            className='label-medico'
+                        >Médico responsável</label>
+                        <input
+                            type="text"
+                            className='input-medico input-crm'
+                            placeholder='CRM'
+                            value={medicoBusca.crm}
+                            onChange={(e) => setMedicoBusca({ ...medicoBusca, crm: e.target.value })}
+                        />
+                        <input
+                            type="text"
+                            className='input-medico'
+                            placeholder='Nome'
+                            value={medicoBusca.medico}
+                            onChange={(e) => setMedicoBusca({ ...medicoBusca, medico: e.target.value })}
+                        />
+                        <button
+                            type="submit"
+                            className="btn-submit"
+                            disabled={
+                                (!atendimentoId && !paciente.id) ||
+                                (atendimentoId &&
+                                    JSON.stringify(paciente) === JSON.stringify(pacienteOriginal) &&
+                                    JSON.stringify(medicoBusca) === JSON.stringify(medicoOriginal)
+                                )
+                            }
+                        >
+                            {atendimentoId ? 'Atualizar atendimento' : 'Criar atendimento'}
+                        </button>
+                    </div>
                 </form>
+
+                <>
+                    {mostrarSugestoesMedicos && sugestoesMedicos.length > 0 && (
+                        <div className="dropdown-sugestoes">
+                            {sugestoesMedicos.map((med) => (
+                                <div
+                                    key={med.id}
+                                    className="item-sugestao"
+                                    onClick={() => {
+                                        setSugestoesMedicos([]);
+                                        setMedicoBusca({ id: med.id, crm: med.crm, medico: med.nome })
+                                        setMostrarSugestoesMedicos(false)
+                                    }}
+                                >
+                                    {med.crm} - {med.nome}
+                                </div>
+                            ))}
+                        </div>
+                    )}
+
+                </>
 
 
 
