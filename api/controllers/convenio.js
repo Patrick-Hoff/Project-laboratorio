@@ -35,3 +35,34 @@ export const createConvenio = (req, res) => {
     }
 
 }
+
+export const updateConvenio = (req, res) => {
+    try {
+
+        const values = [
+            req.body.cod,
+            req.body.nome
+        ];
+
+        const q = `
+            UPDATE convenio
+            SET cod = ?, nome = ?
+            WHERE id = ?
+        `
+
+        db.query(q, [...values, req.params.id], (err, result) => {
+            if (err) {
+                if (err.code == 'ER_DUP_ENTRY') {
+                    return res.status(409).json({ error: 'Já existe um convênio com esse código.' })
+                }
+                console.error(err)
+                return res.status(500).json({ error: 'Erro ao atualizar convênio.' })
+            }
+            return res.status(200).json({ mensagem: 'Convênio atualizado com sucesso!' })
+        })
+    } catch (err) {
+        return res.status(500).json({
+            error: 'Erro interno no servidor'
+        })
+    }
+}
