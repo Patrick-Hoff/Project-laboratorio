@@ -66,3 +66,28 @@ export const updateConvenio = (req, res) => {
         })
     }
 }
+
+export const deleteConvenio = (req, res) => {
+
+    const q = `
+        DELETE FROM convenio
+        WHERE id = ?
+    `
+
+    db.query(q, [req.params.id], (err, result) => {
+        if (err) {
+            if (err.code == 'ER_ROW_IS_REFERENCED_2') {
+                return res.status(400).json({
+                    error: 'Não é possivel excluir esse convenio pois esta vinculado a exames.'
+                })
+            }
+            return res.status(500).json({
+                error: 'Erro ao deletar convênio.'
+            })
+        }
+        return res.status(200).json({
+            mensagem: 'Convênio excluido com sucesso!'
+        })
+    })
+
+}
