@@ -1,5 +1,65 @@
 import { db } from '../db.js'
 
+// Pesquisando convenios
+export const getConvenio = (req, res) => {
+
+    const {
+        cod,
+        nome,
+        limit = 20,
+        page = 1
+    } = req.query;
+
+    const safeLimit = Math.min(Number(limit) || 20, 100);
+    const safePage = Number(page) || 1;
+    const offset = (safePage - 1) * safeLimit;
+
+    // ============================
+    // 📄 DADOS
+    // ============================
+
+    let dataQuery = `
+        SELECT
+            id,
+            cod,
+            nome
+        FROM convenio
+        WHERE 1=1
+    `;
+
+    const dataParams = [];
+
+    // Filtro por código
+    if (cod) {
+        dataQuery += ' AND cod LIKE ?';
+        dataParams.push(`%${cod}%`);
+    }
+
+    // Filtro por nome
+    if (nome) {
+        dataQuery += ' AND nome LIKE ?';
+        dataParams.push(`%${nome}%`);
+    }
+
+    // Paginação
+    dataQuery += ' LIMIT ? OFFSET ?';
+    dataParams.push(safeLimit, offset);
+
+    db.query(dataQuery, dataParams, (err, rows) => {
+        if (err) {
+            console.error(err);
+            return res.status(500).json({
+                message: "Erro ao buscar convênios"
+            });
+        }
+
+        return res.status(200).json(rows);
+    });
+
+};
+
+
+
 // Criando convenio
 export const createConvenio = (req, res) => {
     try {
@@ -35,6 +95,7 @@ export const createConvenio = (req, res) => {
     }
 
 }
+
 
 export const updateConvenio = (req, res) => {
     try {
