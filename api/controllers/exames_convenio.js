@@ -73,3 +73,22 @@ export const updateExameConvenio = (req, res) => {
         });
     });
 };
+
+
+export const deleteExameConvenio = (req, res) => {
+
+    const q = `
+        DELETE FROM exame_convenio
+        WHERE id = ?
+    `
+
+    db.query(q, [req.params.id], (err) => {
+        if (err) {
+            return res.status(500).json({
+                error: 'Erro interno no servidor.'
+            })
+        }
+        return res.status(200).json('Valor deletado do convenio com sucesso!')
+    })
+
+}
