@@ -17,6 +17,7 @@ import dashboardRoutes from './routes/dashboard.js'
 import agendamentoRoutes from './routes/agendamento.js'
 import medicosRoutes from './routes/medico.js'
 import convenioRoutes from './routes/convenio.js'
+import exameConveniosRoutes from './routes/exame_convenios.js'
 
 dotenv.config()
 
@@ -61,6 +62,7 @@ app.use('/dashboard', dashboardRoutes)
 app.use('/agendamento', agendamentoRoutes)
 app.use('/medicos', medicosRoutes)
 app.use('/convenio', convenioRoutes)
+app.use('/exame_convenios', exameConveniosRoutes)
 
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument))
 
