@@ -1,13 +1,15 @@
 import express from 'express'
 import {
-    postExameConvenios,
+    getExameConvenio,
+    postExameConvenio,
     updateExameConvenio,
     deleteExameConvenio
 } from '../controllers/exames_convenio.js'
 
 const router = express.Router()
 
-router.post('/', postExameConvenios)
+router.get('/', getExameConvenio)
+router.post('/', postExameConvenio)
 router.put('/:id', updateExameConvenio)
 router.delete('/:id', deleteExameConvenio)
 

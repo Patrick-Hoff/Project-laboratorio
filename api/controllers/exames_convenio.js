@@ -1,6 +1,62 @@
 import { db } from '../db.js'
 
-export const postExameConvenios = (req, res) => {
+export const getExameConvenio = (req, res) => {
+    const {
+        cod,
+        exame,
+        convenio,
+        limit = 10,
+        page = 1
+    } = req.query;
+
+    let q = `
+        SELECT 
+            exame_convenio.id,
+            exames.cod AS exame_cod,
+            exames.nome AS exame,
+            convenio.cod AS convenio_cod,
+            convenio.nome AS convenio
+        FROM exame_convenio
+        INNER JOIN exames
+            ON exame_convenio.exame_id = exames.id
+        INNER JOIN convenio
+            ON exame_convenio.convenio_id = convenio.id
+        WHERE 1=1
+    `;
+
+    const safeLimit = Math.min(Number(limit) || 10, 100);
+    const offset = (Number(page) - 1) * safeLimit;
+
+    const dataParams = [];
+
+    if (cod) {
+        q += " AND exames.cod LIKE ?";
+        dataParams.push(`${cod}%`);
+    }
+
+    if (exame) {
+        q += " AND exames.nome LIKE ?";
+        dataParams.push(`${exame}%`);
+    }
+
+    if (convenio) {
+        q += " AND convenio.cod LIKE ?";
+        dataParams.push(`${convenio}%`);
+    }
+
+    q += " LIMIT ? OFFSET ?";
+    dataParams.push(safeLimit, offset);
+
+    db.query(q, dataParams, (err, data) => {
+        if (err) {
+            return res.status(500).json(err);
+        }
+        return res.status(200).json(data);
+    });
+};
+
+
+export const postExameConvenio = (req, res) => {
     try {
 
         const {
