@@ -15,7 +15,8 @@ export const getExameConvenio = (req, res) => {
             exames.cod AS exame_cod,
             exames.nome AS exame,
             convenio.cod AS convenio_cod,
-            convenio.nome AS convenio
+            convenio.nome AS convenio,
+            exame_convenio.valor AS valor
         FROM exame_convenio
         INNER JOIN exames
             ON exame_convenio.exame_id = exames.id
