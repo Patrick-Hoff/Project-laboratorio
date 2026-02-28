@@ -2,7 +2,6 @@ import { db } from '../db.js'
 
 // Pesquisando convenios
 export const getConvenio = (req, res) => {
-
     const {
         cod,
         nome,
@@ -15,29 +14,37 @@ export const getConvenio = (req, res) => {
     const offset = (safePage - 1) * safeLimit;
 
     // ============================
-    // 📄 DADOS
+    // 📊 COUNT QUERY
     // ============================
 
-    let dataQuery = `
-        SELECT
-            id,
-            cod,
-            nome
+    let countQuery = `
+        SELECT COUNT(*) AS total
         FROM convenio
         WHERE 1=1
     `;
 
+    let dataQuery = `
+        SELECT id, cod, nome
+        FROM convenio
+        WHERE 1=1
+    `;
+
+    const countParams = [];
     const dataParams = [];
 
     // Filtro por código
     if (cod) {
+        countQuery += ' AND cod LIKE ?';
         dataQuery += ' AND cod LIKE ?';
+        countParams.push(`%${cod}%`);
         dataParams.push(`%${cod}%`);
     }
 
     // Filtro por nome
     if (nome) {
+        countQuery += ' AND nome LIKE ?';
         dataQuery += ' AND nome LIKE ?';
+        countParams.push(`%${nome}%`);
         dataParams.push(`%${nome}%`);
     }
 
@@ -45,17 +52,32 @@ export const getConvenio = (req, res) => {
     dataQuery += ' LIMIT ? OFFSET ?';
     dataParams.push(safeLimit, offset);
 
-    db.query(dataQuery, dataParams, (err, rows) => {
+    // ============================
+    // EXECUÇÃO
+    // ============================
+
+    db.query(countQuery, countParams, (err, countResult) => {
         if (err) {
             console.error(err);
-            return res.status(500).json({
-                message: "Erro ao buscar convênios"
-            });
+            return res.status(500).json({ message: "Erro ao contar registros" });
         }
 
-        return res.status(200).json(rows);
-    });
+        const total = countResult[0].total;
 
+        db.query(dataQuery, dataParams, (err, rows) => {
+            if (err) {
+                console.error(err);
+                return res.status(500).json({
+                    message: "Erro ao buscar convênios"
+                });
+            }
+
+            return res.status(200).json({
+                data: rows,
+                total
+            });
+        });
+    });
 };
 
 
