@@ -1,4 +1,4 @@
-import { useEffect, useState, useContext } from 'react';
+import { useEffect, useState, useContext, useRef } from 'react';
 import { UserContext } from '../../routes/UserContext'
 
 import { useParams, useNavigate, Link } from 'react-router-dom';
@@ -31,6 +31,9 @@ function Atendimento() {
     const [exameBusca, setExameBusca] = useState({ cod: '', nome: '' });
     const [medicoBusca, setMedicoBusca] = useState({ id: '', crm: '', medico: '' })
     const [medicoOriginal, setMedicoOriginal] = useState(null)
+    const [digitandoMedico, setDigitandoMedico] = useState(false);
+    const medicoRef = useRef(null);
+
     const [exameAdicionado, setExameAdicionado] = useState([])
 
     const [formaPagamento, setFormaPagamento] = useState('');
@@ -236,6 +239,8 @@ function Atendimento() {
 
         const fetchSugestoesMedicos = async () => {
 
+            if (!digitandoMedico) return;
+
             if (!medicoBusca.crm && !medicoBusca.medico) {
                 setSugestoesMedicos([])
                 setMostrarSugestoesMedicos(false)
@@ -272,9 +277,23 @@ function Atendimento() {
         const timeout = setTimeout(fetchSugestoesMedicos, 600)
         return () => clearTimeout(timeout)
 
-    }, [medicoBusca.crm, medicoBusca.medico])
+    }, [medicoBusca.crm, medicoBusca.medico, digitandoMedico])
 
+    useEffect(() => {
+        const handleClickOutside = (event) => {
+            if (medicoRef.current && !medicoRef.current.contains(event.target)) {
+                setDigitandoMedico(false);
+                setMostrarSugestoesMedicos(false);
+            }
 
+            document.addEventListener("click", handleClickOutside);
+
+            return () => {
+                document.removeEventListener("click", handleClickOutside)
+            }
+        };
+
+    }, []);
 
 
     useEffect(() => {
@@ -449,57 +468,39 @@ function Atendimento() {
                         />
                     </div>
 
-                    <div className='linha-medico-button'>
-                        <div className='container-input'>
-                            <label
-                                htmlFor="medico"
-                                className='label-medico'
-                            >Médico</label>
-                            <input
-                                type="text"
-                                className='input-medico input-crm'
-                                placeholder='CRM'
-                                value={medicoBusca.crm}
-                                onChange={(e) => setMedicoBusca({ ...medicoBusca, crm: e.target.value })}
-                                style={{ width: '130px' }}
-                            />
-                            <input
-                                type="text"
-                                className='input-medico'
-                                placeholder='Nome'
-                                value={medicoBusca.medico}
-                                onChange={(e) => setMedicoBusca({ ...medicoBusca, medico: e.target.value })}
-                                style={{ width: '190px' }}
-                            />
-                        </div>
-                        <div className='container-input'>
-                            <label htmlFor="convenio">Convênio</label>
-                            <input
-                                type="text"
-                                placeholder='Cód'
-                                style={{ width: '130px' }}
-                            />
-                            <input
-                                type="text"
-                                placeholder='Convênio'
-                                style={{ width: '190px' }}
-                            />
-                        </div>
-                        <div>
-                            <button
-                                type="submit"
-                                className="btn-submit"
-                                disabled={
-                                    (!atendimentoId && !paciente.id) ||
-                                    (atendimentoId &&
-                                        JSON.stringify(paciente) === JSON.stringify(pacienteOriginal) &&
-                                        JSON.stringify(medicoBusca) === JSON.stringify(medicoOriginal)
-                                    )
-                                }
-                            >
-                                {atendimentoId ? 'Atualizar atendimento' : 'Criar atendimento'}
-                            </button>
-                        </div>
+                    <div ref={medicoRef} className='linha-medico-button'>
+                        <label
+                            htmlFor="medico"
+                            className='label-medico'
+                        >Médico responsável</label>
+                        <input
+                            type="text"
+                            className='input-medico input-crm'
+                            placeholder='CRM'
+                            value={medicoBusca.crm}
+                            onFocus={() => setDigitandoMedico(true)}
+                            onChange={(e) => setMedicoBusca({ ...medicoBusca, crm: e.target.value })}
+                        />
+                        <input
+                            type="text"
+                            className='input-medico'
+                            placeholder='Nome'
+                            value={medicoBusca.medico}
+                            onChange={(e) => setMedicoBusca({ ...medicoBusca, medico: e.target.value })}
+                        />
+                        <button
+                            type="submit"
+                            className="btn-submit"
+                            disabled={
+                                (!atendimentoId && !paciente.id) ||
+                                (atendimentoId &&
+                                    JSON.stringify(paciente) === JSON.stringify(pacienteOriginal) &&
+                                    JSON.stringify(medicoBusca) === JSON.stringify(medicoOriginal)
+                                )
+                            }
+                        >
+                            {atendimentoId ? 'Atualizar atendimento' : 'Criar atendimento'}
+                        </button>
                     </div>
                 </form>
 
@@ -511,9 +512,10 @@ function Atendimento() {
                                     key={med.id}
                                     className="item-sugestao"
                                     onClick={() => {
-                                        setSugestoesMedicos([]);
                                         setMedicoBusca({ id: med.id, crm: med.crm, medico: med.nome })
+                                        setSugestoesMedicos([]);
                                         setMostrarSugestoesMedicos(false)
+                                        setDigitandoMedico(false)
                                     }}
                                 >
                                     {med.crm} - {med.nome}
