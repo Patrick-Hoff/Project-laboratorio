@@ -32,17 +32,17 @@ export const getExameConvenio = (req, res) => {
 
     if (cod) {
         q += " AND exames.cod LIKE ?";
-        dataParams.push(`${cod}%`);
+        dataParams.push(`${cod}`);
     }
 
     if (exame) {
         q += " AND exames.nome LIKE ?";
-        dataParams.push(`${exame}%`);
+        dataParams.push(`${exame}`);
     }
 
     if (convenio) {
         q += " AND convenio.cod LIKE ?";
-        dataParams.push(`${convenio}%`);
+        dataParams.push(`${convenio}`);
     }
 
     q += " LIMIT ? OFFSET ?";
@@ -92,7 +92,7 @@ export const postExameConvenio = (req, res) => {
                 return res.status(500).json({ error: 'Erro interno no servidor' })
             }
 
-            return res.status(201).json({ mensagem: 'Valor criado com sucesso.' })
+            return res.status(201).json({ mensagem: 'Valor criado com sucesso!' })
         })
 
     } catch (err) {
