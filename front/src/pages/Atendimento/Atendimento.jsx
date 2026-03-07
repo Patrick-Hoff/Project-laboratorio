@@ -450,37 +450,56 @@ function Atendimento() {
                     </div>
 
                     <div className='linha-medico-button'>
-                        <label
-                            htmlFor="medico"
-                            className='label-medico'
-                        >Médico responsável</label>
-                        <input
-                            type="text"
-                            className='input-medico input-crm'
-                            placeholder='CRM'
-                            value={medicoBusca.crm}
-                            onChange={(e) => setMedicoBusca({ ...medicoBusca, crm: e.target.value })}
-                        />
-                        <input
-                            type="text"
-                            className='input-medico'
-                            placeholder='Nome'
-                            value={medicoBusca.medico}
-                            onChange={(e) => setMedicoBusca({ ...medicoBusca, medico: e.target.value })}
-                        />
-                        <button
-                            type="submit"
-                            className="btn-submit"
-                            disabled={
-                                (!atendimentoId && !paciente.id) ||
-                                (atendimentoId &&
-                                    JSON.stringify(paciente) === JSON.stringify(pacienteOriginal) &&
-                                    JSON.stringify(medicoBusca) === JSON.stringify(medicoOriginal)
-                                )
-                            }
-                        >
-                            {atendimentoId ? 'Atualizar atendimento' : 'Criar atendimento'}
-                        </button>
+                        <div className='container-input'>
+                            <label
+                                htmlFor="medico"
+                                className='label-medico'
+                            >Médico</label>
+                            <input
+                                type="text"
+                                className='input-medico input-crm'
+                                placeholder='CRM'
+                                value={medicoBusca.crm}
+                                onChange={(e) => setMedicoBusca({ ...medicoBusca, crm: e.target.value })}
+                                style={{ width: '130px' }}
+                            />
+                            <input
+                                type="text"
+                                className='input-medico'
+                                placeholder='Nome'
+                                value={medicoBusca.medico}
+                                onChange={(e) => setMedicoBusca({ ...medicoBusca, medico: e.target.value })}
+                                style={{ width: '190px' }}
+                            />
+                        </div>
+                        <div className='container-input'>
+                            <label htmlFor="convenio">Convênio</label>
+                            <input
+                                type="text"
+                                placeholder='Cód'
+                                style={{ width: '130px' }}
+                            />
+                            <input
+                                type="text"
+                                placeholder='Convênio'
+                                style={{ width: '190px' }}
+                            />
+                        </div>
+                        <div>
+                            <button
+                                type="submit"
+                                className="btn-submit"
+                                disabled={
+                                    (!atendimentoId && !paciente.id) ||
+                                    (atendimentoId &&
+                                        JSON.stringify(paciente) === JSON.stringify(pacienteOriginal) &&
+                                        JSON.stringify(medicoBusca) === JSON.stringify(medicoOriginal)
+                                    )
+                                }
+                            >
+                                {atendimentoId ? 'Atualizar atendimento' : 'Criar atendimento'}
+                            </button>
+                        </div>
                     </div>
                 </form>
 
