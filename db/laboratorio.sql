@@ -80,6 +80,14 @@ CREATE TABLE logpaciente (
   CONSTRAINT fk_logpaciente_user FOREIGN KEY (id_user) REFERENCES users(id)
 ) ENGINE=InnoDB;
 
+CREATE TABLE convenio (
+  id INT NOT NULL AUTO_INCREMENT,
+  cod VARCHAR(10) NOT NULL,
+  nome VARCHAR(30) NOT NULL,
+  PRIMARY KEY (id),
+  UNIQUE KEY uk_codconvenio (cod)
+) ENGINE=InnoDB;
+
 -- ==============================
 -- TABELAS COM DEPENDÊNCIA
 -- ==============================
@@ -137,6 +145,17 @@ CREATE TABLE agendamento (
   retorno ENUM('S','N') DEFAULT 'N',
   observacao TEXT,
   PRIMARY KEY (id)
+) ENGINE=InnoDB;
+
+CREATE TABLE exame_convenio (
+  id INT NOT NULL AUTO_INCREMENT,
+  convenio_id INT NOT NULL,
+  exame_id INT NOT NULL,
+  valor DECIMAL(10,2) DEFAULT NULL,
+  PRIMARY KEY (id),
+  UNIQUE KEY unique_exame_convenio (exame_id, convenio_id),
+  CONSTRAINT fk_convenio FOREIGN KEY (convenio_id) REFERENCES convenio(id),
+  CONSTRAINT fk_exame_convenio_exame FOREIGN KEY (exame_id) REFERENCES exames(id)
 ) ENGINE=InnoDB;
 
 SET FOREIGN_KEY_CHECKS = 1;
