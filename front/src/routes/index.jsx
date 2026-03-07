@@ -14,6 +14,8 @@ import Consultas from '../pages/Consultas/Consultas'
 import ProtectedRoute from './ProtectedRoute'
 import AtendimentoFinanceiro from '../pages/AtendimentoFinanceiro/AtendimentoFinanceiro'
 import Medico from '../pages/Medico/Medico'
+import Convenio from '../pages/Convenio/Convenio'
+import ExameConvenio from '../pages/ExameConvenio/ExameConvenio'
 
 
 function RoutesApp() {
@@ -34,6 +36,8 @@ function RoutesApp() {
             <Route path='/Users' element={<ProtectedRoute isAdmin='S'><Usuarios /></ProtectedRoute>} />
             <Route path='/Financeiro/:id' element={<ProtectedRoute isAdmin='S'><AtendimentoFinanceiro /></ProtectedRoute>} />
             <Route path='/Medico' element={<ProtectedRoute><Medico /></ProtectedRoute>} />
+            <Route path='/Convenios' element={<ProtectedRoute><Convenio /></ProtectedRoute>} />
+            <Route path='/valor-exame' element={<ProtectedRoute><ExameConvenio /></ProtectedRoute>} />
         </Routes>
     )
 }
