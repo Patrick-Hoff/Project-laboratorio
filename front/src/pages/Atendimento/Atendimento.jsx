@@ -1,4 +1,4 @@
-import { useEffect, useState, useContext } from 'react';
+import { useEffect, useState, useContext, useRef } from 'react';
 import { UserContext } from '../../routes/UserContext'
 
 import { useParams, useNavigate, Link } from 'react-router-dom';
@@ -49,11 +49,22 @@ function Atendimento() {
     const [sugestoesMedicos, setSugestoesMedicos] = useState([])
     const [mostrarSugestoesMedicos, setMostrarSugestoesMedicos] = useState(false)
 
+    const [sugestoesConvenios, setSugestoesConvenios] = useState([])
+    const [mostrarSugestoesConvenios, setMostrarSugestoesConvenios] = useState(false)
+    const [convenioBusca, setConvenioBusca] = useState({ id: '', cod: '', convenio: '' })
+    const [convenioOriginal, setConvenioOriginal] = useState(null)
+
     const [sugestoes, setSugestoes] = useState([])
     const [mostrarSugestoes, setMostrarSugestoes] = useState(false)
 
+    const [digitandoMedico, setDigitandoMedico] = useState(false)
+    const [digitandoConvenio, setDigitandoConvenio] = useState(false)
+
 
     const { userData } = useContext(UserContext);
+
+    const convenioRef = useRef(null);
+    const medicoRef = useRef(null);
 
     const { id } = useParams()
     const navigate = useNavigate()
@@ -79,12 +90,13 @@ function Atendimento() {
         try {
             if (!id) return;
 
-            const res = await axios.get(`http://localhost:8081/exames_atendimento/${id}`);
+            const res = await axios.get(`http://localhost:8081/exames_atendimento?atendimento_id=${id}`);
 
             const pacienteData = res.data.paciente;
             const medico = res.data.medico
             const examesData = res.data.exames || [];
             const atendimentoData = res.data.atendimento;
+            const convenioData = res.data.convenio
 
             if (pacienteData) {
                 setPacienteOriginal({
@@ -111,6 +123,8 @@ function Atendimento() {
             setMedicoOriginal({ id: medico.id, crm: medico.crm, medico: medico.medico })
             setExameAdicionado(examesData);
             setValorTotal(atendimentoData?.valor_total ?? 0);
+            setConvenioBusca(convenioData)
+            setConvenioOriginal(convenioData)
 
         } catch (err) {
             console.error(err);
@@ -137,7 +151,8 @@ function Atendimento() {
                 const res = await axios.post('http://localhost:8081/atendimentos/add', {
                     paciente_id: paciente.id,
                     user: userData,
-                    medico_id: medicoBusca.id
+                    medico_id: medicoBusca.id,
+                    convenio_id: convenioBusca.id
                 });
 
                 setAtendimentoId(res.data.insertId);
@@ -152,7 +167,8 @@ function Atendimento() {
                 const edit = {
                     paciente_id: paciente.id,
                     user: userData,
-                    medico_id: medicoBusca.id
+                    medico_id: medicoBusca.id,
+                    convenio_id: convenioBusca.id
                 }
 
                 const res = await axios.put(`http://localhost:8081/atendimentos/${id}/edit`, edit)
@@ -236,6 +252,8 @@ function Atendimento() {
 
         const fetchSugestoesMedicos = async () => {
 
+            if (!digitandoMedico) return;
+
             if (!medicoBusca.crm && !medicoBusca.medico) {
                 setSugestoesMedicos([])
                 setMostrarSugestoesMedicos(false)
@@ -275,6 +293,52 @@ function Atendimento() {
     }, [medicoBusca.crm, medicoBusca.medico])
 
 
+    const getConvenio = async () => {
+
+        if(!digitandoConvenio) return;
+
+        if (!convenioBusca.cod && !convenioBusca.convenio) {
+            setSugestoesConvenios([])
+            setMostrarSugestoesConvenios(false)
+            return;
+        }
+        try {
+
+            const res = await axios.get(`http://localhost:8081/convenio`, {
+                params: {
+                    cod: convenioBusca.cod,
+                    nome: convenioBusca.convenio,
+                    limit: 5
+                }
+            })
+
+
+            if (
+                res.data.data.length === 1 &&
+                res.data.data[0].cod === convenioBusca.cod &&
+                res.data.data[0].convenio === convenioBusca.convenio
+            ) {
+                setMostrarSugestoesConvenios(false)
+                return
+            }
+
+            setSugestoesConvenios(res.data.data)
+            setMostrarSugestoesConvenios(true)
+
+
+        } catch (err) {
+            console.log(err)
+        }
+    }
+
+    useEffect(() => {
+        const timeout = setTimeout(getConvenio, 600)
+        return () => clearTimeout(timeout)
+    }, [convenioBusca.cod, convenioBusca.convenio])
+
+    useEffect(() => {
+
+    })
 
 
     useEffect(() => {
@@ -306,16 +370,44 @@ function Atendimento() {
 
     }, [exameBusca.cod, exameBusca.nome])
 
-    useEffect(() => {
-        const handleClickOutside = () => {
-            setMostrarSugestoes(false)
-        }
+    // useEffect(() => {
+    //     const handleClickOutside = () => {
+    //         setMostrarSugestoes(false)
+    //     }
 
-        document.addEventListener('click', handleClickOutside);
-        return () => {
-            document.removeEventListener('click', handleClickOutside)
+    //     document.addEventListener('click', handleClickOutside);
+    //     return () => {
+    //         document.removeEventListener('click', handleClickOutside)
+    //     };
+    // }, [])
+
+    useEffect(() => {
+
+        const handleClickOutside = (event) => {
+
+            if (
+                medicoRef.current &&
+                !medicoRef.current.contains(event.target)
+            ) {
+                setMostrarSugestoesMedicos(false);
+            }
+
+            if (
+                convenioRef.current &&
+                !convenioRef.current.contains(event.target)
+            ) {
+                setMostrarSugestoesConvenios(false);
+            }
+
         };
-    }, [])
+
+        document.addEventListener("click", handleClickOutside);
+
+        return () => {
+            document.removeEventListener("click", handleClickOutside);
+        };
+
+    }, []);
 
 
     function handleDelete(id_primary) {
@@ -449,8 +541,8 @@ function Atendimento() {
                         />
                     </div>
 
-                    <div className='linha-medico-button'>
-                        <div className='container-input'>
+                    <div ref={medicoRef} className='linha-medico-button'>
+                        <div className='container-input container-autocomplete'>
                             <label
                                 htmlFor="medico"
                                 className='label-medico'
@@ -460,6 +552,7 @@ function Atendimento() {
                                 className='input-medico input-crm'
                                 placeholder='CRM'
                                 value={medicoBusca.crm}
+                                onFocus={() => setDigitandoMedico(true)}
                                 onChange={(e) => setMedicoBusca({ ...medicoBusca, crm: e.target.value })}
                                 style={{ width: '130px' }}
                             />
@@ -471,19 +564,65 @@ function Atendimento() {
                                 onChange={(e) => setMedicoBusca({ ...medicoBusca, medico: e.target.value })}
                                 style={{ width: '190px' }}
                             />
+
+                            {mostrarSugestoesMedicos && sugestoesMedicos.length > 0 && (
+                                <div className="dropdown-sugestoes">
+                                    {sugestoesMedicos.map((med) => (
+                                        <div
+                                            key={med.id}
+                                            className="item-sugestao"
+                                            onClick={() => {
+                                                setSugestoesMedicos([]);
+                                                setMedicoBusca({ id: med.id, crm: med.crm, medico: med.nome })
+                                                setMostrarSugestoesMedicos(false)
+                                                setDigitandoMedico(false)
+                                            }}
+                                        >
+                                            {med.crm} - {med.nome}
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
+
                         </div>
-                        <div className='container-input'>
+                        <div ref={convenioRef}  className='container-input container-autocomplete'>
                             <label htmlFor="convenio">Convênio</label>
                             <input
                                 type="text"
                                 placeholder='Cód'
+                                value={convenioBusca.cod}
                                 style={{ width: '130px' }}
+                                onChange={(e) => setConvenioBusca({ ...convenioBusca, cod: e.target.value })}
                             />
                             <input
                                 type="text"
                                 placeholder='Convênio'
+                                value={convenioBusca.convenio}
                                 style={{ width: '190px' }}
+                                onFocus={() => setDigitandoConvenio(true)}
+                                onChange={(e) => setConvenioBusca({ ...convenioBusca, convenio: e.target.value })}
                             />
+
+                            {mostrarSugestoesConvenios && sugestoesConvenios.length > 0 && (
+                                <div className="dropdown-sugestoes">
+                                    {sugestoesConvenios.map((conv) => (
+                                        <div
+                                            key={conv.id}
+                                            className="item-sugestao"
+                                            onClick={() => {
+                                                setSugestoesConvenios([])
+                                                setConvenioBusca({ id: conv.id, cod: conv.cod, convenio: conv.nome })
+                                                setMostrarSugestoesConvenios(false)
+                                                setDigitandoConvenio(false)
+                                            }}
+                                        >
+                                            {conv.cod} - {conv.nome}
+                                        </div>
+                                    ))}
+                                </div>
+                            )
+                            }
+
                         </div>
                         <div>
                             <button
@@ -493,7 +632,8 @@ function Atendimento() {
                                     (!atendimentoId && !paciente.id) ||
                                     (atendimentoId &&
                                         JSON.stringify(paciente) === JSON.stringify(pacienteOriginal) &&
-                                        JSON.stringify(medicoBusca) === JSON.stringify(medicoOriginal)
+                                        JSON.stringify(medicoBusca) === JSON.stringify(medicoOriginal) &&
+                                        JSON.stringify(convenioBusca) === JSON.stringify(convenioOriginal)
                                     )
                                 }
                             >
@@ -502,28 +642,6 @@ function Atendimento() {
                         </div>
                     </div>
                 </form>
-
-                <>
-                    {mostrarSugestoesMedicos && sugestoesMedicos.length > 0 && (
-                        <div className="dropdown-sugestoes">
-                            {sugestoesMedicos.map((med) => (
-                                <div
-                                    key={med.id}
-                                    className="item-sugestao"
-                                    onClick={() => {
-                                        setSugestoesMedicos([]);
-                                        setMedicoBusca({ id: med.id, crm: med.crm, medico: med.nome })
-                                        setMostrarSugestoesMedicos(false)
-                                    }}
-                                >
-                                    {med.crm} - {med.nome}
-                                </div>
-                            ))}
-                        </div>
-                    )}
-
-                </>
-
 
 
                 <div className="container-headbar">
