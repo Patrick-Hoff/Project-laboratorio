@@ -23,8 +23,6 @@ function Exames() {
     const [cod, setCod] = useState('')
     const [nome, setNome] = useState('')
     const [edit, setEdit] = useState([])
-    const [valor, setValor] = useState()
-    const [displayValor, setDisplayValor] = useState('' || 'R$ 0,00')
 
     const [searchId, setSearchId] = useState('')
     const [searchCod, setSearchCod] = useState('')
@@ -66,12 +64,10 @@ function Exames() {
         setModalShow(false)
         setCod('')
         setNome('')
-        setValor('')
         setEdit({})
         getExames()
         setCod('')
         setNome('')
-        setDisplayValor('R$ 0,00')
     }
 
 
@@ -88,14 +84,13 @@ function Exames() {
 
         const exame = {
             cod,
-            nome,
-            valor
+            nome
         }
 
         if (edit?.id) {
 
             axios.put(`http://localhost:8081/exames/${edit.id}/edit`, exame,
-                { withCredentials: true } // 🔥 ISSO é o essencial
+                { withCredentials: true }
 
             )
                 .then(() => {
@@ -109,7 +104,7 @@ function Exames() {
             axios.post(
                 'http://localhost:8081/exames',
                 exame,
-                { withCredentials: true } // 🔥 ISSO é o essencial
+                { withCredentials: true }
             )
                 .then(() => {
                     toast.success('Exame criado com sucesso!')
@@ -128,7 +123,7 @@ function Exames() {
 
     function handleDelete(id) {
         axios.delete(`http://localhost:8081/exames/${id}/remove`,
-            { withCredentials: true } // 🔥 ISSO é o essencial
+            { withCredentials: true }
         )
             .then(() => {
                 toast.success('Exame deletado com sucesso!')
@@ -140,18 +135,13 @@ function Exames() {
 
 
 
-    function handleEdit(id, cod, nome, valor) {
-        setEdit({ id, cod, nome, valor });
+    function handleEdit(id, cod, nome) {
+        setEdit({ id, cod, nome });
         setCod(cod);
         setNome(nome);
-        setValor(valor)
-        setDisplayValor(valor)
         setModalShow(true);
     }
 
-
-    // Função exportada para realizar o cadastro do exame com o valor correto
-    const handleChange = createCurrencyChangeHandler(setValor, setDisplayValor);
 
     const listaParaMostrar = exames;
 
@@ -204,13 +194,13 @@ function Exames() {
                             </tr>
                         ) : listaParaMostrar.length > 0 ? (
                             listaParaMostrar.map((item, index) => (
-                                <tr key={index} onDoubleClick={() => handleEdit(item.id, item.cod, item.nome, item.valor)}>
+                                <tr key={index} onDoubleClick={() => handleEdit(item.id, item.cod, item.nome)}>
                                     <td>{item.id}</td>
                                     <td>{item.cod}</td>
                                     <td>{item.nome}</td>
                                     <td className="icon">
                                         <span>
-                                            <BiSolidCommentEdit onClick={() => handleEdit(item.id, item.cod, item.nome, item.valor)} />
+                                            <BiSolidCommentEdit onClick={() => handleEdit(item.id, item.cod, item.nome)} />
                                         </span>
                                         <span>
                                             <FaDeleteLeft onClick={() => handleDelete(item.id)} />
@@ -276,16 +266,6 @@ function Exames() {
                                 required
                                 onChange={(e) => setNome(e.target.value)}
                                 value={nome}
-                            />
-                        </Form.Group>
-                        <Form.Group className="mb-3" controlId="formGroupPrice">
-                            <Form.Label>Valor</Form.Label>
-                            <Form.Control
-                                type="text"
-                                name="valor"
-                                placeholder="Valor"
-                                onChange={handleChange}
-                                value={displayValor}
                             />
                         </Form.Group>
                         <Modal.Footer>

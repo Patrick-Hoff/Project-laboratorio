@@ -49,7 +49,7 @@ export const getAtendimentos = (req, res) => {
 
 // Criar novo atendimento
 export const addAtendimento = (req, res) => {
-    const q = 'INSERT INTO atendimentos(`paciente_id`, `data_atendimento`, `medico_id`) VALUES (?)'
+    const q = 'INSERT INTO atendimentos(`paciente_id`, `data_atendimento`, `medico_id`, `convenio_id`) VALUES (?)'
 
     if (!req.body.paciente_id || req.body.paciente_id === 0) {
         return res.status(400).json({ error: 'Deve ser adicionado um paciente para criar o atendimento.' })
@@ -59,11 +59,16 @@ export const addAtendimento = (req, res) => {
         return res.status(400).json({ error: 'Deve ser adcionado um medico para criar o atendimento' })
     }
 
+    if (!req.body.convenio_id || req.body.convenio_id === 0) {
+        return res.status(400).json({ error: 'Deve ser adicionado um convênio para criar o atendimento'})
+    }
+
 
     const values = [
         req.body.paciente_id,
         req.body.data || new Date(),
-        req.body.medico_id
+        req.body.medico_id,
+        req.body.convenio_id
     ]
 
     db.query(q, [values], (err, result) => {
@@ -77,11 +82,12 @@ export const addAtendimento = (req, res) => {
 
 // Atualizar atendimento
 export const updateAtendimento = (req, res) => {
-    const q = 'UPDATE atendimentos SET `paciente_id` = ?, `medico_id` = ? WHERE `id` = ?'
+    const q = 'UPDATE atendimentos SET `paciente_id` = ?, `medico_id` = ?, `convenio_id` = ? WHERE `id` = ?'
 
     const values = [
         req.body.paciente_id,
-        req.body.medico_id
+        req.body.medico_id,
+        req.body.convenio_id
     ]
 
     db.query(q, [...values, req.params.id], (err) => {

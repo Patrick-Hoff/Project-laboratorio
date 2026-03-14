@@ -41,14 +41,13 @@ export const getExames = (req, res) => {
 // Criar novo exame
 export const addExame = (req, res) => {
     const q = `
-        INSERT INTO exames (cod, nome, valor)
-        VALUES (?, ?, ?)
+        INSERT INTO exames (cod, nome)
+        VALUES (?, ?)
     `
 
     const values = [
         req.body.cod,
         req.body.nome,
-        req.body.valor || 0
     ]
 
     db.query(q, values, (err, result) => {
@@ -62,15 +61,14 @@ export const addExame = (req, res) => {
         // LOG
         const logQuery = `
             INSERT INTO logexame
-            (id_exame, cod, exame, valor, tipo_alteracao, id_user)
-            VALUES (?, ?, ?, ?, ?, ?)
+            (id_exame, cod, exame, tipo_alteracao, id_user)
+            VALUES (?, ?, ?, ?, ?)
         `
 
         const logValues = [
             insertId,
             req.body.cod,
             req.body.nome,
-            req.body.valor || 0,
             'Insert',
             req.userId
         ]
@@ -107,8 +105,8 @@ export const updateExame = (req, res) => {
         const oldExame = selectResult[0];
 
         // 2. Atualizar o exame
-        const updateQuery = 'UPDATE exames SET `cod` = ?, `nome` = ?, `valor` = ? WHERE `id` = ?';
-        const values = [req.body.cod, req.body.nome, req.body.valor, exameId];
+        const updateQuery = 'UPDATE exames SET `cod` = ?, `nome` = ?, WHERE `id` = ?';
+        const values = [req.body.cod, req.body.nome, exameId];
 
         db.query(updateQuery, values, (updateErr) => {
             if (updateErr) {
@@ -118,12 +116,12 @@ export const updateExame = (req, res) => {
 
             // 3. Inserir dois logs: "Update - Antes" e "Update - Depois"
             const logQuery = `
-                INSERT INTO logexame (id_exame, cod, exame,  valor, tipo_alteracao, id_user)
+                INSERT INTO logexame (id_exame, cod, exame, tipo_alteracao, id_user)
                 VALUES (?, ?, ?, ?, ?, ?)
             `;
 
-            const logAntes = [exameId, oldExame.cod, oldExame.nome, oldExame.valor, 'Update - Antes', req.userId];
-            const logDepois = [exameId, req.body.cod, req.body.nome, req.body.valor, 'Update - Depois', req.userId];
+            const logAntes = [exameId, oldExame.cod, oldExame.nome, 'Update - Antes', req.userId];
+            const logDepois = [exameId, req.body.cod, req.body.nome, 'Update - Depois', req.userId];
 
             // Inserir o log "antes"
             db.query(logQuery, logAntes, (logErr1) => {
@@ -174,15 +172,14 @@ export const deleteExame = (req, res) => {
 
             // 3. Registrar o log da exclusão
             const logQuery = `
-                INSERT INTO logexame (id_exame, cod, exame, valor, tipo_alteracao, id_user)
-                VALUES (?, ?, ?, ?, 'Delete', ?)
+                INSERT INTO logexame (id_exame, cod, exame, tipo_alteracao, id_user)
+                VALUES (?, ?, ?, 'Delete', ?)
             `;
 
             const logValues = [
                 exame.id,
                 exame.cod,
                 exame.nome,
-                exame.valor,
                 req.userId
             ];
 
@@ -214,7 +211,6 @@ export const logExames = (req, res) => {
     logexame.exame,
     logexame.data_alteracao,
     logexame.tipo_alteracao,
-    logexame.valor,
     users.id,
     users.name
     from logexame

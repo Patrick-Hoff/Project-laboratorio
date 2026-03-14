@@ -1,23 +1,40 @@
 import { db } from '../db.js'
 
-// Buscar todos os registros de exames_atendimento
 export const getExamesAtendimento = (req, res) => {
-    const atendimentoId = req.params.id;
+
+    const { atendimento_id } = req.query;
+
+    if (!atendimento_id) {
+        return res.status(400).json({ message: "atendimento_id é obrigatório" });
+    }
 
     const q_paciente_atendimento = `
         SELECT 
-            p.id AS paciente_id,
-            p.nome AS nome_paciente,
-            p.idade,
-            a.id AS atendimento_id,
-            a.valor_total,
-            m.id AS medico_id,
-            m.nome AS medico,
-            m.crm AS crm
-        FROM atendimentos a
-        INNER JOIN pacientes p ON p.id = a.paciente_id
-        INNER JOIN medicos m ON m.id = a.medico_id
-        WHERE a.id = ?;
+    p.id AS paciente_id,
+    p.nome AS nome_paciente,
+    p.idade,
+    a.id AS atendimento_id,
+    SUM(ce.valor) AS valor_total,
+    m.id AS medico_id,
+    m.nome AS medico,
+    m.crm AS crm,
+    c.id AS convenio_id,
+    c.cod AS cod_convenio,
+    c.nome AS convenio
+FROM atendimentos a
+INNER JOIN pacientes p ON p.id = a.paciente_id
+INNER JOIN medicos m ON m.id = a.medico_id
+INNER JOIN convenio c ON c.id = a.convenio_id
+INNER JOIN exames_atendimento ae ON ae.atendimento_id = a.id
+INNER JOIN exame_convenio ce 
+    ON ce.exame_id = ae.exames_id 
+    AND ce.convenio_id = a.convenio_id
+WHERE a.id = ?
+GROUP BY 
+    p.id, p.nome, p.idade,
+    a.id,
+    m.id, m.nome, m.crm,
+    c.id, c.cod, c.nome;
     `;
 
     const q_exames = `
@@ -26,18 +43,22 @@ export const getExamesAtendimento = (req, res) => {
             ea.exames_id AS id_exame,
             e.cod AS cod_exame,
             e.nome AS nome_exame,
-            e.valor
+            ec.valor AS valor
         FROM exames_atendimento ea
         JOIN exames e ON e.id = ea.exames_id
-        WHERE ea.atendimento_id = ?;
+        JOIN exame_convenio ec ON ec.exame_id = e.id
+        WHERE ea.atendimento_id = ?
+        AND ec.convenio_id = ?;
     `;
 
-    db.query(q_paciente_atendimento, [atendimentoId], (err, pacienteResult) => {
+    db.query(q_paciente_atendimento, [atendimento_id], (err, pacienteResult) => {
         if (err) return res.status(500).json(err);
 
         if (pacienteResult.length === 0) {
             return res.status(404).json({ message: "Atendimento não encontrado" });
         }
+
+        const convenio_id = pacienteResult[0].convenio_id;
 
         const paciente = {
             id: pacienteResult[0].paciente_id,
@@ -54,20 +75,121 @@ export const getExamesAtendimento = (req, res) => {
             id: pacienteResult[0].medico_id,
             medico: pacienteResult[0].medico,
             crm: pacienteResult[0].crm
-        }
+        };
 
-        db.query(q_exames, [atendimentoId], (err, examesResult) => {
+        const convenio = {
+            id: pacienteResult[0].convenio_id,
+            cod: pacienteResult[0].cod_convenio,
+            convenio: pacienteResult[0].convenio
+        };
+
+        db.query(q_exames, [atendimento_id, convenio_id], (err, examesResult) => {
             if (err) return res.status(500).json(err);
 
             return res.status(200).json({
                 paciente,
                 atendimento,
                 medico,
+                convenio,
                 exames: examesResult
             });
         });
     });
 };
+
+
+
+// Buscar todos os registros de exames_atendimento
+// export const getExamesAtendimento = (req, res) => {
+//     // const atendimentoId = req.params.atendimentoId;
+//     // const convenioId = req.params.convenioId
+
+//     const {
+//         atendimento_id,
+//         convenio_id
+//     } = req.query;
+
+//     const values = [atendimento_id, convenio_id]
+
+//     const q_paciente_atendimento = `
+//         SELECT 
+//             p.id AS paciente_id,
+//             p.nome AS nome_paciente,
+//             p.idade,
+//             a.id AS atendimento_id,
+//             a.valor_total,
+//             m.id AS medico_id,
+//             m.nome AS medico,
+//             m.crm AS crm,
+//             c.id AS convenio_id,
+//             c.cod AS cod_convenio,
+//             c.nome AS convenio
+//         FROM atendimentos a
+//         INNER JOIN pacientes p ON p.id = a.paciente_id
+//         INNER JOIN medicos m ON m.id = a.medico_id
+//         INNER JOIN convenio c ON c.id = a.convenio_id
+//         WHERE a.id = 70;
+//     `;
+
+//     const q_exames = `
+//         SELECT 
+//             ea.id AS id_primary,
+//             ea.exames_id AS id_exame,
+//             e.cod AS cod_exame,
+//             e.nome AS nome_exame,
+//             ec.valor AS valor
+//         FROM exames_atendimento ea
+//         JOIN exames e ON e.id = ea.exames_id
+//         JOIN exame_convenio ec ON ec.exame_id = e.id
+//         WHERE ea.atendimento_id = ?
+//         AND ec.convenio_id = ?;
+//     `;
+
+//     if(!convenio_id || !atendimento_id) return;
+
+//     db.query(q_paciente_atendimento, [atendimento_id], (err, pacienteResult) => {
+//         if (err) return res.status(500).json(err);
+
+//         if (pacienteResult.length === 0) {
+//             return res.status(404).json({ message: "Atendimento não encontrado" });
+//         }
+
+//         const paciente = {
+//             id: pacienteResult[0].paciente_id,
+//             nome: pacienteResult[0].nome_paciente,
+//             idade: pacienteResult[0].idade
+//         };
+
+//         const atendimento = {
+//             id: pacienteResult[0].atendimento_id,
+//             valor_total: pacienteResult[0].valor_total
+//         };
+
+//         const medico = {
+//             id: pacienteResult[0].medico_id,
+//             medico: pacienteResult[0].medico,
+//             crm: pacienteResult[0].crm
+//         }
+
+//         const convenio = {
+//             id: pacienteResult[0].convenio_id,
+//             cod: pacienteResult[0].cod_convenio,
+//             convenio: pacienteResult[0].convenio
+//         }
+
+//         db.query(q_exames, [atendimento_id, convenio_id], (err, examesResult) => {
+//             if (err) return res.status(500).json(err);
+
+//             return res.status(200).json({
+//                 paciente,
+//                 atendimento,
+//                 medico,
+//                 convenio,
+//                 exames: examesResult
+//             });
+//         });
+//     });
+// };
 
 // Criar novo registro de exame em um atendimento
 export const addExameAtendimento = (req, res) => {

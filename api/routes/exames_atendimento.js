@@ -8,7 +8,7 @@ import { getExamesAtendimento,
 const router = express.Router()
 
 // Buscar todos exames de atendimento
-router.get('/:id', getExamesAtendimento)
+router.get('/', getExamesAtendimento)
 
 // Criar atendimento
 router.post('/add',addExameAtendimento)
