@@ -10,22 +10,31 @@ export const getExamesAtendimento = (req, res) => {
 
     const q_paciente_atendimento = `
         SELECT 
-            p.id AS paciente_id,
-            p.nome AS nome_paciente,
-            p.idade,
-            a.id AS atendimento_id,
-            a.valor_total,
-            m.id AS medico_id,
-            m.nome AS medico,
-            m.crm AS crm,
-            c.id AS convenio_id,
-            c.cod AS cod_convenio,
-            c.nome AS convenio
-        FROM atendimentos a
-        INNER JOIN pacientes p ON p.id = a.paciente_id
-        INNER JOIN medicos m ON m.id = a.medico_id
-        INNER JOIN convenio c ON c.id = a.convenio_id
-        WHERE a.id = ?;
+    p.id AS paciente_id,
+    p.nome AS nome_paciente,
+    p.idade,
+    a.id AS atendimento_id,
+    SUM(ce.valor) AS valor_total,
+    m.id AS medico_id,
+    m.nome AS medico,
+    m.crm AS crm,
+    c.id AS convenio_id,
+    c.cod AS cod_convenio,
+    c.nome AS convenio
+FROM atendimentos a
+INNER JOIN pacientes p ON p.id = a.paciente_id
+INNER JOIN medicos m ON m.id = a.medico_id
+INNER JOIN convenio c ON c.id = a.convenio_id
+INNER JOIN exames_atendimento ae ON ae.atendimento_id = a.id
+INNER JOIN exame_convenio ce 
+    ON ce.exame_id = ae.exames_id 
+    AND ce.convenio_id = a.convenio_id
+WHERE a.id = ?
+GROUP BY 
+    p.id, p.nome, p.idade,
+    a.id,
+    m.id, m.nome, m.crm,
+    c.id, c.cod, c.nome;
     `;
 
     const q_exames = `
