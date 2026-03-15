@@ -14,15 +14,23 @@ export const realizar_pagamento = (req, res) => {
     // Buscar total pago até o momento
     const qValorTotal = `
         SELECT 
-            a.valor_total,
-            COALESCE(SUM(p.valor_pago), 0) AS total_pago
-        FROM atendimentos a
-        LEFT JOIN pagamentos p ON a.id = p.atendimento_id
-        WHERE a.id = ?
-        GROUP BY a.valor_total;
+    (SELECT SUM(ce.valor)
+     FROM exames_atendimento ae
+     INNER JOIN exame_convenio ce 
+        ON ce.exame_id = ae.exames_id
+     INNER JOIN atendimentos a2
+        ON a2.id = ae.atendimento_id
+     WHERE ae.atendimento_id = ?
+     AND ce.convenio_id = a2.convenio_id
+    ) AS valor_total,
+
+    (SELECT COALESCE(SUM(p.valor_pago),0)
+     FROM pagamentos p
+     WHERE p.atendimento_id = ?
+    ) AS total_pago;
     `;
 
-    db.query(qValorTotal, [atendimentoId], (err, result) => {
+    db.query(qValorTotal, [atendimentoId, atendimentoId], (err, result) => {
         if (err) {
             return res.status(500).json({
                 erro: "Erro ao verificar o valor total do atendimento."
@@ -138,13 +146,24 @@ export const atualizar_pagamento = (req, res) => {
         const valorAntigo = parseFloat(pagamentoResult[0].valor_pago);
 
         const qValorTotal = `
-            SELECT
-                a.valor_total,
-                COALESCE(SUM(p.valor_pago), 0) AS total_pago
-            FROM atendimentos a
-            LEFT JOIN pagamentos p ON a.id = p.atendimento_id
-            WHERE a.id = ?
-            GROUP BY a.valor_total;
+            SELECT 
+    (
+        SELECT COALESCE(SUM(ce.valor),0)
+        FROM exames_atendimento ae
+        INNER JOIN exame_convenio ce 
+            ON ce.exame_id = ae.exames_id
+            AND ce.convenio_id = a.convenio_id
+        WHERE ae.atendimento_id = a.id
+    ) AS valor_total,
+    
+    (
+        SELECT COALESCE(SUM(p.valor_pago),0)
+        FROM pagamentos p
+        WHERE p.atendimento_id = a.id
+    ) AS total_pago
+
+FROM atendimentos a
+WHERE a.id = ?;
         `
 
         db.query(qValorTotal, [atendimentoId], (error, result) => {
@@ -190,65 +209,6 @@ export const atualizar_pagamento = (req, res) => {
         })
     })
 }
-
-// export const atualizar_pagamento = (req, res) => {
-
-//     const q = `
-//         UPDATE pagamentos
-//             SET valor_pago = ?,
-//             metodo_pagamento = ?
-//         WHERE id = ?;
-//     `
-
-//     const values = [
-//         req.body.valor_pago,
-//         req.body.metodo_pagamento,
-//         req.params.id
-//     ]
-
-//     db.query(q, values, (err) => {
-//         if (err) return res.status(500).json('Erro interno no servidor.')
-
-//         // Buscar total pago até o momento
-//         const qValorTotal = `
-//         SELECT 
-//             a.valor_total,
-//             COALESCE(SUM(p.valor_pago), 0) AS total_pago
-//         FROM atendimentos a
-//         LEFT JOIN pagamentos p ON a.id = p.atendimento_id
-//         WHERE a.id = ?
-//         GROUP BY a.valor_total;
-//     `;
-
-//         db.query(qValorTotal, [req.params.id], (error, result) => {
-//             if (error) {
-//                 return res.status(500).json({
-//                     erro: "Erro ao verificar o valor total do atendimento."
-//                 });
-//             }
-
-//             if (result.length === 0) {
-//                 return res.status(404).json({
-//                     erro: "Atendimento não encontrado."
-//                 });
-//             }
-
-//             const valorTotal = parseFloat(result[0].valor_total)
-//             const totalPago = parseFloat(result[0].total_pago)
-
-//             const novoTotalPago = totalPago + parseFloat(valor)
-
-//             if (novoTotalPago > valorTotal) {
-//                 return res.status(400).json({
-//                     erro: "O valor total pago ultrapassa o valor devido."
-//                 });
-//             }
-
-//             res.status(200).json('Pagamento atualizado com sucesso.')
-//         })
-
-//     })
-// }
 
 export const delete_pagamento = (req, res) => {
 
