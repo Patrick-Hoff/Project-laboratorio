@@ -14,6 +14,8 @@ import Form from 'react-bootstrap/Form';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 
+import { formatarDataBR } from '../../utils/formatters';
+
 import '../../styles/shared.css'
 
 
@@ -76,8 +78,8 @@ function Pacientes() {
 
         if (edit.id) {
 
-            axios.put(`http://localhost:8081/pacientes/${edit.id}/edit`, paciente, 
-                {withCredentials: true}
+            axios.put(`http://localhost:8081/pacientes/${edit.id}/edit`, paciente,
+                { withCredentials: true }
             )
                 .then(() => {
                     toast.success('Paciente editado com sucesso!')
@@ -87,8 +89,8 @@ function Pacientes() {
 
         } else {
 
-            axios.post('http://localhost:8081/pacientes', paciente, 
-                {withCredentials: true}
+            axios.post('http://localhost:8081/pacientes', paciente,
+                { withCredentials: true }
             )
                 .then(() => {
                     toast.success('Paciente cadastrado com sucesso!')
@@ -103,8 +105,8 @@ function Pacientes() {
 
     function handleDelete(id) {
 
-        axios.delete(`http://localhost:8081/pacientes/${id}/remove`, 
-            {withCredentials: true}
+        axios.delete(`http://localhost:8081/pacientes/${id}/remove`,
+            { withCredentials: true }
         )
             .then(() => {
                 toast.success('Paciente deletado com sucesso!')
@@ -171,11 +173,7 @@ function Pacientes() {
                             <tr key={paciente.id} onDoubleClick={() => handleEdit(paciente.id, paciente.nome, paciente.idade)}>
                                 <td>{paciente.id}</td>
                                 <td>{paciente.nome}</td>
-                                <td>
-                                    {paciente.idade && !isNaN(new Date(paciente.idade))
-                                        ? format(new Date(paciente.idade), "dd 'de' MMMM 'de' yyyy", { locale: ptBR })
-                                        : 'Data inválida'}
-                                </td>
+                                <td>{formatarDataBR(paciente.idade)}</td>
                                 <td className="icon">
                                     <span><BiSolidCommentEdit onClick={() => handleEdit(paciente.id, paciente.nome, paciente.idade)} /></span>
                                     <span><FaDeleteLeft onClick={() => handleDelete(paciente.id)} /></span>
