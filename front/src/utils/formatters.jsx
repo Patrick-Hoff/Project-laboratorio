@@ -35,7 +35,7 @@ export function formatarData(timestamp) {
 
     // Cria a formatação personalizada no formato pt-BR (data com hora, minutos e segundos)
     const formato = new Intl.DateTimeFormat('pt-BR', {
-         year: 'numeric', // Ano completo
+        year: 'numeric', // Ano completo
         month: '2-digit', // Mês por extenso
         day: '2-digit', // Dia do mês
         hour: '2-digit', // Hora com 2 dígitos
@@ -47,3 +47,14 @@ export function formatarData(timestamp) {
     // Retorna a data formatada
     return formato.format(data);
 }
+
+// Formatar data para pt-br
+export function formatarDataBR(data) {
+    if (!data || !data.includes("-")) return "";
+
+    const partes = data.split("-");
+    if (partes.length !== 3) return "";
+
+    const [ano, mes, dia] = partes;
+    return `${dia.padStart(2, "0")}/${mes.padStart(2, "0")}/${ano}`;
+};
