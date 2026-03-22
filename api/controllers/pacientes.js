@@ -14,10 +14,16 @@ export const getPacientes = (req, res) => {
         WHERE id LIKE ? AND nome LIKE ?`;
 
     const dataQuery = `
-        SELECT * FROM pacientes
-        WHERE id LIKE ? AND nome LIKE ?
-        ORDER BY id DESC
-        LIMIT ? OFFSET ?`;
+        SELECT 
+    id, 
+    nome,
+    idade
+FROM pacientes
+WHERE id LIKE ? 
+  AND nome LIKE ?
+ORDER BY id DESC
+LIMIT ? OFFSET ?; `
+
 
     const likeId = `%${searchId}%`;
     const likeNome = `%${searchNome}%`;
