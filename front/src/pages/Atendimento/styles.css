@@ -1,4 +1,4 @@
-/* Container principal com atendimento e pagamento lado a lado */
+/* /* Container principal com atendimento e pagamento lado a lado */
 .container-atendimento {
   display: flex;
   justify-content: space-between;
@@ -63,19 +63,59 @@
   border-radius: 5px;
 }
 
-.linha-idade-data {
-  display: flex;
-  gap: 1rem;
-}
 
-.input-idade,
-.input-data {
-  flex: 1;
+
+
+.input-padrao {
   padding: 0.5rem;
   font-size: 1rem;
   border: 1px solid #ccc;
   border-radius: 5px;
 }
+
+.linha-idade-data {
+  display: flex;
+  align-items: flex-end;
+  gap: 1rem;
+  flex-wrap: nowrap;
+}
+
+.container-data {
+  display: flex;
+  flex-direction: column;
+}
+
+.container-idade {
+  display: flex;
+  align-items: flex-end;
+  gap: 0.5rem;
+}
+
+.container-idade div {
+  display: flex;
+  flex-direction: column;
+}
+
+/* 🔥 ajustes principais */
+.input-data {
+  width: 150px;
+  flex: unset;
+  /* remove o crescimento */
+}
+
+.input-idade {
+  width: 50px;
+  flex: unset;
+  text-align: center;
+}
+
+.input-idade:focus,
+.input-data:focus {
+  outline: none;
+}
+
+
+
 
 
 .subtitulo {
@@ -195,7 +235,7 @@ button:disabled {
   transform: scale(0.97);
 }
 
-.container-autocomplete{
+.container-autocomplete {
   position: relative;
 }
 
@@ -203,7 +243,7 @@ button:disabled {
   position: absolute;
   top: 100%;
   left: 0;
-  box-shadow: 0px 4px 8px rgba(0,0,0,0.15);
+  box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.15);
   background-color: white;
   border: 1px solid #ccc;
   border-radius: 4px;

@@ -1,87 +1,139 @@
 import { useEffect, useState, useContext, useRef } from 'react';
 import { UserContext } from '../../routes/UserContext'
 
+import GenericModal from "../../components/Modal/Modal";
+import { Button } from "react-bootstrap";
+
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import axios from 'axios';
 
 import { FaSearch } from 'react-icons/fa';
 import { ToastContainer, toast } from 'react-toastify';
-import { FaArrowRight, FaArrowLeft } from "react-icons/fa";
 import { FaDeleteLeft, FaFileInvoiceDollar } from "react-icons/fa6";
 
-import Modal from 'react-bootstrap/Modal';
-import Button from 'react-bootstrap/Button';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import './styles.css';
 
-import { formatarParaBRL, createCurrencyChangeHandler } from '../../utils/formatters';
+import { useDebounce } from 'use-debounce';
+
+import { formatarParaBRL, createCurrencyChangeHandler, formatarDataBR } from '../../utils/formatters';
 
 
 function Atendimento() {
 
-    const [errorPayment, setErrorPayment] = useState('')
+    // =========================
+    // ESTADOS DE ERRO
+    // =========================
+    const [errorPayment, setErrorPayment] = useState('');
 
-    const [displayValor, setDisplayValor] = useState('' || 'R$ 0,00')
-
-    const [pacienteOriginal, setPacienteOriginal] = useState(null)
-    const [paciente, setPaciente] = useState({ id: '', nome: '', idade: '', nascimento: '' });
-    const [pacientes, setPacientes] = useState([]);
+    // =========================
+    // CONTROLE DE UI
+    // =========================
     const [modalShow, setModalShow] = useState(false);
-    const [atendimentoId, setAtendimentoId] = useState();
-    const [exameBusca, setExameBusca] = useState({ cod: '', nome: '' });
-    const [medicoBusca, setMedicoBusca] = useState({ id: '', crm: '', medico: '' })
-    const [medicoOriginal, setMedicoOriginal] = useState(null)
 
-    const [exameAdicionado, setExameAdicionado] = useState([])
-
-    const [formaPagamento, setFormaPagamento] = useState('');
+    // =========================
+    // VALORES / PAGAMENTO
+    // =========================
+    const [displayValor, setDisplayValor] = useState('R$ 0,00');
     const [valorTotal, setValorTotal] = useState(0);
-    const [quantoPagar, setQuantoPagar] = useState(0)
-    const [totalPago, setTotalPago] = useState(0)
+    const [quantoPagar, setQuantoPagar] = useState(0);
+    const [totalPago, setTotalPago] = useState(0);
+    const [formaPagamento, setFormaPagamento] = useState('');
+
     const quantoFaltaPagar = valorTotal - totalPago;
 
+    // =========================
+    // PACIENTE
+    // =========================
+    const [pacienteOriginal, setPacienteOriginal] = useState(null);
+    const [paciente, setPaciente] = useState({
+        id: '',
+        nome: '',
+        idade: '',
+        nascimento: ''
+    });
+    const [pacientes, setPacientes] = useState([]);
+    const [searchPaciente, setSearchPaciente] = useState({
+        id: '',
+        nome: ''
+    });
 
-    const [searchId, setSearchId] = useState('')
-    const [searchNome, setSearchNome] = useState('')
+    // =========================
+    // MÉDICO
+    // =========================
+    const [medicoBusca, setMedicoBusca] = useState({
+        id: '',
+        crm: '',
+        medico: ''
+    });
+    const [medicoOriginal, setMedicoOriginal] = useState(null);
 
-    const [page, setPage] = useState(1)
-    const [total, setTotal] = useState(0)
+    const [sugestoesMedicos, setSugestoesMedicos] = useState([]);
+    const [mostrarSugestoesMedicos, setMostrarSugestoesMedicos] = useState(false);
+    const [digitandoMedico, setDigitandoMedico] = useState(false);
 
-    const [sugestoesMedicos, setSugestoesMedicos] = useState([])
-    const [mostrarSugestoesMedicos, setMostrarSugestoesMedicos] = useState(false)
+    // =========================
+    // CONVÊNIO
+    // =========================
+    const [convenioBusca, setConvenioBusca] = useState({
+        id: '',
+        cod: '',
+        convenio: ''
+    });
+    const [convenioOriginal, setConvenioOriginal] = useState(null);
 
-    const [sugestoesConvenios, setSugestoesConvenios] = useState([])
-    const [mostrarSugestoesConvenios, setMostrarSugestoesConvenios] = useState(false)
-    const [convenioBusca, setConvenioBusca] = useState({ id: '', cod: '', convenio: '' })
-    const [convenioOriginal, setConvenioOriginal] = useState(null)
+    const [sugestoesConvenios, setSugestoesConvenios] = useState([]);
+    const [mostrarSugestoesConvenios, setMostrarSugestoesConvenios] = useState(false);
+    const [digitandoConvenio, setDigitandoConvenio] = useState(false);
 
-    const [sugestoes, setSugestoes] = useState([])
-    const [mostrarSugestoes, setMostrarSugestoes] = useState(false)
+    // =========================
+    // EXAMES
+    // =========================
+    const [exameBusca, setExameBusca] = useState({
+        cod: '',
+        nome: ''
+    });
+    const [exameAdicionado, setExameAdicionado] = useState([]);
 
-    const [digitandoMedico, setDigitandoMedico] = useState(false)
-    const [digitandoConvenio, setDigitandoConvenio] = useState(false)
+    const [sugestoesExames, setSugestoesExames] = useState([]);
+    const [mostrarSugestoesExames, setMostrarSugestoesExames] = useState(false);
 
+    // =========================
+    // DEBOUNCE (BUSCAS)
+    // =========================
+    const [debouncedBusca] = useDebounce(exameBusca, 600);
+    const [debouncedBuscaPaciente] = useDebounce(searchPaciente, 600);
 
+    // =========================
+    // CONTEXTO / ROTAS
+    // =========================
     const { userData } = useContext(UserContext);
+    const { id } = useParams();
+    const navigate = useNavigate();
 
+    // =========================
+    // REFS (DOM)
+    // =========================
     const convenioRef = useRef(null);
     const medicoRef = useRef(null);
 
-    const { id } = useParams()
-    const navigate = useNavigate()
+    // =========================
+    // OUTROS
+    // =========================
+    const [atendimentoId, setAtendimentoId] = useState();
+
 
     const carregarPacientes = async () => {
         try {
             const res = await axios.get('http://localhost:8081/pacientes', {
                 params: {
-                    page,
-                    limit: 5,
-                    searchId,
-                    searchNome,
+                    page: 1,
+                    limit: 10,
+                    searchId: debouncedBuscaPaciente.id,
+                    searchNome: debouncedBuscaPaciente.nome,
                 }
             });
             setPacientes(res.data.data);
-            setTotal(res.data.total)
         } catch (err) {
             console.error(err);
         }
@@ -132,18 +184,6 @@ function Atendimento() {
         }
     };
 
-    useEffect(() => {
-        carregarExamesPaciente();
-    }, [id]);
-
-
-    function nextPage() {
-        setPage(prev => prev + 1)
-    }
-
-    function prevPage() {
-        if (page > 1) setPage(prev => prev - 1)
-    }
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -184,6 +224,7 @@ function Atendimento() {
     };
 
     const handleSelecionarPaciente = (p) => {
+        console.log(p)
         setPaciente({
             id: p.id,
             nome: p.nome,
@@ -193,61 +234,99 @@ function Atendimento() {
         setModalShow(false);
     };
 
-    const calcularIdade = (nascimento) => {
+    const calcularIdade = (data) => {
         const hoje = new Date();
-        const nasc = new Date(nascimento);
-        let idade = hoje.getFullYear() - nasc.getFullYear();
-        const m = hoje.getMonth() - nasc.getMonth();
-        if (m < 0 || (m === 0 && hoje.getDate() < nasc.getDate())) {
-            idade--;
+
+        const dataStr = formatarDataBR(data)
+
+        // Converter "dd/mm/yyyy" para Date
+        const [dia, mes, ano] = dataStr.split('/');
+        const nascimento = new Date(ano, mes - 1, dia);
+
+        let anos = hoje.getFullYear() - nascimento.getFullYear();
+        let meses = hoje.getMonth() - nascimento.getMonth();
+        let dias = hoje.getDate() - nascimento.getDate();
+
+        // Ajustar dias negativos
+        if (dias < 0) {
+            meses--;
+            const ultimoMes = new Date(hoje.getFullYear(), hoje.getMonth(), 0);
+            dias += ultimoMes.getDate();
         }
-        return idade;
+
+        // Ajustar meses negativos
+        if (meses < 0) {
+            anos--;
+            meses += 12;
+        }
+
+        return {
+            anos,
+            meses,
+            dias
+        };
     };
 
 
-    async function addExames(exameSelecionado) {
+    const getExame = async () => {
         try {
-            const res = await axios.get('http://localhost:8081/exames');
-            const exames = res.data.data;
+            const cod = debouncedBusca.cod.trim();
+            const nome = debouncedBusca.nome.trim();
 
-            const exameEncontrado = exames.find(e =>
-                (exameSelecionado.cod && e.cod === exameSelecionado.cod) ||
-                (exameSelecionado.nome && e.nome === exameSelecionado.nome)
-            );
-
-            if (!exameEncontrado) {
-                toast.error('Exame não existente.');
+            if (!cod && !nome) {
+                setMostrarSugestoesExames(false);
                 return;
             }
 
-            const jaAdicionado = exameAdicionado.some(e => e.id === exameEncontrado.id);
+            const res = await axios.get('http://localhost:8081/exames', {
+                params: {
+                    searchCod: cod,
+                    searchNome: nome,
+                    limit: 5
+                }
+            });
 
-            if (jaAdicionado) {
-                toast.info('Exame já foi adicionado.');
+            if (res.data.total < 1) {
+                console.log('Nenhum exame encontrado!');
+                setMostrarSugestoesExames(false);
                 return;
             }
 
-            const postExames = {
-                atendimento_id: id,
-                exames_id: exameEncontrado.id,
-                resultado: 'pendente',
-                user: userData
-            };
-
-            await axios.post('http://localhost:8081/exames_atendimento/add', postExames);
-
-            await carregarExamesPaciente();
-
-            setExameBusca({ cod: '', nome: '' });
-
-            toast.success('Exame adicionado com sucesso!');
+            setMostrarSugestoesExames(true);
+            setSugestoesExames(res.data.data);
 
         } catch (err) {
-            console.error('Erro ao buscar ou adicionar exame:', err);
-            toast.error('Erro ao adicionar exame.');
+            console.log(err);
+        }
+    };
+
+
+    useEffect(() => {
+        carregarExamesPaciente();
+    }, [id]);
+
+    useEffect(() => {
+        getExame();
+    }, [debouncedBusca]);
+
+    const addExames = async (item) => {
+        try {
+
+            const data = {
+                atendimento_id: id,
+                exames_id: item.id,
+                resultado: "Pendente"
+            }
+
+            await axios.post('http://localhost:8081/exames_atendimento/add', data)
+
+            toast.success("Exame adicionado com sucesso!")
+            await carregarExamesPaciente()
+
+        } catch (err) {
+            console.log(err)
         }
     }
-
 
     useEffect(() => {
 
@@ -296,7 +375,7 @@ function Atendimento() {
 
     const getConvenio = async () => {
 
-        if(!digitandoConvenio) return;
+        if (!digitandoConvenio) return;
 
         if (!convenioBusca.cod && !convenioBusca.convenio) {
             setSugestoesConvenios([])
@@ -337,50 +416,6 @@ function Atendimento() {
         return () => clearTimeout(timeout)
     }, [convenioBusca.cod, convenioBusca.convenio])
 
-    useEffect(() => {
-
-    })
-
-
-    useEffect(() => {
-
-        const fetchSugestoes = async () => {
-            if (!exameBusca.cod && !exameBusca.nome) {
-                setSugestoes([])
-                return;
-            }
-
-            try {
-                const res = await axios.get('http://localhost:8081/exames', {
-                    params: {
-                        searchCod: exameBusca.cod || '',
-                        searchNome: exameBusca.nome || '',
-                        limit: 4,
-                        page: 1,
-                    }
-                });
-                setSugestoes(res.data.data)
-                setMostrarSugestoes(true)
-            } catch (err) {
-                console.log(err)
-            }
-        }
-
-        const timeout = setTimeout(() => fetchSugestoes(), 10)
-        return () => clearTimeout(timeout)
-
-    }, [exameBusca.cod, exameBusca.nome])
-
-    // useEffect(() => {
-    //     const handleClickOutside = () => {
-    //         setMostrarSugestoes(false)
-    //     }
-
-    //     document.addEventListener('click', handleClickOutside);
-    //     return () => {
-    //         document.removeEventListener('click', handleClickOutside)
-    //     };
-    // }, [])
 
     useEffect(() => {
 
@@ -435,12 +470,8 @@ function Atendimento() {
 
 
     useEffect(() => {
-        setPage(1)
-    }, [searchId, searchNome])
-
-    useEffect(() => {
         if (modalShow) carregarPacientes();
-    }, [modalShow, page, searchId, searchNome]);
+    }, [modalShow, debouncedBuscaPaciente]);
 
 
 
@@ -483,7 +514,7 @@ function Atendimento() {
     }, [])
 
 
-    // Função exportada para realizar o pagamento do atendimento corretamente
+    // Função exportada para realizar o pagamento do atendimento
     const handleChange = createCurrencyChangeHandler(setQuantoPagar, setDisplayValor);
 
 
@@ -522,24 +553,48 @@ function Atendimento() {
                         />
                         <FaSearch className="search" onClick={() => setModalShow(true)} />
                     </div>
-
                     <div className="linha-idade-data">
-                        <input
-                            type="number"
-                            name="idade"
-                            placeholder="Idade"
-                            className="input-idade"
-                            value={paciente.idade}
-                            readOnly
-                        />
-                        <input
-                            type="date"
-                            name="nascimento"
-                            placeholder="Data de Nascimento"
-                            className="input-data"
-                            value={paciente.nascimento}
-                            readOnly
-                        />
+                        <div className='container-data'>
+                            <label>Data Nasc</label>
+                            <input
+                                type="text"
+                                className="input-padrao input-data"
+                                value={formatarDataBR(paciente.nascimento)}
+                                readOnly
+                            />
+                        </div>
+
+                        <div className='container-idade'>
+                            <div>
+                                <label>Anos</label>
+                                <input
+                                    type="number"
+                                    className="input-padrao input-idade"
+                                    value={paciente.idade.anos}
+                                    readOnly
+                                />
+                            </div>
+
+                            <div>
+                                <label>Meses</label>
+                                <input
+                                    type="number"
+                                    className="input-padrao input-idade"
+                                    value={paciente.idade.meses}
+                                    readOnly
+                                />
+                            </div>
+
+                            <div>
+                                <label>Dias</label>
+                                <input
+                                    type="number"
+                                    className="input-padrao input-idade"
+                                    value={paciente.idade.dias}
+                                    readOnly
+                                />
+                            </div>
+                        </div>
                     </div>
 
                     <div ref={medicoRef} className='linha-medico-button'>
@@ -586,7 +641,7 @@ function Atendimento() {
                             )}
 
                         </div>
-                        <div ref={convenioRef}  className='container-input container-autocomplete'>
+                        <div ref={convenioRef} className='container-input container-autocomplete'>
                             <label htmlFor="convenio">Convênio</label>
                             <input
                                 type="text"
@@ -654,51 +709,52 @@ function Atendimento() {
                     </div>
                 </div>
                 <form className="filtro-exames">
-                    <input
-                        type="text"
-                        disabled={!id}
-                        placeholder="Código do exame"
-                        value={exameBusca.cod}
-                        onChange={(e) => setExameBusca({ ...exameBusca, cod: e.target.value })}
-                        className="input-filtro-codigo"
-                    />
-                    <input
-                        type="text"
-                        disabled={!id}
-                        placeholder="Nome do exame"
-                        value={exameBusca.nome}
-                        onChange={(e) => setExameBusca({ ...exameBusca, nome: e.target.value })}
-                        className="input-filtro-nome"
-                    />
+                    <div className='container-input container-autocomplete' style={{ width: '100%' }}>
 
-                    <Button
-                        variant="secondary"
-                        onClick={() => addExames(exameBusca)}
-                        disabled={!id}
-                    >
-                        Adicionar
-                    </Button>
+                        <input
+                            type="text"
+                            disabled={!id}
+                            placeholder="Código do exame"
+                            value={exameBusca.cod}
+                            onChange={(e) => setExameBusca(prev => ({
+                                ...prev,
+                                cod: e.target.value
+                            }))}
+                            className="input-filtro-codigo"
+                        />
+                        <input
+                            type="text"
+                            disabled={!id}
+                            placeholder="Nome do exame"
+                            value={exameBusca.nome}
+                            onChange={(e) => setExameBusca(prev => ({
+                                ...prev,
+                                nome: e.target.value
+                            }))}
+                            className="input-filtro-nome"
+                        />
+                        {mostrarSugestoesExames && sugestoesExames.length > 0 && (
+                            <div className="dropdown-sugestoes">
+                                {sugestoesExames.map((sugestao) => (
+                                    <div
+                                        key={sugestao.id}
+                                        className="item-sugestao"
+                                        onClick={() => {
+                                            setExameBusca({ cod: sugestao.cod, nome: sugestao.nome });
+                                            addExames(sugestao);
+                                            setMostrarSugestoesExames(false);
+                                            setExameBusca({ cod: '', nome: '' })
+                                            setSugestoesExames([])
+                                        }}
+                                    >
+                                        {sugestao.cod} - {sugestao.nome}
+                                    </div>
+                                ))}
+                            </div>
+                        )}
+                    </div>
 
                 </form>
-                <>
-                    {mostrarSugestoes && sugestoes.length > 0 && (
-                        <div className="dropdown-sugestoes">
-                            {sugestoes.map((sugestao) => (
-                                <div
-                                    key={sugestao.id}
-                                    className="item-sugestao"
-                                    onClick={() => {
-                                        setExameBusca({ cod: sugestao.cod, nome: sugestao.nome });
-                                        addExames(sugestao);
-                                        setMostrarSugestoes(false);
-                                    }}
-                                >
-                                    {sugestao.cod} - {sugestao.nome}
-                                </div>
-                            ))}
-                        </div>
-                    )}
-                </>
 
                 <div>
                     <table className="tabela-exames">
@@ -731,7 +787,6 @@ function Atendimento() {
             <div className="pagamento-container">
                 <h2>Pagamento</h2>
 
-                {/* Valor Total */}
                 <div className="form-group">
                     <label htmlFor="valorTotal">Valor Total</label>
                     <input
@@ -801,71 +856,60 @@ function Atendimento() {
             </div>
 
 
-            <Modal show={modalShow} onHide={() => setModalShow(false)} centered size="lg">
-                <Modal.Header closeButton>
-                    <Modal.Title>Selecionar Paciente</Modal.Title>
-                </Modal.Header>
-                <Modal.Body>
-                    <div className="mb-3 d-flex gap-3">
-                        <input
-                            type="text"
-                            placeholder="ID"
-                            className="form-control"
-                            onChange={(e) => setSearchId(e.target.value)}
-                        />
-                        <input
-                            type="text"
-                            placeholder="Filtrar por Nome"
-                            className="form-control"
-                            onChange={(e) => setSearchNome(e.target.value)}
-                        />
-                    </div>
+            <GenericModal
+                show={modalShow}
+                onClose={() => setModalShow(false)}
+                title="Selecionar Paciente"
+            >
+                <div className="mb-3 d-flex gap-3">
+                    <input
+                        type="text"
+                        placeholder="ID"
+                        className="form-control"
+                        onChange={(e) => setSearchPaciente(prev => ({
+                            ...prev,
+                            id: e.target.value
+                        }))}
+                    />
+                    <input
+                        type="text"
+                        placeholder="Filtrar por Nome"
+                        className="form-control"
+                        onChange={(e) => setSearchPaciente(prev => ({
+                            ...prev,
+                            nome: e.target.value
+                        }))}
+                    />
+                </div>
 
-                    <table className="table table-striped">
-                        <thead>
-                            <tr>
-                                <th>ID</th>
-                                <th>Nome</th>
-                                <th>Data Nasc.</th>
-                                <th>Idade</th>
-                                <th>Ação</th>
+                <table className="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Nome</th>
+                            <th>Data Nasc.</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {pacientes.map((p) => (
+                            <tr key={p.id}>
+                                <td>{p.id}</td>
+                                <td>{p.nome}</td>
+                                <td>{formatarDataBR(p.idade)}</td>
+                                <td>
+                                    <Button
+                                        variant="success"
+                                        onClick={() => handleSelecionarPaciente(p)}
+                                    >
+                                        Selecionar
+                                    </Button>
+                                </td>
                             </tr>
-                        </thead>
-                        <tbody>
-                            {pacientes.length > 0 ? (
-                                pacientes.map((p) => (
-                                    <tr key={p.id}>
-                                        <td>{p.id}</td>
-                                        <td>{p.nome}</td>
-                                        <td>{p.idade}</td>
-                                        <td>{calcularIdade(p.idade)}</td>
-                                        <td>
-                                            <Button variant="success" onClick={() => handleSelecionarPaciente(p)}>
-                                                Selecionar
-                                            </Button>
-                                        </td>
-                                    </tr>
-                                ))
-                            ) : (
-                                <tr>
-                                    <td colSpan="5" className="text-center">Nenhum paciente encontrado.</td>
-                                </tr>
-                            )}
-                        </tbody>
-                    </table>
-                    <div className="pagination">
-                        <FaArrowLeft
-                            className={`arrow ${page <= 1 ? 'disabled' : ''}`}
-                            onClick={page <= 1 ? null : prevPage}
-                        />
-                        <span>Página {page} de {Math.ceil(total / 5)}</span>
-                        <FaArrowRight
-                            className={`arrow ${page >= Math.ceil(total / 5) ? 'disabled' : ''}`}
-                            onClick={page >= Math.ceil(total / 5) ? null : nextPage}
-                        />
-                    </div>
-                </Modal.Body>
-            </Modal>
+                        ))}
+                    </tbody>
+                </table>
+
+            </GenericModal>
 
             <ToastContainer
                 autoClose={3000}
