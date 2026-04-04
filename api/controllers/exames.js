@@ -105,7 +105,7 @@ export const updateExame = (req, res) => {
         const oldExame = selectResult[0];
 
         // 2. Atualizar o exame
-        const updateQuery = 'UPDATE exames SET `cod` = ?, `nome` = ?, WHERE `id` = ?';
+        const updateQuery = 'UPDATE exames SET `cod` = ?, `nome` = ? WHERE `id` = ?';
         const values = [req.body.cod, req.body.nome, exameId];
 
         db.query(updateQuery, values, (updateErr) => {
@@ -117,7 +117,7 @@ export const updateExame = (req, res) => {
             // 3. Inserir dois logs: "Update - Antes" e "Update - Depois"
             const logQuery = `
                 INSERT INTO logexame (id_exame, cod, exame, tipo_alteracao, id_user)
-                VALUES (?, ?, ?, ?, ?, ?)
+                VALUES (?, ?, ?, ?, ?)
             `;
 
             const logAntes = [exameId, oldExame.cod, oldExame.nome, 'Update - Antes', req.userId];
