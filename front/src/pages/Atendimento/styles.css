@@ -25,9 +25,6 @@
   gap: 1rem;
 }
 
-
-
-
 .titulo {
   margin-top: 0.5rem;
   margin-bottom: 1rem;
@@ -63,9 +60,6 @@
   border-radius: 5px;
 }
 
-
-
-
 .input-padrao {
   padding: 0.5rem;
   font-size: 1rem;
@@ -96,11 +90,9 @@
   flex-direction: column;
 }
 
-/* 🔥 ajustes principais */
 .input-data {
   width: 150px;
   flex: unset;
-  /* remove o crescimento */
 }
 
 .input-idade {
@@ -113,10 +105,6 @@
 .input-data:focus {
   outline: none;
 }
-
-
-
-
 
 .subtitulo {
   margin-bottom: 1rem;

@@ -150,6 +150,7 @@
 ======================== */
 
 @media (max-width: 768px) {
+
   .input-id,
   .input-cod,
   .input-nome {
@@ -184,4 +185,111 @@
     font-weight: bold;
     color: #555;
   }
+}
+
+
+.container-modal-btn button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  padding: 12px 20px;
+  min-height: 44px;
+
+  border-radius: 10px;
+  border: none;
+
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 1;
+
+  cursor: pointer;
+
+  transition: all 0.2s ease;
+
+  margin: 16px 12px 0 0;
+}
+
+/* Botões do Modal */
+.container-modal-btn button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 12px 24px;
+  min-height: 48px;
+  border-radius: 12px;
+  border: none;
+  font-size: 15px;
+  font-weight: 600;
+  line-height: 1.2;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  margin: 16px 12px 0 0;
+}
+
+/* Botão secundário (Cancelar / Fechar) */
+.container-modal-btn button:first-child {
+  background-color: #cfd3d6;
+  color: #1f1f1f;
+}
+
+.container-modal-btn button:first-child:hover {
+  background-color: #bfc3c6;
+}
+
+.container-modal-btn button:first-child:active {
+  background-color: #afb3b6;
+}
+
+/* Botão primário (Salvar / Submit) */
+.container-modal-btn button[type="submit"] {
+  background-color: #4a90e2;
+  color: #ffffff;
+}
+
+.container-modal-btn button[type="submit"]:hover {
+  background-color: #357abd;
+  transform: translateY(-1px);
+}
+
+.container-modal-btn button[type="submit"]:active {
+  background-color: #2f69a3;
+  transform: translateY(0);
+}
+
+.container-modal-btn button:focus-visible {
+  outline: 2px solid #4a90e2;
+  outline-offset: 2px;
+}
+
+.container-button-modal {
+  display: flex;
+  justify-content: space-around;
+}
+
+.btn-modal {
+  width: 40%;
+  padding: 10px 16px;
+  border-radius: 6px;
+  border: none;
+  cursor: pointer;
+  font-weight: 500;
+}
+
+.btn-cancelar {
+  background: #6b7280;
+  color: #fff;
+}
+
+.btn-cancelar:hover {
+  background: #4b5563;
+}
+
+.btn-excluir {
+  background: #dc2626;
+  color: #fff;
+}
+
+.btn-excluir:hover {
+  background: #b91c1c;
 }

@@ -2,13 +2,14 @@ import { useLocation, Link } from 'react-router-dom'
 import React, { useState, useEffect } from "react";
 import axios from 'axios'
 import { FaArrowRight, FaArrowLeft } from "react-icons/fa";
-import { formatarData } from '../../utils/formatters'
+
+import GenericModal from '../../components/Modal/Modal';
 import "./style.css";
 
 export default function Consultas() {
 
     const [consultas, setConsultas] = useState([])
-    const [selectedConsulta, setSelectedConsulta] = useState(null);
+    const [selectedConsulta, setSelectedConsulta] = useState(false);
 
     const [nome, setNome] = useState("")
     const [data, setData] = useState("")
@@ -16,7 +17,7 @@ export default function Consultas() {
     const [limit, setLimit] = useState(10)
     const [page, setPage] = useState(1)
     const [total, setTotal] = useState(0)
-    const [modalExcluir, setModalExcluir] = useState(null)
+    const [modalExcluir, setModalExcluir] = useState(false)
 
     const location = useLocation();
     const [mensagem, setMensagem] = useState("");
@@ -42,6 +43,7 @@ export default function Consultas() {
     const removeConsulta = async (id) => {
         try {
             const res = await axios.delete(`http://localhost:8081/agendamento/${id}`)
+            setModalExcluir(false)
             setMensagem(res.data)
             getConsultas()
         } catch (error) {
@@ -207,82 +209,66 @@ export default function Consultas() {
                 )}
             </div>
 
-            {/* MODAL */}
-            {modalExcluir && (
-                <div className="consultas-modal-overlay"
-                    onClick={(e) => {
-                        if (modalExcluir) {
-                            setModalExcluir(null)
-                        }
-                    }}>
-                    <div className="consultas-modal modal-buttons">
-                        <h2 className="consultas-modal-title">Tem certeza que deseja deletar essa consulta ?</h2>
-                        <div>
-                            <button
-                                className='btn-modal btn-cancelar'
-                                onClick={() => setModalExcluir(null)}
-                            >
-                                Cancelar
-                            </button>
+            <GenericModal
+                show={modalExcluir}
+                onClose={() => setModalExcluir(false)}
+                title="Excluir Consulta"
+            >
+                <div className='container-button-modal'>
+                    <button
+                        className='btn-modal btn-cancelar'
+                        onClick={() => setModalExcluir(false)}
+                    >
+                        Cancelar
+                    </button>
 
-                            <button
-                                className='btn-modal btn-excluir'
-                                onClick={() => removeConsulta(modalExcluir.id)}
-                            >
-                                Excluir
-                            </button>
-                        </div>
-                    </div>
+                    <button
+                        className='btn-modal btn-excluir'
+                        onClick={() => removeConsulta(modalExcluir.id)}
+                    >
+                        Excluir
+                    </button>
                 </div>
-            )}
+            </GenericModal>
 
-            {selectedConsulta && (
-                <div
-                    className="consultas-modal-overlay"
-                    onClick={(e) => {
-                        // Fecha ao clicar fora do modal
-                        if (e.target.classList.contains("consultas-modal-overlay")) {
-                            setSelectedConsulta(null);
-                        }
-                    }}
-                >
-                    <div className="consultas-modal">
-                        <h2 className="consultas-modal-title">Detalhes da Consulta</h2>
-
-                        <div className="consultas-modal-body">
-                            <p><strong>Nome:</strong> {selectedConsulta.nome}</p>
-                            <p><strong>Sexo:</strong> {selectedConsulta.sexo}</p>
-                            <p><strong>CPF:</strong> {selectedConsulta.cpf}</p>
-                            <p><strong>RG:</strong> {selectedConsulta.rg}</p>
-                            <p><strong>Nascimento:</strong> {selectedConsulta.nascimento}</p>
-                            <p><strong>Telefone:</strong> {selectedConsulta.telefone}</p>
-                            <p><strong>Email:</strong> {selectedConsulta.email}</p>
-                            <p>
-                                <strong>Endereço:</strong>{" "}
-                                {selectedConsulta.rua}, {selectedConsulta.numero},{" "}
-                                {selectedConsulta.bairro}, {selectedConsulta.cidade} -{" "}
-                                {selectedConsulta.estado}, CEP {selectedConsulta.cep}
-                            </p>
-                            <p><strong>Data:</strong> {selectedConsulta.data_consulta}</p>
-                            <p><strong>Horário:</strong> {selectedConsulta.horario}</p>
-                            <p><strong>Tipo:</strong> {selectedConsulta.tipo_consulta}</p>
-                            <p>
-                                <strong>Retorno:</strong>{" "}
-                                {selectedConsulta.retorno === "S" ? "Sim" : "Não"}
-                            </p>
-
-                            <p><strong>Observação:</strong> {selectedConsulta.observacao}</p>
-                        </div>
-
-                        <button
-                            className="consultas-btn fechar"
-                            onClick={() => setSelectedConsulta(null)}
-                        >
-                            Fechar
-                        </button>
-                    </div>
+            <GenericModal
+                show={selectedConsulta}
+                onClose={() => setSelectedConsulta(false)}
+                title="Detalhes da Consulta"
+            >
+                <div className="consultas-modal-body">
+                    <p><strong>Nome:</strong> {selectedConsulta.nome}</p>
+                    <p><strong>Sexo:</strong> {selectedConsulta.sexo}</p>
+                    <p><strong>CPF:</strong> {selectedConsulta.cpf}</p>
+                    <p><strong>RG:</strong> {selectedConsulta.rg}</p>
+                    <p><strong>Nascimento:</strong> {selectedConsulta.nascimento}</p>
+                    <p><strong>Telefone:</strong> {selectedConsulta.telefone}</p>
+                    <p><strong>Email:</strong> {selectedConsulta.email}</p>
+                    <p>
+                        <strong>Endereço:</strong>{" "}
+                        {selectedConsulta.rua}, {selectedConsulta.numero},{" "}
+                        {selectedConsulta.bairro}, {selectedConsulta.cidade} -{" "}
+                        {selectedConsulta.estado}, CEP {selectedConsulta.cep}
+                    </p>
+                    <p><strong>Data:</strong> {selectedConsulta.data_consulta}</p>
+                    <p><strong>Horário:</strong> {selectedConsulta.horario}</p>
+                    <p><strong>Tipo:</strong> {selectedConsulta.tipo_consulta}</p>
+                    <p>
+                        <strong>Retorno:</strong>{" "}
+                        {selectedConsulta.retorno === "S" ? "Sim" : "Não"}
+                    </p>
+                    <p><strong>Observação:</strong> {selectedConsulta.observacao}</p>
                 </div>
-            )}
+                <div>
+                    <button
+                        className="consultas-btn fechar"
+                        onClick={() => setSelectedConsulta(false)}
+                    >
+                        Fechar
+                    </button>
+                </div>
+            </GenericModal>
+            
             <div className="pagination">
                 <FaArrowLeft
                     className={`arrow ${page <= 1 ? 'disabled' : ''}`}

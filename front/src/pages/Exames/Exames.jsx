@@ -7,19 +7,16 @@ import { IoIosAddCircle } from "react-icons/io";
 import { FaArrowRight, FaArrowLeft } from "react-icons/fa";
 
 import { ToastContainer, toast } from 'react-toastify';
-import Button from 'react-bootstrap/Button';
-import Modal from 'react-bootstrap/Modal';
-import Form from 'react-bootstrap/Form';
 
-import 'bootstrap/dist/css/bootstrap.min.css';
 import '../../styles/shared.css'
 
-import { formatarParaBRL, createCurrencyChangeHandler } from '../../utils/formatters';
+import GenericModal from "../../components/Modal/Modal";
+import Input from "../../components/Input/Input";
 
 
 function Exames() {
     const [exames, setExames] = useState([]);
-    const [modalShow, setModalShow] = useState(false); // 👈 controla visibilidade do modal
+    const [modalShow, setModalShow] = useState(false);
     const [cod, setCod] = useState('')
     const [nome, setNome] = useState('')
     const [edit, setEdit] = useState([])
@@ -230,54 +227,43 @@ function Exames() {
             </div>
 
 
-            {/* Modal */}
-            <Modal
+            <GenericModal
                 show={modalShow}
-                onHide={resetForm}
-                size="lg"
-                aria-labelledby="contained-modal-title-vcenter"
-                centered
+                onClose={() => setModalShow(false)}
+                title="Exame"
             >
-                <Modal.Header closeButton>
-                    <Modal.Title id="contained-modal-title-vcenter">
-                        {edit.id ? 'Editar exame' : 'Cadastrar novo exame'}
-                    </Modal.Title>
-                </Modal.Header>
-                <Modal.Body>
-                    <Form onSubmit={handleSubmit}>
-                        <Form.Group className="mb-3" controlId="formGroupName">
-                            <Form.Label>Código</Form.Label>
-                            <Form.Control
-                                type="text"
-                                name="cod"
-                                maxLength="5"
-                                placeholder="Cód"
-                                required
-                                onChange={(e) => setCod(e.target.value)}
-                                value={cod}
-                            />
-                        </Form.Group>
-                        <Form.Group className="mb-3" controlId="formGroupPassword">
-                            <Form.Label>Nome</Form.Label>
-                            <Form.Control
-                                type="text"
-                                name="nome"
-                                placeholder="Exame"
-                                required
-                                onChange={(e) => setNome(e.target.value)}
-                                value={nome}
-                            />
-                        </Form.Group>
-                        <Modal.Footer>
-                            <Button onClick={() => setModalShow(false)}>Fechar</Button>
-                            <Button type="submit">
-                                {edit.id ? 'Salvar alterações' : 'Cadastrar'}
-                            </Button>
-                        </Modal.Footer>
-                    </Form>
-                </Modal.Body>
 
-            </Modal>
+                <form onSubmit={handleSubmit} className="container-modal-btn">
+
+                    <Input
+                        label="Cód"
+                        type="text"
+                        name="cod"
+                        maxLength="5"
+                        placeholder="Cód"
+                        required
+                        onChange={(e) => setCod(e.target.value)}
+                        value={cod}
+                    />
+
+                    <Input
+                        label="Nome"
+                        type="text"
+                        name="nome"
+                        placeholder="Exame"
+                        required
+                        onChange={(e) => setNome(e.target.value)}
+                        value={nome}
+                    />
+                    <div>
+                        <button onClick={() => setModalShow(false)}>Fechar</button>
+                        <button type="submit">
+                            {edit.id ? 'Salvar alterações' : 'Cadastrar'}
+                        </button>
+                    </div>
+                </form>
+
+            </GenericModal>
             <ToastContainer />
         </section>
     );

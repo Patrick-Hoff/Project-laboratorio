@@ -5,12 +5,15 @@ import axios from "axios"
 
 import { formatarData, formatarParaBRL, createCurrencyChangeHandler } from '../../utils/formatters';
 
+import GenericModal from "../../components/Modal/Modal";
+import Input from "../../components/Input/Input"
+
 export default function AtendimentoFinanceiro() {
 
-    const [modalAjusteAberto, setModalAjusteAberto] = useState(null)
+    const [modalAjusteAberto, setModalAjusteAberto] = useState(false)
     const [modalExcluirAberto, setModalExcluirAberto] = useState(false);
 
-    const [ errorPayment, setErrorPayment ] = useState('');
+    const [errorPayment, setErrorPayment] = useState('');
 
     const [atendimento, setAtendimento] = useState()
     const [pagamentos, setPagamentos] = useState([])
@@ -49,7 +52,8 @@ export default function AtendimentoFinanceiro() {
     }
 
     // Função para salvar ajustes
-    const salvarAjuste = async () => {
+    const salvarAjuste = async (e) => {
+        e.preventDefault();
         try {
             setErrorPayment('')
             await axios.put(`http://localhost:8081/pagamentos/atualizar_pagamento/${modalAjusteAberto.id}`, {
@@ -57,7 +61,7 @@ export default function AtendimentoFinanceiro() {
                 metodo_pagamento: formaPagamento
             });
             getFinanceiro()
-            setModalAjusteAberto(null);
+            setModalAjusteAberto(false);
         } catch (err) {
             setErrorPayment(err.response.data.erro)
         }
@@ -129,86 +133,67 @@ export default function AtendimentoFinanceiro() {
                 </div>
             </div>
 
-            {/* MODAL AJUSTE */}
-            {modalAjusteAberto && (
-                <div
-                    className="financeiro-modal-overlay"
-                    onClick={(e) => {
-                        if (e.target.classList.contains("financeiro-modal-overlay")) {
-                            setModalAjusteAberto(null);
-                        }
-                    }}
-                >
-                    <div className="financeiro-modal">
-                        <h2 className="financeiro-modal-titulo">Ajustar Pagamento</h2>
-                        <span className="err">
-                            {errorPayment}
-                        </span>
-                        <input
-                            className="financeiro-input"
-                            type="text"
-                            placeholder="Novo valor"
-                            value={valorTexto}
-                            onChange={handleChange}
-                        />
 
-                        <select
-                            className="financeiro-input"
-                            onChange={(e) => setFormaPagamento(e.target.value)}
-                            value={formaPagamento}
-                        >
-                            <option value="" disabled>Selecione</option>
-                            <option value="Dinheiro">Dinheiro</option>
-                            <option value="Cartao">Cartão</option>
-                            <option value="Pix">Pix</option>
-                            <option value="Boleto">Boleto</option>
-                        </select>
+            <GenericModal
+                show={modalAjusteAberto}
+                onClose={() => setModalAjusteAberto(false)}
+                title="Ajustar Pagamento"
+            >
+                <form onSubmit={salvarAjuste} className="container-modal-btn">
+                    {errorPayment}
+                    <Input
+                        label="Novo valor"
+                        type="text"
+                        placeholder="Novo valor"
+                        value={valorTexto}
+                        onChange={handleChange}
 
-                        <div className="financeiro-modal-acoes">
-                            <button className="financeiro-btn-azul" onClick={salvarAjuste}>Salvar</button>
-                            <button
-                                className="financeiro-btn-cinza"
-                                onClick={() => setModalAjusteAberto(null)}
-                            >
-                                Cancelar
-                            </button>
-                        </div>
+                    />
+
+                    <select
+                        className="financeiro-input"
+                        onChange={(e) => setFormaPagamento(e.target.value)}
+                        value={formaPagamento}
+                    >
+                        <option value="" disabled>Selecione</option>
+                        <option value="Dinheiro">Dinheiro</option>
+                        <option value="Cartao">Cartão</option>
+                        <option value="Pix">Pix</option>
+                        <option value="Boleto">Boleto</option>
+                    </select>
+
+                    <div>
+                        <button type="submit">
+                            Salvar
+                        </button>
+                        <button onClick={() => setModalAjusteAberto(false)}>
+                            Cancelar
+                        </button>
                     </div>
-                </div>
-            )}
+                </form>
+            </GenericModal>
 
-            {/* MODAL EXCLUIR */}
-            {modalExcluirAberto && (
-                <div
-                    className="financeiro-modal-overlay"
-                    onClick={(e) => {
-                        if (e.target.classList.contains("financeiro-modal-overlay")) {
-                            setModalExcluirAberto(false);
-                        }
-                    }}
-                >
-                    <div className="financeiro-modal">
-                        <h2 className="financeiro-modal-titulo">
-                            Deseja excluir este pagamento?
-                        </h2>
-
-                        <div className="financeiro-modal-acoes">
-                            <button
-                                className="financeiro-btn-cinza"
-                                onClick={() => setModalExcluirAberto(false)}
-                            >
-                                Cancelar
-                            </button>
-                            <button
-                                className="financeiro-btn-vermelho"
-                                onClick={deletePagamento}
-                            >
-                                Excluir
-                            </button>
-                        </div>
-                    </div>
+            <GenericModal
+                show={modalExcluirAberto}
+                onClose={() => setModalExcluirAberto(false)}
+                title="Excluir pagamento"
+            >
+                <div className="container-button-modal">
+                    <button
+                        className="btn-modal btn-cancelar"
+                        onClick={() => setModalExcluirAberto(false)}
+                    >
+                        Cancelar
+                    </button>
+                    <button
+                        className="btn-modal btn-excluir"
+                        onClick={deletePagamento}
+                    >
+                        Excluir
+                    </button>
                 </div>
-            )}
+            </GenericModal>
+
         </div>
     );
 }

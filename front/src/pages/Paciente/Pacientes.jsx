@@ -3,16 +3,11 @@ import axios from 'axios'
 import { BiSolidCommentEdit } from "react-icons/bi";
 import { FaDeleteLeft } from "react-icons/fa6";
 import { IoIosAddCircle } from "react-icons/io";
-import 'bootstrap/dist/css/bootstrap.min.css';
 import { ToastContainer, toast } from 'react-toastify';
 import { FaArrowRight, FaArrowLeft } from "react-icons/fa";
 
-import Button from 'react-bootstrap/Button';
-import Modal from 'react-bootstrap/Modal';
-import Form from 'react-bootstrap/Form';
-
-import { format } from 'date-fns';
-import { ptBR } from 'date-fns/locale';
+import GenericModal from "../../components/Modal/Modal"
+import Input from "../../components/Input/Input"
 
 import { formatarDataBR } from '../../utils/formatters';
 
@@ -202,56 +197,45 @@ function Pacientes() {
                 />
             </div>
 
-            {/* Modal */}
-            <Modal
+
+            <GenericModal
+                title={edit.id ? 'Editar paciente' : 'Cadastrar novo paciente'}
                 show={modalShow}
-                onHide={resetForm}
-                size="lg"
-                aria-labelledby="contained-modal-title-vcenter"
-                centered
+                onClose={resetForm}
             >
-                <Modal.Header closeButton>
-                    <Modal.Title id="contained-modal-title-vcenter">
-                        {edit.id ? 'Editar paciente' : 'Cadastrar novo paciente'}
-                    </Modal.Title>
-                </Modal.Header>
-                <Modal.Body>
-                    <Form onSubmit={handleSubmit}>
-                        <Form.Group className="mb-3" controlId="formGroupName">
-                            <Form.Label>Nome</Form.Label>
-                            <Form.Control
-                                type="text"
-                                name="nome"
-                                placeholder="Nome"
-                                required
-                                maxLength={50}
-                                onChange={(e) => setNome(e.target.value)}
-                                value={nome}
-                            />
-                        </Form.Group>
-                        <Form.Group className="mb-3" controlId="formGroupPassword">
-                            <Form.Label>Data de nascimento</Form.Label>
-                            <Form.Control
-                                type="date"
-                                name="nascimento"
-                                placeholder="Data de nascimento"
-                                required
-                                onChange={(e) => setIdade(e.target.value)}
-                                value={idade}
-                            />
-                        </Form.Group>
-                        <Modal.Footer>
-                            <Button onClick={resetForm}>Fechar</Button>
-                            <Button type="submit">
-                                {edit.id ? 'Salvar alterações' : 'Cadastrar'}
-                            </Button>
-                        </Modal.Footer>
-                    </Form>
-                </Modal.Body>
+                <form onSubmit={handleSubmit} className='container-modal-btn'>
+                    <Input
+                        type="text"
+                        label="Nome"
+                        name="nome"
+                        placeholder="Nome"
+                        required
+                        maxLength={50}
+                        onChange={(e) => setNome(e.target.value)}
+                        value={nome}
+                    />
 
-            </Modal>
+                    <Input
+                        type="date"
+                        label="Data de nascimento"
+                        name="nascimento"
+                        placeholder="Data de nascimento"
+                        required
+                        onChange={(e) => setIdade(e.target.value)}
+                        value={idade}
+                    />
+                    <div>
+                        <button onClick={resetForm}>
+                            Fechar
+                        </button>
+                        <button type="submit">
+                            {edit.id ? 'Salvar alterações' : 'Cadastrar'}
+                        </button>
+                    </div>
+                </form>
+            </GenericModal>
+
             <ToastContainer />
-
 
         </div >
     )

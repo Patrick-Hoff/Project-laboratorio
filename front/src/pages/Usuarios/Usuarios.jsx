@@ -2,12 +2,11 @@ import { useState, useEffect } from 'react';
 import axios from 'axios';
 import { BiSolidCommentEdit } from "react-icons/bi";
 import { IoIosAddCircle } from "react-icons/io";
-import 'bootstrap/dist/css/bootstrap.min.css';
 import { ToastContainer, toast } from 'react-toastify';
 import { FaArrowRight, FaArrowLeft } from "react-icons/fa";
-import Button from 'react-bootstrap/Button';
-import Modal from 'react-bootstrap/Modal';
-import Form from 'react-bootstrap/Form';
+
+import GenericModal from '../../components/Modal/Modal'
+import Input from '../../components/Input/Input'
 
 import '../../styles/shared.css'
 
@@ -25,6 +24,7 @@ function Usuarios() {
     const [searchId, setSearchId] = useState('');
     const [searchName, setSearchName] = useState('');
     const [searchEmail, setSearchEmail] = useState('');
+
 
     const getUsuarios = async () => {
         try {
@@ -201,67 +201,64 @@ function Usuarios() {
             </div>
 
             {/* Modal */}
-            <Modal
+
+            <GenericModal
+                title={edit.id ? 'Editar usuário' : 'Cadastrar novo usuário'}
                 show={modalShow}
-                onHide={resetForm}
-                size="lg"
-                aria-labelledby="contained-modal-title-vcenter"
-                centered
+                onClose={resetForm}
             >
-                <Modal.Header closeButton>
-                    <Modal.Title id="contained-modal-title-vcenter">
-                        {edit.id ? 'Editar usuário' : 'Cadastrar novo usuário'}
-                    </Modal.Title>
-                </Modal.Header>
-                <Modal.Body>
-                    <Form onSubmit={handleSubmit}>
-                        <Form.Group className="mb-3" controlId="formGroupName">
-                            <Form.Label>Nome</Form.Label>
-                            <Form.Control
-                                type="text"
-                                placeholder="Nome"
-                                required
-                                maxLength={50}
-                                onChange={(e) => setName(e.target.value)}
-                                value={name}
-                            />
-                        </Form.Group>
-                        <Form.Group className="mb-3" controlId="formGroupEmail">
-                            <Form.Label>Email</Form.Label>
-                            <Form.Control
-                                type="email"
-                                placeholder="Email"
-                                required
-                                onChange={(e) => setEmail(e.target.value)}
-                                value={email}
-                            />
-                        </Form.Group>
-                        <Form.Group className="mb-3" controlId="formGroupPassword">
-                            <Form.Label>Senha</Form.Label>
-                            <Form.Control
-                                type="password"
-                                placeholder="Senha"
-                                onChange={(e) => setPassword(e.target.value)}
-                                value={password}
-                            />
-                        </Form.Group>
-                        <Form.Group className="mb-3" controlId="formGroupIsAdmin">
-                            <Form.Check
-                                type="checkbox"
-                                label="Administrador"
-                                checked={isAdmin}
-                                onChange={() => setIsAdmin(!isAdmin)}
-                            />
-                        </Form.Group>
-                        <Modal.Footer>
-                            <Button onClick={resetForm}>Fechar</Button>
-                            <Button type="submit">
-                                {edit.id ? 'Salvar alterações' : 'Cadastrar'}
-                            </Button>
-                        </Modal.Footer>
-                    </Form>
-                </Modal.Body>
-            </Modal>
+                <form onSubmit={handleSubmit} className="container-modal-btn">
+
+                    <Input
+                        type="text"
+                        label="Nome"
+                        placeholder="Nome"
+                        required
+                        maxLength={50}
+                        onChange={(e) => setName(e.target.value)}
+                        value={name}
+                    />
+
+                    <Input
+                        type="email"
+                        label="Email"
+                        placeholder="Email"
+                        required
+                        onChange={(e) => setEmail(e.target.value)}
+                        value={email}
+                    />
+
+                    <Input
+                        type="password"
+                        label="Senha"
+                        placeholder="Senha"
+                        onChange={(e) => setPassword(e.target.value)}
+                        value={password}
+                    />
+
+                    <Input
+                        type="checkbox"
+                        label="Administrador"
+                        checked={isAdmin}
+                        onChange={() => setIsAdmin(!isAdmin)}
+                        style={{
+                            width: "20px",
+                            height: "20px"
+                        }}
+                    />
+
+                    <div>
+                        <button onClick={resetForm}>
+                            Fechar
+                        </button>
+                        <button type='submit'>
+                            {edit.id ? 'Salvar alterações' : 'Cadastrar'}
+                        </button>
+                    </div>
+
+                </form>
+
+            </GenericModal>
 
             <ToastContainer />
         </div>

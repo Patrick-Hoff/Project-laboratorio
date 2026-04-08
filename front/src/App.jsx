@@ -3,6 +3,8 @@ import RoutesApp from './routes/index';
 import { UserProvider } from './routes/UserContext';
 import Header from './components/Header/Header';
 
+import "./styles/shared.css"
+
 function App() {
   const location = useLocation();
 

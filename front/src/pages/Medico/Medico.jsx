@@ -9,12 +9,10 @@ import 'bootstrap/dist/css/bootstrap.min.css'
 import { ToastContainer, toast } from 'react-toastify'
 import 'react-toastify/dist/ReactToastify.css'
 
-import Button from 'react-bootstrap/Button'
-import Modal from 'react-bootstrap/Modal'
-import Form from 'react-bootstrap/Form'
-
 import '../../styles/shared.css'
-import './Medico.css'
+
+import GenericModal from '../../components/Modal/Modal'
+import Input from '../../components/Input/Input'
 
 function Medico() {
 
@@ -26,10 +24,7 @@ function Medico() {
 
     const [edit, setEdit] = useState({})
     const [modalShow, setModalShow] = useState(false)
-    const [modalExcluir, setModalExcluir] = useState({
-        show: false,
-        id: null
-    })
+    const [modalExcluir, setModalExcluir] = useState(false)
 
 
     const [page, setPage] = useState(1)
@@ -85,7 +80,7 @@ function Medico() {
         try {
             await axios.delete(`http://localhost:8081/medicos/${modalExcluir.id}`)
             toast.success('Médico removido com sucesso!')
-            setModalExcluir({ show: false, id: null })
+            setModalExcluir(false)
             getMedicos()
         } catch (err) {
             console.log(err)
@@ -189,7 +184,7 @@ function Medico() {
                                         <BiSolidCommentEdit onClick={() => handleEdit(medico)} />
                                     </span>
                                     <span>
-                                        <FaDeleteLeft onClick={() => setModalExcluir({ show: true, id: medico.id })} />
+                                        <FaDeleteLeft onClick={() => setModalExcluir({ id: medico.id })} />
                                     </span>
                                 </td>
                             </tr>
@@ -219,93 +214,68 @@ function Medico() {
             </div>
 
             {/* Modal delete */}
-            <Modal
-                show={modalExcluir.show}
-                onHide={() => setModalExcluir({ show: false, id: null })}
-                centered
-                className="container_excluir"
+            <GenericModal
+                show={modalExcluir}
+                onClose={() => setModalExcluir(false)}
+                title="Deseja realmente excluir este médico?"
             >
-                <Modal.Body className="buttons_excluir">
-                    <p>Deseja realmente excluir este médico?</p>
+                <div className='container-button-modal'>
+                    <button
+                        className='btn-modal btn-cancelar'
+                        onClick={() => setModalExcluir(false)}
+                    >
+                        Cancelar
+                    </button>
 
-                    <div style={{ display: 'flex', gap: '10px', justifyContent: 'center' }}>
-                        <Button
-                            variant="secondary"
-                            size="sm"
-                            onClick={() => setModalExcluir({ show: false, id: null })}
-                        >
-                            Cancelar
-                        </Button>
+                    <button
+                        className='btn-modal btn-excluir'
+                        onClick={handleDelete}
+                    >
+                        Excluir
+                    </button>
 
-                        <Button
-                            variant="danger"
-                            size="sm"
-                            onClick={handleDelete}
-                        >
-                            Excluir
-                        </Button>
-
-                    </div>
-                </Modal.Body>
-            </Modal>
+                </div>
+            </GenericModal>
 
 
             {/* Modal edit */}
-            <Modal
+            <GenericModal
                 show={modalShow}
-                onHide={resetForm}
-                size="lg"
-                centered
+                onClose={resetForm}
+                title={edit.id ? 'Editar médico' : 'Cadastrar médico'}
             >
-                <Modal.Header closeButton>
-                    <Modal.Title>
-                        {edit.id ? 'Editar médico' : 'Cadastrar médico'}
-                    </Modal.Title>
-                </Modal.Header>
-
-                <Modal.Body>
-                    <Form onSubmit={handleSubmit}>
-                        <Form.Group className="mb-3">
-                            <Form.Label>Nome</Form.Label>
-                            <Form.Control
-                                type="text"
-                                required
-                                value={nome}
-                                onChange={(e) => setNome(e.target.value)}
-                            />
-                        </Form.Group>
-
-                        <Form.Group className="mb-3">
-                            <Form.Label>CRM</Form.Label>
-                            <Form.Control
-                                type="text"
-                                required
-                                value={crm}
-                                onChange={(e) => setCrm(e.target.value)}
-                            />
-                        </Form.Group>
-
-                        <Form.Group className="mb-3">
-                            <Form.Label>Estado</Form.Label>
-                            <Form.Control
-                                type="text"
-                                required
-                                value={estado}
-                                onChange={(e) => setEstado(e.target.value)}
-                            />
-                        </Form.Group>
-
-                        <Modal.Footer>
-                            <Button variant="secondary" onClick={resetForm}>
-                                Cancelar
-                            </Button>
-                            <Button type="submit">
-                                {edit.id ? 'Salvar' : 'Cadastrar'}
-                            </Button>
-                        </Modal.Footer>
-                    </Form>
-                </Modal.Body>
-            </Modal>
+                <form onSubmit={handleSubmit} className='container-modal-btn'>
+                    <Input
+                        type="text"
+                        label="Nome"
+                        required
+                        value={nome}
+                        onChange={(e) => setNome(e.target.value)}
+                    />
+                    <Input
+                        label="CRM"
+                        type="text"
+                        required
+                        value={crm}
+                        onChange={(e) => setCrm(e.target.value)}
+                    />
+                    <Input
+                        type="text"
+                        label="Estado"
+                        required
+                        value={estado}
+                        onChange={(e) => setEstado(e.target.value)}
+                    />
+                    <div>
+                        <button onClick={resetForm}>
+                            Cancelar
+                        </button>
+                        <button type='submit'>
+                            {edit.id ? 'Salvar' : 'Cadastrar'}
+                        </button>
+                    </div>
+                </form>
+            </GenericModal>
 
             <ToastContainer />
         </div>
