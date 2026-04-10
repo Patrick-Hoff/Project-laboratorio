@@ -1,6 +1,5 @@
 import { useLocation } from 'react-router-dom';
 import RoutesApp from './routes/index';
-import { UserProvider } from './routes/UserContext';
 import Header from './components/Header/Header';
 
 import "./styles/shared.css"
@@ -12,10 +11,8 @@ function App() {
 
   return (
     <>
-      {!isLoginPage && <Header />}
-      <UserProvider>
+        {!isLoginPage && <Header />}
         <RoutesApp />
-      </UserProvider>
     </>
   );
 }

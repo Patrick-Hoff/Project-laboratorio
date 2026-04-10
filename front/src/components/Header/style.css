@@ -140,6 +140,11 @@
   color: #b02a37;
 }
 
+.user-container {
+  margin-right: 60px;
+  font-size: 1.2rem;
+}
+
 /* ================= RESPONSIVO ================= */
 @media (max-width: 768px) {
   .nav {

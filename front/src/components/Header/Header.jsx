@@ -1,16 +1,17 @@
 import { Link } from 'react-router-dom'
 import { IoIosLogOut } from "react-icons/io";
 import { CiSettings } from "react-icons/ci";
-import { 
-  FaUserCircle, 
-  FaFileAlt, 
-  FaUser, 
-  FaRegCalendarAlt, 
+import {
+  FaUserCircle,
+  FaFileAlt,
+  FaUser,
+  FaRegCalendarAlt,
   FaUserMd,
-  FaMoneyBillWave 
+  FaMoneyBillWave
 } from "react-icons/fa";
 import axios from 'axios'
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useContext } from 'react';
+import { UserContext } from '../../routes/UserContext';
 import './style.css'
 
 async function logoutSistem() {
@@ -27,10 +28,14 @@ function Header() {
   const [menuRotina, setMenuRotina] = useState(false)
   const [menuFinance, setMenuFinance] = useState(false)
   const [isAdmin, setIsAdmin] = useState('')
+  const [user, setUser] = useState('')
 
   useEffect(() => {
     axios.get('http://localhost:8081/usuarios/me', { withCredentials: true })
-      .then((res) => setIsAdmin(res.data.isAdmin))
+      .then((res) => {
+         setIsAdmin(res.data.isAdmin)
+         setUser(res.data.name)
+      })
       .catch((err) => console.log(err))
   }, [])
 
@@ -53,6 +58,7 @@ function Header() {
       setMenuRotina(false)
     }
   }
+
 
   return (
     <header className="header">
@@ -111,6 +117,15 @@ function Header() {
         </ul>
 
         {/* DIREITA */}
+
+        <div className='user-container'>
+          <strong>
+            Usuário:
+          </strong>
+          <span>
+            {" " + user}
+          </span>
+        </div>
         <ul className="nav-right">
           <li className="containerLink">
             <CiSettings
