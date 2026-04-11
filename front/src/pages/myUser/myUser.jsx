@@ -10,7 +10,7 @@ function myUser() {
     const [id, setId] = useState()
     const [changePassword, setChangePassword] = useState(false);
     const [isAdmin, setIsAdmin] = useState()
-    const [avatar, setAvatar] = useState('')
+    const [avatar, setAvatar] = useState('https://img.icons8.com/nolan/1200/user-default.jpg')
 
     const handleImageChange = (e) => {
         const file = e.target.files[0];
@@ -87,7 +87,7 @@ function myUser() {
                 <div className="image-section">
                     <label htmlFor="imageUpload" className="image-label">
                         <img
-                            src={avatar || 'https://via.placeholder.com/150'}
+                            src={avatar || 'https://img.icons8.com/nolan/1200/user-default.jpg'}
                             alt="Imagem de perfil"
                             className="profile-image"
                         />
