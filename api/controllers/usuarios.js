@@ -121,7 +121,7 @@ export const searchUsers = (req, res) => {
         WHERE id LIKE ? AND name LIKE ? AND email LIKE ?`;
 
     const dataQuery = `
-        SELECT id, name, email, isAdmin FROM users
+        SELECT id, name, email, isAdmin, profileImage FROM users
         WHERE id LIKE ? AND name LIKE ? AND email LIKE ?
         ORDER BY id DESC
         LIMIT ? OFFSET ?`;

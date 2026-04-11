@@ -16,6 +16,7 @@ function Usuarios() {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [isAdmin, setIsAdmin] = useState(false);
+    const [profileImage, setProfileImage] = useState('')
     const [edit, setEdit] = useState({});
     const [modalShow, setModalShow] = useState(false);
     const [page, setPage] = useState(1);
@@ -108,13 +109,19 @@ function Usuarios() {
         setPassword('');
         setIsAdmin(false);
         setEdit({});
+        setProfileImage('https://img.icons8.com/nolan/1200/user-default.jpg')
     }
 
-    function handleEdit(id, name, email, isAdminValue) {
+    function handleEdit(id, name, email, isAdminValue, profileImage) {
         setEdit({ id, name, email, isAdmin: isAdminValue });
         setName(name);
         setEmail(email);
         setIsAdmin(isAdminValue === 'S'); // garante boolean
+        if (profileImage) {
+            setProfileImage(`http://localhost:8081/uploads/${profileImage}`)
+        } else {
+            setProfileImage("https://img.icons8.com/nolan/1200/user-default.jpg")
+        }
         setModalShow(true);
     }
 
@@ -168,13 +175,13 @@ function Usuarios() {
                 <tbody>
                     {usuarios.length > 0 ? (
                         usuarios.map((usuario) => (
-                            <tr key={usuario.id}>
+                            <tr key={usuario.id} onDoubleClick={() => handleEdit(usuario.id, usuario.name, usuario.email, usuario.isAdmin, usuario.profileImage)}>
                                 <td>{usuario.id}</td>
                                 <td>{usuario.name}</td>
                                 <td>{usuario.email}</td>
                                 <td>{usuario.isAdmin === 'S' ? 'Sim' : 'Não'}</td>
                                 <td className="icon">
-                                    <span><BiSolidCommentEdit onClick={() => handleEdit(usuario.id, usuario.name, usuario.email, usuario.isAdmin)} /></span>
+                                    <span><BiSolidCommentEdit onClick={() => handleEdit(usuario.id, usuario.name, usuario.email, usuario.isAdmin, usuario.profileImage)} /></span>
                                 </td>
                             </tr>
                         ))
@@ -207,6 +214,12 @@ function Usuarios() {
                 show={modalShow}
                 onClose={resetForm}
             >
+
+                <img
+                    src={profileImage || 'https://img.icons8.com/nolan/1200/user-default.jpg'}
+                    alt="Imagem de perfil"
+                    className="profile-image"
+                />
                 <form onSubmit={handleSubmit} className="container-modal-btn">
 
                     <Input
