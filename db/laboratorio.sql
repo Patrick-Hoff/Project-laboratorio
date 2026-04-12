@@ -21,6 +21,7 @@ CREATE TABLE users (
   email VARCHAR(100) NOT NULL,
   password TEXT NOT NULL,
   isAdmin VARCHAR(1) DEFAULT NULL,
+  isActive enum(S, N) NOT NULL DEFAULT S,
   profileImage VARCHAR(250) DEFAULT NULL,
   PRIMARY KEY (id)
 ) ENGINE=InnoDB;

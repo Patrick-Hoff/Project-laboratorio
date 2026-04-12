@@ -26,8 +26,8 @@ function Form() {
             window.dispatchEvent(new Event('tokenChanged'))
 
         } catch (err) {
-            toast.info('E-mail ou senha inválidos !')
-            console.log('Usuario ou senha incorretos!', err)
+            toast.info(err.response.data.error)
+            console.log(err.response.data.error)
         }
     }
 

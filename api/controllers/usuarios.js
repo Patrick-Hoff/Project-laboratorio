@@ -8,7 +8,7 @@ const JWT_SECRET = process.env.JWT_SECRET || 'segredo_supersecreto'
 
 // Registro
 export const registerUser = (req, res) => {
-    const { name, email, password, isAdmin } = req.body
+    const { name, email, password, isAdmin, isActive } = req.body
 
     const q = 'SELECT * FROM users WHERE email = ?'
     db.query(q, [email], async (err, results) => {
@@ -19,7 +19,7 @@ export const registerUser = (req, res) => {
         const hashedPassword = await bcrypt.hash(password, salt)
 
         const insert = 'INSERT INTO users (name, email, password, isAdmin) VALUES (?, ?, ?, ?)'
-        db.query(insert, [name, email, hashedPassword, isAdmin], (err) => {
+        db.query(insert, [name, email, hashedPassword, isAdmin, isActive], (err) => {
             if (err) return res.status(500).json({ error: 'Erro ao cadastrar.' })
             res.status(201).json({ message: 'Usuário cadastrado com sucesso' })
         })
@@ -35,23 +35,23 @@ export const updateUser = (req, res) => {
         if (selectErr) return res.status(500).json(selectErr);
         if (result.length === 0) return res.status(404).json('Usuário não encontrado.');
 
-        const { name, email, password, isAdmin } = req.body;
+        const { name, email, password, isAdmin, isActive } = req.body;
 
         // Atualiza com ou sem senha
         let q, values;
         if (password) {
             bcrypt.hash(password, 10, (hashErr, hashedPassword) => {
                 if (hashErr) return res.status(500).json(hashErr);
-                q = `UPDATE users SET name = ?, email = ?, password = ?, isAdmin = ? WHERE id = ?`;
-                values = [name, email, hashedPassword, isAdmin, userId];
+                q = `UPDATE users SET name = ?, email = ?, password = ?, isAdmin = ?, isActive = ? WHERE id = ?`;
+                values = [name, email, hashedPassword, isAdmin, isActive, userId];
                 db.query(q, values, (updateErr) => {
                     if (updateErr) return res.status(500).json(updateErr);
                     return res.status(200).json('Dados do usuário atualizados com sucesso');
                 });
             });
         } else {
-            q = `UPDATE users SET name = ?, email = ?, isAdmin = ? WHERE id = ?`;
-            values = [name, email, isAdmin, userId];
+            q = `UPDATE users SET name = ?, email = ?, isAdmin = ?, isActive = ? WHERE id = ?`;
+            values = [name, email, isAdmin, isActive, userId];
             db.query(q, values, (updateErr) => {
                 if (updateErr) return res.status(500).json(updateErr);
                 return res.status(200).json('Dados do usuário atualizados com sucesso');
@@ -73,6 +73,7 @@ export const loginUser = (req, res) => {
         }
 
         const user = results[0]
+        if (user.isActive !== "S") return res.status(403).json({ error: 'Usuário inativo, entre em contato com o administrador do sistema.' })
         const match = await bcrypt.compare(password, user.password)
 
         if (!match) {
@@ -121,7 +122,7 @@ export const searchUsers = (req, res) => {
         WHERE id LIKE ? AND name LIKE ? AND email LIKE ?`;
 
     const dataQuery = `
-        SELECT id, name, email, isAdmin, profileImage FROM users
+        SELECT id, name, email, isAdmin, isActive, profileImage FROM users
         WHERE id LIKE ? AND name LIKE ? AND email LIKE ?
         ORDER BY id DESC
         LIMIT ? OFFSET ?`;

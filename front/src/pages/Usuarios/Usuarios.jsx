@@ -16,7 +16,8 @@ function Usuarios() {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [isAdmin, setIsAdmin] = useState(false);
-    const [profileImage, setProfileImage] = useState('')
+    const [isActive, setIsActive] = useState(false)
+    const [profileImage, setProfileImage] = useState(false)
     const [edit, setEdit] = useState({});
     const [modalShow, setModalShow] = useState(false);
     const [page, setPage] = useState(1);
@@ -68,7 +69,8 @@ function Usuarios() {
             name,
             email,
             password: password || undefined, // não sobrescreve senha se vazio na edição
-            isAdmin: isAdmin ? 'S' : 'N'
+            isAdmin: isAdmin ? 'S' : 'N',
+            isActive: isActive ? 'S' : 'N'
         };
 
         if (edit.id) {
@@ -108,15 +110,17 @@ function Usuarios() {
         setEmail('');
         setPassword('');
         setIsAdmin(false);
+        setIsActive(false)
         setEdit({});
         setProfileImage('https://img.icons8.com/nolan/1200/user-default.jpg')
     }
 
-    function handleEdit(id, name, email, isAdminValue, profileImage) {
+    function handleEdit(id, name, email, isAdminValue, isActive, profileImage) {
         setEdit({ id, name, email, isAdmin: isAdminValue });
         setName(name);
         setEmail(email);
         setIsAdmin(isAdminValue === 'S'); // garante boolean
+        setIsActive(isActive === 'S');
         if (profileImage) {
             setProfileImage(`http://localhost:8081/uploads/${profileImage}`)
         } else {
@@ -175,13 +179,13 @@ function Usuarios() {
                 <tbody>
                     {usuarios.length > 0 ? (
                         usuarios.map((usuario) => (
-                            <tr key={usuario.id} onDoubleClick={() => handleEdit(usuario.id, usuario.name, usuario.email, usuario.isAdmin, usuario.profileImage)}>
+                            <tr key={usuario.id} onDoubleClick={() => handleEdit(usuario.id, usuario.name, usuario.email, usuario.isAdmin, usuario.isActive, usuario.profileImage)}>
                                 <td>{usuario.id}</td>
                                 <td>{usuario.name}</td>
                                 <td>{usuario.email}</td>
                                 <td>{usuario.isAdmin === 'S' ? 'Sim' : 'Não'}</td>
                                 <td className="icon">
-                                    <span><BiSolidCommentEdit onClick={() => handleEdit(usuario.id, usuario.name, usuario.email, usuario.isAdmin, usuario.profileImage)} /></span>
+                                    <span><BiSolidCommentEdit onClick={() => handleEdit(usuario.id, usuario.name, usuario.email, usuario.isAdmin, usuario.isActive, usuario.profileImage)} /></span>
                                 </td>
                             </tr>
                         ))
@@ -254,6 +258,17 @@ function Usuarios() {
                         label="Administrador"
                         checked={isAdmin}
                         onChange={() => setIsAdmin(!isAdmin)}
+                        style={{
+                            width: "20px",
+                            height: "20px"
+                        }}
+                    />
+
+                    <Input
+                        type="checkbox"
+                        label="Ativo"
+                        checked={isActive}
+                        onChange={() => setIsActive(!isActive)}
                         style={{
                             width: "20px",
                             height: "20px"
