@@ -12,10 +12,10 @@ export const consultas_hoje = (req, res) => {
     ) AS quantidade_atendimentos,
 
     /* Faturamento do dia com 2 casas decimais */
-    (SELECT FORMAT(ROUND(COALESCE(SUM(valor_total), 0), 2), 2)
-     FROM atendimentos 
-     WHERE data_atendimento >= CURRENT_DATE()
-       AND data_atendimento < CURRENT_DATE() + INTERVAL 1 DAY
+    (SELECT FORMAT(ROUND(COALESCE(SUM(valor_pago), 0), 2), 2)
+     FROM pagamentos
+     WHERE data_pagamento >= CURRENT_DATE()
+       AND data_pagamento < CURRENT_DATE() + INTERVAL 1 DAY
     ) AS faturamento,
 
     /* Pacientes criados no dia */
@@ -43,7 +43,7 @@ export const consultas_hoje = (req, res) => {
         });
 
     } catch (error) {
-        console.error(error);
+        console.log(error);
         res.status(500).json({ error: "Erro interno no servidor" });
     }
 };
