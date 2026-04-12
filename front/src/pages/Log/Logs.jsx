@@ -10,8 +10,8 @@ const Logs = () => {
     const { page } = useParams();
     const [log, setLog] = useState([]);
 
-    const [dataInicio, setDataInicio] = useState()
-    const [dataFinal, setDataFinal] = useState()
+    const [dataInicio, setDataInicio] = useState('')
+    const [dataFinal, setDataFinal] = useState('')
     const [type, setType] = useState('')
 
     async function searchLog(e) {
