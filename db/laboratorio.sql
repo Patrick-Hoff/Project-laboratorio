@@ -28,7 +28,7 @@ CREATE TABLE users (
 
 INSERT INTO users (id, name, email, password, isAdmin, profileImage)
 VALUES
-(14, 'admin', 'admin@admin.com', '$2b$10$iNIHL2Q9QDoX3UUF6KexYekts6HVod69Fo6vzclbhDK3jKb/M3FZy', 'S', NULL);
+(14, 'admin', 'admin@admin.com', '$2b$10$iNIHL2Q9QDoX3UUF6KexYekts6HVod69Fo6vzclbhDK3jKb/M3FZy', 'S', 'S', NULL);
 
 CREATE TABLE pacientes (
   id INT NOT NULL AUTO_INCREMENT,
