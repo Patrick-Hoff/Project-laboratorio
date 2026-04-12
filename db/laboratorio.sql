@@ -50,7 +50,6 @@ CREATE TABLE exames (
   id INT NOT NULL AUTO_INCREMENT,
   cod VARCHAR(5) NOT NULL,
   nome VARCHAR(30) NOT NULL,
-  valor DECIMAL(10,2) DEFAULT NULL,
   PRIMARY KEY (id),
   UNIQUE KEY cod (cod)
 ) ENGINE=InnoDB;
@@ -62,7 +61,6 @@ CREATE TABLE logexame (
   exame VARCHAR(50),
   data_alteracao DATETIME DEFAULT CURRENT_TIMESTAMP,
   tipo_alteracao VARCHAR(20),
-  valor DECIMAL(10,2),
   id_user INT NOT NULL,
   PRIMARY KEY (id_log),
   CONSTRAINT fk_logexame_user FOREIGN KEY (id_user) REFERENCES users(id)
@@ -80,6 +78,15 @@ CREATE TABLE logpaciente (
   CONSTRAINT fk_logpaciente_user FOREIGN KEY (id_user) REFERENCES users(id)
 ) ENGINE=InnoDB;
 
+CREATE TABLE IF NOT EXISTS convenio (
+  id int NOT NULL AUTO_INCREMENT,
+  cod varchar(10) NOT NULL,
+  nome varchar(30) NOT NULL,
+  PRIMARY KEY (id),
+  UNIQUE KEY uk_codconvenio (cod)
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+
 -- ==============================
 -- TABELAS COM DEPENDÊNCIA
 -- ==============================
@@ -88,11 +95,24 @@ CREATE TABLE atendimentos (
   id INT NOT NULL AUTO_INCREMENT,
   paciente_id INT NOT NULL,
   data_atendimento DATETIME DEFAULT CURRENT_TIMESTAMP,
-  valor_total DECIMAL(10,2) DEFAULT NULL,
   medico_id INT DEFAULT NULL,
+  convenio_id INT NOT NULL,
+
   PRIMARY KEY (id),
-  CONSTRAINT fk_atendimento_paciente FOREIGN KEY (paciente_id) REFERENCES pacientes(id),
-  CONSTRAINT fk_medicoid FOREIGN KEY (medico_id) REFERENCES medicos(id)
+
+  CONSTRAINT fk_atendimento_paciente
+    FOREIGN KEY (paciente_id)
+    REFERENCES pacientes(id),
+
+  CONSTRAINT fk_convenioid
+    FOREIGN KEY (convenio_id)
+    REFERENCES convenio(id)
+    ON DELETE RESTRICT
+    ON UPDATE CASCADE,
+
+  CONSTRAINT fk_medicoid
+    FOREIGN KEY (medico_id)
+    REFERENCES medicos(id)
 ) ENGINE=InnoDB;
 
 CREATE TABLE exames_atendimento (
@@ -138,6 +158,16 @@ CREATE TABLE agendamento (
   observacao TEXT,
   PRIMARY KEY (id)
 ) ENGINE=InnoDB;
+
+CREATE TABLE exame_convenio (
+  id int NOT NULL AUTO_INCREMENT,
+  convenio_id int NOT NULL,
+  exame_id int NOT NULL,
+  valor decimal(10,2) DEFAULT NULL,
+  PRIMARY KEY (id),
+  UNIQUE KEY unique_exame_convenio (exame_id, convenio_id),
+  KEY fk_convenio (convenio_id)
+) ENGINE=InnoDB AUTO_INCREMENT=8 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 SET FOREIGN_KEY_CHECKS = 1;
 
