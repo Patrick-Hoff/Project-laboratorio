@@ -135,6 +135,7 @@ CREATE TABLE pagamentos (
   metodo_pagamento ENUM('Dinheiro','Cartao','Pix','Boleto') NOT NULL,
   PRIMARY KEY (id),
   CONSTRAINT fk_pagamento_atendimento FOREIGN KEY (atendimento_id) REFERENCES atendimentos(id)
+  ON DELETE RESTRICT
 ) ENGINE=InnoDB;
 
 CREATE TABLE agendamento (
