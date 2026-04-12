@@ -71,6 +71,7 @@
   cursor: pointer;
   color: #333;
   transition: color .3s;
+  height: 100%;
 }
 
 .icon:hover {
@@ -84,7 +85,7 @@
 
 .linkSearch {
   position: absolute;
-  top: 120%;
+  top: 100%;
   right: 0;
   width: 220px;
   background: #fff;
@@ -101,6 +102,7 @@
 .finance {
   left: 0;
   right: auto;
+  transition: ease 0.2s;
 }
 
 .linkSearch li {

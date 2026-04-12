@@ -10,8 +10,7 @@ import {
   FaMoneyBillWave
 } from "react-icons/fa";
 import axios from 'axios'
-import { useState, useEffect, useContext } from 'react';
-import { UserContext } from '../../routes/UserContext';
+import { useState, useEffect } from 'react';
 import './style.css'
 
 async function logoutSistem() {
@@ -33,8 +32,8 @@ function Header() {
   useEffect(() => {
     axios.get('http://localhost:8081/usuarios/me', { withCredentials: true })
       .then((res) => {
-         setIsAdmin(res.data.isAdmin)
-         setUser(res.data.name)
+        setIsAdmin(res.data.isAdmin)
+        setUser(res.data.name)
       })
       .catch((err) => console.log(err))
   }, [])
@@ -78,11 +77,16 @@ function Header() {
           <li className="containerLink">
             <FaRegCalendarAlt
               className="icon"
-              onClick={() => toggleMenu('routine')}
+              onMouseEnter={() => toggleMenu('routine')}
+              onMouseLeave={() => toggleMenu('routine')}
             />
 
             {menuRotina && (
-              <div className="linkSearch routine">
+              <div
+                className="linkSearch routine"
+                onMouseEnter={() => toggleMenu('routine')}
+                onMouseLeave={() => toggleMenu('routine')}
+              >
                 <li><Link to="/atendimentos">Atendimentos</Link></li>
                 <li><Link to="/atendimento">Novo Atendimento</Link></li>
                 <li><Link to="/pacientes">Pacientes</Link></li>
@@ -99,11 +103,16 @@ function Header() {
           <li className="containerLink">
             <FaMoneyBillWave
               className="icon"
-              onClick={() => toggleMenu('finance')}
+              onMouseEnter={() => toggleMenu('finance')}
+              onMouseLeave={() => toggleMenu('finance')}
             />
 
             {menuFinance && (
-              <div className="linkSearch finance">
+              <div
+                className="linkSearch finance"
+                onMouseEnter={() => toggleMenu('finance')}
+                onMouseLeave={() => toggleMenu('finance')}
+              >
                 <li>
                   <Link to="/convenios">Convênios</Link>
                 </li>
@@ -130,11 +139,16 @@ function Header() {
           <li className="containerLink">
             <CiSettings
               className="icon"
-              onClick={() => toggleMenu('setting')}
+              onMouseLeave={() => toggleMenu('setting')}
+              onMouseEnter={() => toggleMenu('setting')}
             />
 
             {menuOpen && (
-              <div className="linkSearch">
+              <div
+                className="linkSearch"
+                onMouseLeave={() => toggleMenu('setting')}
+                onMouseEnter={() => toggleMenu('setting')}
+              >
                 <li>
                   <FaUser className="iconLink" />
                   <Link to="/meu-usuario">Usuário</Link>
