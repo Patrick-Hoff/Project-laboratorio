@@ -45,17 +45,19 @@ GROUP BY
 
     const q_exames = `
         SELECT 
-            ea.id AS id_primary,
-            ea.exames_id AS id_exame,
-            e.cod AS cod_exame,
-            e.nome AS nome_exame,
-            ec.valor AS valor
-        FROM exames_atendimento ea
-        JOIN exames e ON e.id = ea.exames_id
-        JOIN exame_convenio ec ON ec.exame_id = e.id
-        WHERE ea.atendimento_id = ?
-        AND ec.convenio_id = ?;
-    `;
+    ea.id AS id_primary,
+    ea.exames_id AS id_exame,
+    e.cod AS cod_exame,
+    e.nome AS nome_exame,
+    ec.valor AS valor
+FROM exames_atendimento ea
+JOIN exames e 
+    ON e.id = ea.exames_id
+LEFT JOIN exame_convenio ec 
+    ON ec.exame_id = e.id 
+    AND ec.convenio_id = ?
+WHERE ea.atendimento_id = ?;
+    `
 
     db.query(q_paciente_atendimento, [atendimento_id], (err, pacienteResult) => {
         if (err) return res.status(500).json(err);
@@ -89,7 +91,7 @@ GROUP BY
             convenio: pacienteResult[0].convenio
         };
 
-        db.query(q_exames, [atendimento_id, convenio_id], (err, examesResult) => {
+        db.query(q_exames, [convenio_id, atendimento_id], (err, examesResult) => {
             if (err) return res.status(500).json(err);
 
             return res.status(200).json({
@@ -109,45 +111,6 @@ export const addExameAtendimento = (req, res) => {
     const { atendimento_id, resultado } = req.body;
     const exames_id = parseInt(req.body.exames_id);
 
-    // const getExameValor = 'SELECT valor FROM exames WHERE id = ?';
-    //     db.query(getExameValor, [exames_id], (err, exameResult) => {
-    //         if (err || exameResult.length === 0) {
-    //             return res.status(404).json({ error: 'Exame não encontrado' });
-    //         }
-
-    //         const valorExame = parseFloat(exameResult[0].valor) || 0;
-
-    //         const getAtendimentoValor = `
-    //             SELECT COALESCE(SUM(ce.valor),0) AS valor_total
-    // FROM exames_atendimento ae
-    // INNER JOIN atendimentos a 
-    //     ON a.id = ae.atendimento_id
-    // INNER JOIN exame_convenio ce 
-    //     ON ce.exame_id = ae.exames_id
-    //     AND ce.convenio_id = a.convenio_id
-    // WHERE ae.atendimento_id = ?;
-    //         `;
-    //         db.query(getAtendimentoValor, [atendimento_id], (err, atendimentoResult) => {
-    //             if (err || atendimentoResult.length === 0) {
-    //                 return res.status(404).json({ error: 'Atendimento não encontrado' });
-    //             }
-
-    //             const valorAtual = parseFloat(atendimentoResult[0].valor_total) || 0;
-    //             const novoValor = valorAtual + valorExame;
-
-    //             console.log({
-    //                 exame_id: exames_id,
-    //                 valor_exame: valorExame,
-    //                 valor_atual: valorAtual,
-    //                 novo_valor_total: novoValor
-    //             });
-
-    // const updateValor = 'UPDATE atendimentos SET valor_total = ? WHERE id = ?';
-    // db.query(updateValor, [novoValor, atendimento_id], (err) => {
-    //     if (err) {
-    //         return res.status(500).json({ error: 'Erro ao atualizar valor_total' });
-    //     }
-
     const insertExame =
         'INSERT INTO exames_atendimento(atendimento_id, exames_id, resultado) VALUES (?, ?, ?)';
     db.query(insertExame, [atendimento_id, exames_id, resultado], (err) => {
@@ -160,9 +123,6 @@ export const addExameAtendimento = (req, res) => {
             // valor_total_atualizado: novoValor.toFixed(2)
         });
     });
-    // });
-    // });
-    // });
 };
 
 
@@ -202,34 +162,6 @@ export const deleteExameAtendimento = (req, res) => {
             return res.status(404).json('Vínculo exame-atendimento não encontrado.');
         }
 
-        // const exame_id = vinculoResult[0].exames_id;
-
-        // Buscar valor do exame
-        // const getExameValor = `SELECT valor FROM exames WHERE id = ?`;
-        // db.query(getExameValor, [exame_id], (err, exameResult) => {
-        //     if (err || exameResult.length === 0) {
-        //         return res.status(404).json('Exame não encontrado.');
-        //     }
-
-        //     const valorExame = parseFloat(exameResult[0].valor);
-
-        //     // Buscar valor total atual do atendimento
-        //     const getAtendimentoValor = `SELECT valor_total FROM atendimentos WHERE id = ?`;
-        //     db.query(getAtendimentoValor, [atendimento_id], (err, atendimentoResult) => {
-        //         if (err || atendimentoResult.length === 0) {
-        //             return res.status(404).json('Atendimento não encontrado.');
-        //         }
-
-        //         const valorAtual = parseFloat(atendimentoResult[0].valor_total) || 0;
-        //         const novoValor = Math.max(valorAtual - valorExame, 0);
-
-        // Atualizar o valor_total
-        // const updateValor = `UPDATE atendimentos SET valor_total = ? WHERE id = ?`;
-        // db.query(updateValor, [novoValor, atendimento_id], (err) => {
-        // if (err) {
-        // return res.status(500).json('Erro ao atualizar valor_total.');
-        // }
-
         // Remover vínculo exame_atendimento
         const deleteVinculo = `DELETE FROM exames_atendimento WHERE id = ?`;
         db.query(deleteVinculo, [ea_id], (err) => {
@@ -244,7 +176,3 @@ export const deleteExameAtendimento = (req, res) => {
         });
     });
 }
-// );
-//         });
-//     });
-// };
