@@ -120,7 +120,7 @@ function Atendimento() {
     // =========================
     // OUTROS
     // =========================
-    const [atendimentoId, setAtendimentoId] = useState();
+    const [atendimentoId, setAtendimentoId] = useState('');
 
 
     const carregarPacientes = async () => {
@@ -324,7 +324,7 @@ function Atendimento() {
             await carregarExamesPaciente()
 
         } catch (err) {
-            console.log(err)
+            toast.info(err.response.data.message)
         }
     }
 

@@ -51,6 +51,7 @@ CREATE TABLE exames (
   id INT NOT NULL AUTO_INCREMENT,
   cod VARCHAR(5) NOT NULL,
   nome VARCHAR(30) NOT NULL,
+  dupExame ENUM("S", "N") NOT NULL DEFAULT "S",
   PRIMARY KEY (id),
   UNIQUE KEY cod (cod)
 ) ENGINE=InnoDB;
@@ -60,6 +61,7 @@ CREATE TABLE logexame (
   id_exame INT NOT NULL,
   cod VARCHAR(5),
   exame VARCHAR(50),
+  dupExame varchar(1),
   data_alteracao DATETIME DEFAULT CURRENT_TIMESTAMP,
   tipo_alteracao VARCHAR(20),
   id_user INT NOT NULL,

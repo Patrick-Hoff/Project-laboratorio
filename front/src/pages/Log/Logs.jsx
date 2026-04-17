@@ -116,6 +116,7 @@ const Logs = () => {
                                 <strong>ID Exame:</strong> {item.id_exame} <br />
                                 <strong>Cod: </strong> {item.cod} <br />
                                 <strong>Exame: </strong> {item.exame} <br />
+                                <strong>dupExame: </strong> {item.dupExame} <br />
                                 <strong>ID usuário: </strong> {item.id} <br />
                                 <strong>Usuário: </strong> {item.name}
                                 <hr />

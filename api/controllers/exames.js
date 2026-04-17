@@ -41,13 +41,14 @@ export const getExames = (req, res) => {
 // Criar novo exame
 export const addExame = (req, res) => {
     const q = `
-        INSERT INTO exames (cod, nome)
-        VALUES (?, ?)
+        INSERT INTO exames (cod, nome, dupExame)
+        VALUES (?, ?, ?)
     `
 
     const values = [
         req.body.cod,
         req.body.nome,
+        req.body.dupExame
     ]
 
     db.query(q, values, (err, result) => {
@@ -61,14 +62,15 @@ export const addExame = (req, res) => {
         // LOG
         const logQuery = `
             INSERT INTO logexame
-            (id_exame, cod, exame, tipo_alteracao, id_user)
-            VALUES (?, ?, ?, ?, ?)
+            (id_exame, cod, exame, dupExame, tipo_alteracao, id_user)
+            VALUES (?, ?, ?, ?, ?, ?)
         `
 
         const logValues = [
             insertId,
             req.body.cod,
             req.body.nome,
+            req.body.dupExame,
             'Insert',
             req.userId
         ]
@@ -105,8 +107,8 @@ export const updateExame = (req, res) => {
         const oldExame = selectResult[0];
 
         // 2. Atualizar o exame
-        const updateQuery = 'UPDATE exames SET `cod` = ?, `nome` = ? WHERE `id` = ?';
-        const values = [req.body.cod, req.body.nome, exameId];
+        const updateQuery = 'UPDATE exames SET `cod` = ?, `nome` = ?, dupExame = ? WHERE `id` = ?';
+        const values = [req.body.cod, req.body.nome, req.body.dupExame, exameId];
 
         db.query(updateQuery, values, (updateErr) => {
             if (updateErr) {
@@ -116,24 +118,24 @@ export const updateExame = (req, res) => {
 
             // 3. Inserir dois logs: "Update - Antes" e "Update - Depois"
             const logQuery = `
-                INSERT INTO logexame (id_exame, cod, exame, tipo_alteracao, id_user)
-                VALUES (?, ?, ?, ?, ?)
+                INSERT INTO logexame (id_exame, cod, exame, dupExame, tipo_alteracao, id_user)
+                VALUES (?, ?, ?, ?, ?, ?)
             `;
 
-            const logAntes = [exameId, oldExame.cod, oldExame.nome, 'Update - Antes', req.userId];
-            const logDepois = [exameId, req.body.cod, req.body.nome, 'Update - Depois', req.userId];
+            const logAntes = [exameId, oldExame.cod, oldExame.nome, oldExame.dupExame, 'Update - Antes', req.userId];
+            const logDepois = [exameId, req.body.cod, req.body.nome, req.body.dupExame, 'Update - Depois', req.userId];
 
             // Inserir o log "antes"
             db.query(logQuery, logAntes, (logErr1) => {
                 if (logErr1) {
-                    console.error('Erro ao registrar log (antes):', logErr1);
+                    return console.error('Erro ao registrar log (antes):', logErr1);
                     // Continua para tentar registrar o "depois"
                 }
 
                 // Inserir o log "depois"
                 db.query(logQuery, logDepois, (logErr2) => {
                     if (logErr2) {
-                        console.error('Erro ao registrar log (depois):', logErr2);
+                        return console.error('Erro ao registrar log (depois):', logErr2);
                     }
 
                     return res.status(200).json('Exame atualizado e log de antes/depois registrado.');
@@ -172,14 +174,15 @@ export const deleteExame = (req, res) => {
 
             // 3. Registrar o log da exclusão
             const logQuery = `
-                INSERT INTO logexame (id_exame, cod, exame, tipo_alteracao, id_user)
-                VALUES (?, ?, ?, 'Delete', ?)
+                INSERT INTO logexame (id_exame, cod, exame, dupExame, tipo_alteracao, id_user)
+                VALUES (?, ?, ?, ?, 'Delete', ?)
             `;
 
             const logValues = [
                 exame.id,
                 exame.cod,
                 exame.nome,
+                exame.dupExame,
                 req.userId
             ];
 
@@ -209,6 +212,7 @@ export const logExames = (req, res) => {
     logexame.id_exame,
     logexame.cod,
     logexame.exame,
+    logexame.dupExame,
     logexame.data_alteracao,
     logexame.tipo_alteracao,
     users.id,

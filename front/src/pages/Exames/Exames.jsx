@@ -19,6 +19,7 @@ function Exames() {
     const [modalShow, setModalShow] = useState(false);
     const [cod, setCod] = useState('')
     const [nome, setNome] = useState('')
+    const [dupExame, setDupExame] = useState(false)
     const [edit, setEdit] = useState([])
 
     const [searchId, setSearchId] = useState('')
@@ -65,6 +66,7 @@ function Exames() {
         getExames()
         setCod('')
         setNome('')
+        setDupExame(true)
     }
 
 
@@ -81,7 +83,8 @@ function Exames() {
 
         const exame = {
             cod,
-            nome
+            nome,
+            dupExame: dupExame ? 'S' : 'N'
         }
 
         if (edit?.id) {
@@ -132,10 +135,11 @@ function Exames() {
 
 
 
-    function handleEdit(id, cod, nome) {
-        setEdit({ id, cod, nome });
+    function handleEdit(id, cod, nome, dupExame) {
+        setEdit({ id, cod, nome, dupExame });
         setCod(cod);
         setNome(nome);
+        setDupExame(dupExame === 'S')
         setModalShow(true);
     }
 
@@ -191,13 +195,13 @@ function Exames() {
                             </tr>
                         ) : listaParaMostrar.length > 0 ? (
                             listaParaMostrar.map((item, index) => (
-                                <tr key={index} onDoubleClick={() => handleEdit(item.id, item.cod, item.nome)}>
+                                <tr key={index} onDoubleClick={() => handleEdit(item.id, item.cod, item.nome, item.dupExame)}>
                                     <td>{item.id}</td>
                                     <td>{item.cod}</td>
                                     <td>{item.nome}</td>
                                     <td className="icon">
                                         <span>
-                                            <BiSolidCommentEdit onClick={() => handleEdit(item.id, item.cod, item.nome)} />
+                                            <BiSolidCommentEdit onClick={() => handleEdit(item.id, item.cod, item.nome, item.dupExame)} />
                                         </span>
                                         <span>
                                             <FaDeleteLeft onClick={() => handleDelete(item.id)} />
@@ -229,7 +233,10 @@ function Exames() {
 
             <GenericModal
                 show={modalShow}
-                onClose={() => setModalShow(false)}
+                onClose={() => {
+                    setModalShow(false)
+                    resetForm()
+                }}
                 title="Exame"
             >
 
@@ -255,8 +262,22 @@ function Exames() {
                         onChange={(e) => setNome(e.target.value)}
                         value={nome}
                     />
+
+                    <Input
+                        type="checkbox"
+                        label="Duplicar exame no atendimento"
+                        checked={dupExame}
+                        onChange={() => setDupExame(!dupExame)}
+                        style={{
+                            width: "20px",
+                            height: "20px"
+                        }}
+                    />
                     <div>
-                        <button onClick={() => setModalShow(false)}>Fechar</button>
+                        <button onClick={() => {
+                            setModalShow(false)
+                            resetForm()
+                        }}>Fechar</button>
                         <button type="submit">
                             {edit.id ? 'Salvar alterações' : 'Cadastrar'}
                         </button>

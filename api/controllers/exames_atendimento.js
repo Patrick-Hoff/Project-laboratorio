@@ -109,62 +109,61 @@ export const addExameAtendimento = (req, res) => {
     const { atendimento_id, resultado } = req.body;
     const exames_id = parseInt(req.body.exames_id);
 
-    // const getExameValor = 'SELECT valor FROM exames WHERE id = ?';
-    //     db.query(getExameValor, [exames_id], (err, exameResult) => {
-    //         if (err || exameResult.length === 0) {
-    //             return res.status(404).json({ error: 'Exame não encontrado' });
-    //         }
+    const getExame = 'SELECT dupExame FROM exames WHERE id = ?';
 
-    //         const valorExame = parseFloat(exameResult[0].valor) || 0;
-
-    //         const getAtendimentoValor = `
-    //             SELECT COALESCE(SUM(ce.valor),0) AS valor_total
-    // FROM exames_atendimento ae
-    // INNER JOIN atendimentos a 
-    //     ON a.id = ae.atendimento_id
-    // INNER JOIN exame_convenio ce 
-    //     ON ce.exame_id = ae.exames_id
-    //     AND ce.convenio_id = a.convenio_id
-    // WHERE ae.atendimento_id = ?;
-    //         `;
-    //         db.query(getAtendimentoValor, [atendimento_id], (err, atendimentoResult) => {
-    //             if (err || atendimentoResult.length === 0) {
-    //                 return res.status(404).json({ error: 'Atendimento não encontrado' });
-    //             }
-
-    //             const valorAtual = parseFloat(atendimentoResult[0].valor_total) || 0;
-    //             const novoValor = valorAtual + valorExame;
-
-    //             console.log({
-    //                 exame_id: exames_id,
-    //                 valor_exame: valorExame,
-    //                 valor_atual: valorAtual,
-    //                 novo_valor_total: novoValor
-    //             });
-
-    // const updateValor = 'UPDATE atendimentos SET valor_total = ? WHERE id = ?';
-    // db.query(updateValor, [novoValor, atendimento_id], (err) => {
-    //     if (err) {
-    //         return res.status(500).json({ error: 'Erro ao atualizar valor_total' });
-    //     }
-
-    const insertExame =
-        'INSERT INTO exames_atendimento(atendimento_id, exames_id, resultado) VALUES (?, ?, ?)';
-    db.query(insertExame, [atendimento_id, exames_id, resultado], (err) => {
+    db.query(getExame, [exames_id], (err, exameResult) => {
         if (err) {
-            return res.status(500).json({ error: 'Erro ao adicionar exame' });
+            return res.status(500).json({ error: 'Erro ao buscar exame' });
         }
 
-        return res.status(200).json({
-            message: 'Exame vinculado com sucesso',
-            // valor_total_atualizado: novoValor.toFixed(2)
-        });
-    });
-    // });
-    // });
-    // });
-};
+        if (exameResult.length === 0) {
+            return res.status(404).json({ error: 'Exame não encontrado' });
+        }
 
+        const dupExame = exameResult[0].dupExame;
+
+        // Se não permite duplicação
+        if (dupExame === 'N') {
+            const checkDuplicado = `
+                SELECT * FROM exames_atendimento 
+                WHERE atendimento_id = ? AND exames_id = ?
+            `;
+
+            db.query(checkDuplicado, [atendimento_id, exames_id], (err, dupResult) => {
+                if (err) {
+                    return res.status(500).json({ error: 'Erro ao verificar duplicidade' });
+                }
+
+                if (dupResult.length > 0) {
+                    return res.status(400).json({
+                        message: 'Este exame não pode ser duplicado'
+                    });
+                }
+
+                inserirExame();
+            });
+        } else {
+            inserirExame();
+        }
+
+        function inserirExame() {
+            const insertExame = `
+                INSERT INTO exames_atendimento(atendimento_id, exames_id, resultado) 
+                VALUES (?, ?, ?)
+            `;
+
+            db.query(insertExame, [atendimento_id, exames_id, resultado], (err) => {
+                if (err) {
+                    return res.status(500).json({ error: 'Erro ao adicionar exame' });
+                }
+
+                return res.status(200).json({
+                    message: 'Exame vinculado com sucesso'
+                });
+            });
+        }
+    });
+};
 
 
 // Atualizar resultado de um exame vinculado a um atendimento
