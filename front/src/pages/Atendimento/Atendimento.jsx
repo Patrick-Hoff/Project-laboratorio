@@ -16,7 +16,12 @@ import './styles.css';
 
 import { useDebounce } from 'use-debounce';
 
-import { formatarParaBRL, createCurrencyChangeHandler, formatarDataBR } from '../../utils/formatters';
+import { formatarParaBRL, createCurrencyChangeHandler, formatarDataBR, formatarData } from '../../utils/formatters';
+
+import pendente from '../../assets/Amostra/pendente.png'
+import recoleta from '../../assets/Amostra/recoleta.png'
+import recebida from '../../assets/Amostra/recebida.png'
+
 
 
 function Atendimento() {
@@ -116,6 +121,13 @@ function Atendimento() {
     // =========================
     const convenioRef = useRef(null);
     const medicoRef = useRef(null);
+
+    // =========================
+    // STATUS DOS EXAMES
+    // =========================
+    const [modalStatus, setModalStatus] = useState(false)
+    const [selectedExames, setSelectedExames] = useState([])
+    const [novoStatus, setNovoStatus] = useState('')
 
     // =========================
     // OUTROS
@@ -514,6 +526,62 @@ function Atendimento() {
     }, [])
 
 
+
+    const resetStatus = () => {
+        setNovoStatus('')
+        setSelectedExames([]);
+        setModalStatus(false);
+    }
+
+    const toggleExame = (id, status) => {
+        if (status === novoStatus) return;
+        setSelectedExames((prev) => {
+            if (prev.includes(id)) {
+                // já está selecionado → remove
+                return prev.filter((item) => item !== id);
+            } else {
+                // não está → adiciona
+                return [...prev, id];
+            }
+        });
+    };
+
+    const toggleAll = (checked) => {
+        if (checked) {
+            const idsValidos = exameAdicionado
+                .filter(exame => exame.status_exame !== novoStatus)
+                .map(exame => exame.id_primary);
+            setSelectedExames(idsValidos);
+        } else {
+            setSelectedExames([]);
+        }
+    };
+
+    useEffect(() => {
+        setSelectedExames((prev) =>
+            prev.filter((id) => {
+                const exame = exameAdicionado.find(
+                    (e) => e.id_primary === id
+                )
+
+                return exame && exame.status_exame !== novoStatus;
+            }))
+    }, [novoStatus])
+
+    const handleUpdateStatus = async () => {
+        try {
+            await axios.put('http://localhost:8081/exames_atendimento/status_lote', {
+                status: novoStatus,
+                examesIds: selectedExames,
+            });
+            toast.success('Status atualizado com sucesso!');
+            resetStatus();
+            carregarExamesPaciente();
+        } catch (err) {
+            console.error(err);
+        }
+    }
+
     // Função exportada para realizar o pagamento do atendimento
     const handleChange = createCurrencyChangeHandler(setQuantoPagar, setDisplayValor);
 
@@ -702,11 +770,16 @@ function Atendimento() {
 
                 <div className="container-headbar">
                     <h2 className="subtitulo">Adicionar Exame</h2>
-                    <div className="listbar">
-                        <Link to={`/financeiro/${id}`}>
-                            <FaFileInvoiceDollar id="icon-dolar" />
-                        </Link>
-                    </div>
+                    <ul className="listbar">
+                        <li onClick={() => setModalStatus(true)}>
+                            <img src={pendente} alt="" className='iconPendente' />
+                        </li>
+                        <li>
+                            <Link to={`/financeiro/${id}`}>
+                                <FaFileInvoiceDollar id="icon-dolar" />
+                            </Link>
+                        </li>
+                    </ul>
                 </div>
                 <form className="filtro-exames">
                     <div className='container-input container-autocomplete' style={{ width: '100%' }}>
@@ -760,6 +833,7 @@ function Atendimento() {
                     <table className="tabela-exames">
                         <thead>
                             <tr>
+                                <th>Status</th>
                                 <th>Código</th>
                                 <th>Nome do Exame</th>
                                 <th>Valor</th>
@@ -769,6 +843,19 @@ function Atendimento() {
                         <tbody>
                             {exameAdicionado.map((exame) => (
                                 <tr key={exame.id_primary}>
+                                    <td>
+                                        <img
+                                            src={
+                                                exame.status_exame === 'PENDENTE'
+                                                    ? pendente
+                                                    : exame.status_exame === 'RECEBIDO'
+                                                        ? recebida
+                                                        : recoleta
+                                            }
+                                            alt={exame.status_exame}
+                                            style={{ width: '35px', height: '35px' }}
+                                        />
+                                    </td>
                                     <td>{exame.cod_exame}</td>
                                     <td>{exame.nome_exame}</td>
                                     <td>{formatarParaBRL(exame.valor)}</td>
@@ -908,6 +995,79 @@ function Atendimento() {
                         ))}
                     </tbody>
                 </table>
+
+            </GenericModal>
+
+            {/* Modal de Status dos Exames */}
+            <GenericModal
+                show={modalStatus}
+                onClose={resetStatus}
+                title="Coleta Pendente"
+            >
+                <table className="table-coleta">
+                    <thead>
+                        <tr>
+                            <th className="col-check">
+                                <input type="checkbox" onChange={(e) => toggleAll(e.target.checked)} />
+                            </th>
+                            <th>Cód</th>
+                            <th>Exame</th>
+                            <th>Data</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        {exameAdicionado.map((exame) => (
+                            <tr key={exame.id}>
+                                <td className="col-check">
+                                    {exame.status_exame === novoStatus ? (
+                                        <img src={novoStatus === 'PENDENTE' ? pendente : novoStatus === 'RECOLETA' ? recoleta : recebida} alt={novoStatus}
+                                            style={{ width: "30px", height: "30px" }}
+                                        />
+                                    ) : (
+                                        <input
+                                            type="checkbox"
+                                            checked={selectedExames.includes(exame.id_primary)}
+                                            onChange={() => toggleExame(exame.id_primary, exame.status_exame)}
+                                        />
+                                    )}
+                                </td>
+                                <td>{exame.cod_exame}</td>
+                                <td>{exame.nome_exame}</td>
+                                <td>{formatarData(exame.dataColeta)}</td>
+                            </tr>
+                        ))}
+                    </tbody>
+                </table>
+
+                <div className="status-box">
+                    <p>Alterar status dos selecionados:</p>
+
+                    <div className="status-options">
+                        <label>
+                            <input type="radio" name="status" value="PENDENTE" onChange={(e) => setNovoStatus(e.target.value)} />
+                            <img src={pendente} alt="Amostra Pendente" style={{ width: "25px", height: "25px" }} />
+                            Amostra Pendente
+                        </label>
+
+                        <label>
+                            <input type="radio" name="status" value="RECOLETA" onChange={(e) => setNovoStatus(e.target.value)} />
+                            <img src={recoleta} alt="Recoleta" style={{ width: "25px", height: "25px" }} />
+                            Aguardando Recoleta
+                        </label>
+
+                        <label>
+                            <input type="radio" name="status" value="RECEBIDO" onChange={(e) => setNovoStatus(e.target.value)} />
+                            <img src={recebida} alt="Recebido" style={{ width: "25px", height: "25px" }} />
+                            Amostra Recebida
+                        </label>
+                    </div>
+                </div>
+
+                <div className='container-modal-btn'>
+                    <button onClick={resetStatus}>Fechar</button>
+                    <button type="submit" onClick={handleUpdateStatus}>Aplicar Alteração</button>
+                </div>
 
             </GenericModal>
 

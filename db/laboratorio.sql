@@ -122,8 +122,8 @@ CREATE TABLE exames_atendimento (
   id INT NOT NULL AUTO_INCREMENT,
   atendimento_id INT NOT NULL,
   exames_id INT NOT NULL,
-  resultado TEXT,
-  data_realizacao DATETIME DEFAULT NULL,
+  status enum('PENDENTE','RECEBIDO','RECOLETA') NOT NULL DEFAULT 'PENDENTE',
+  data_realizacao datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (id),
   CONSTRAINT fk_exame_atendimento FOREIGN KEY (atendimento_id) REFERENCES atendimentos(id) ON DELETE RESTRICT,
   CONSTRAINT fk_exame FOREIGN KEY (exames_id) REFERENCES exames(id)

@@ -1,7 +1,7 @@
 import express from 'express'
 import { getExamesAtendimento,
     addExameAtendimento,
-    updateExameAtendimento,
+    updateStatusLote,
     deleteExameAtendimento
  } from '../controllers/exames_atendimento.js'
 
@@ -14,7 +14,7 @@ router.get('/', getExamesAtendimento)
 router.post('/add',addExameAtendimento)
 
 // Atualizar atendimento pelo ID
-router.put('/:id', updateExameAtendimento)
+router.put('/status_lote', updateStatusLote)
 
 // Deletar atendimento pelo ID
 router.delete('/:id/atendimento/:att', deleteExameAtendimento)
