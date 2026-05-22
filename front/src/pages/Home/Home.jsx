@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import axios from 'axios'
+import api from '../../services/api'
 import { BiSolidCommentEdit } from "react-icons/bi";
 import { FaArrowRight, FaArrowLeft } from "react-icons/fa";
 import { Link, useNavigate } from 'react-router-dom';
@@ -20,7 +20,7 @@ function Home() {
 
     const getAtendimento = async () => {
         try {
-            const res = await axios.get('http://localhost:8081/atendimentos', {
+            const res = await api.get('/atendimentos', {
                 params: {
                     page,
                     limit: 5,

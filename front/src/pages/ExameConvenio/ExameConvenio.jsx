@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { formatarParaBRL, createCurrencyChangeHandler, formatCurrency } from '../../utils/formatters'
-import axios from 'axios'
+import api from '../../services/api'
 import "./ExameConvenio.css";
 
 export default function ConsultaValoresPage() {
@@ -27,7 +27,7 @@ export default function ConsultaValoresPage() {
 
     const convenio = async () => {
         try {
-            const res = await axios.get(`http://localhost:8081/convenio`, {
+            const res = await api.get(`/convenio`, {
                 params: {
                     cod: debouncedCodConvenio,
                     page: 1,
@@ -58,7 +58,7 @@ export default function ConsultaValoresPage() {
     const getExames = async () => {
         try {
 
-            const res = await axios.get(`http://localhost:8081/exames`, {
+            const res = await api.get(`/exames`, {
                 params: {
                     page: 1,
                     limit: 5,
@@ -87,7 +87,7 @@ export default function ConsultaValoresPage() {
 
     const valorExame = async () => {
         try {
-            const res = await axios.get(`http://localhost:8081/exame_convenios`, {
+            const res = await api.get(`/exame_convenios`, {
                 params: {
                     cod: exameSelecionado.cod,
                     convenio: convenioSelecionado.cod,
@@ -118,7 +118,7 @@ export default function ConsultaValoresPage() {
                 valor: valorEditado
             }
 
-            const res = await axios.put(`http://localhost:8081/exame_convenios/${id}`, valor)
+            const res = await api.put(`/exame_convenios/${id}`, valor)
 
             await valorExame()
             setSucess(res.data.mensagem)
@@ -140,7 +140,7 @@ export default function ConsultaValoresPage() {
                 valor: valorEditado
             }
 
-            const res = await axios.post('http://localhost:8081/exame_convenios', values)
+            const res = await api.post('/exame_convenios', values)
 
             await valorExame()
 

@@ -1,7 +1,7 @@
+import api from '../../services/api'
 import './style.css';
 import { useNavigate, useParams } from 'react-router-dom';
 import React, { useState, useRef, useEffect } from 'react';
-import axios from 'axios';
 import { InputMask } from 'primereact/inputmask';
 
 export default function AgendamentoConsulta() {
@@ -48,7 +48,7 @@ export default function AgendamentoConsulta() {
     // Preenche automaticamente o formulário se houver id (edição)
     useEffect(() => {
         if (id) {
-            axios.get(`http://localhost:8081/agendamento?id=${id}`)
+            api.get(`/agendamento?id=${id}`)
                 .then(res => {
                     const consulta = res.data.data;
                     console.log(consulta);
@@ -134,9 +134,9 @@ export default function AgendamentoConsulta() {
         try {
             setLoading(true);
             if (id) {
-                await axios.put(`http://localhost:8081/agendamento/${id}`, data);
+                await api.put(`/agendamento/${id}`, data);
             } else {
-                await axios.post(`http://localhost:8081/agendamento`, data);
+                await api.post(`/agendamento`, data);
             }
             navigate("/consultas", {
                 state: {

@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import axios from 'axios';
+import api from '../../services/api'
 
 import { BiSolidCommentEdit } from "react-icons/bi";
 import { FaDeleteLeft } from "react-icons/fa6";
@@ -32,7 +32,7 @@ function Exames() {
 
     const getExames = async () => {
         try {
-            const res = await axios.get(`http://localhost:8081/exames`, {
+            const res = await api.get(`/exames`, {
                 params: {
                     page,
                     limit: 5,
@@ -89,7 +89,7 @@ function Exames() {
 
         if (edit?.id) {
 
-            axios.put(`http://localhost:8081/exames/${edit.id}/edit`, exame,
+            api.put(`/exames/${edit.id}/edit`, exame,
                 { withCredentials: true }
 
             )
@@ -101,8 +101,8 @@ function Exames() {
 
         } else {
 
-            axios.post(
-                'http://localhost:8081/exames',
+            api.post(
+                '/exames',
                 exame,
                 { withCredentials: true }
             )
@@ -122,7 +122,7 @@ function Exames() {
     }
 
     function handleDelete(id) {
-        axios.delete(`http://localhost:8081/exames/${id}/remove`,
+        api.delete(`/exames/${id}/remove`,
             { withCredentials: true }
         )
             .then(() => {

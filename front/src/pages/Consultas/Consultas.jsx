@@ -1,6 +1,6 @@
 import { useLocation, Link } from 'react-router-dom'
 import React, { useState, useEffect } from "react";
-import axios from 'axios'
+import api from '../../services/api'
 import { FaArrowRight, FaArrowLeft } from "react-icons/fa";
 
 import GenericModal from '../../components/Modal/Modal';
@@ -24,8 +24,8 @@ export default function Consultas() {
 
     const getConsultas = async () => {
         try {
-            const res = await axios.get(
-                `http://localhost:8081/agendamento?` +
+            const res = await api.get(
+                `/agendamento?` +
                 `orderDir=ASC` +
                 `&nome=${nome}` +
                 `&data=${data}` +
@@ -42,7 +42,7 @@ export default function Consultas() {
 
     const removeConsulta = async (id) => {
         try {
-            const res = await axios.delete(`http://localhost:8081/agendamento/${id}`)
+            const res = await api.delete(`/agendamento/${id}`)
             setModalExcluir(false)
             setMensagem(res.data)
             getConsultas()

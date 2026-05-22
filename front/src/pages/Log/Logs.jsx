@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import './Logs.css';
 import { useParams } from 'react-router-dom';
-import axios from 'axios';
+import api from '../../services/api'
 import { ToastContainer, toast } from 'react-toastify'
 import { formatarData } from '../../utils/formatters';
 
@@ -13,7 +13,7 @@ const Logs = () => {
     const [dataInicio, setDataInicio] = useState('')
     const [dataFinal, setDataFinal] = useState('')
     const [type, setType] = useState('')
-
+a
     async function searchLog(e) {
         e.preventDefault();
 
@@ -23,7 +23,7 @@ const Logs = () => {
         }
 
         try {
-            const response = await axios.get(`http://localhost:8081/${page}/log`, {
+            const response = await api.get(`/${page}/log`, {
                 params: {
                     dataInicio,
                     dataFinal,

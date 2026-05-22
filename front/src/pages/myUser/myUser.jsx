@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import axios from 'axios';
+import api from '../../services/api'
 import { ToastContainer, toast } from 'react-toastify'
 import './myUser.css';
 
@@ -19,7 +19,7 @@ function myUser() {
         const formData = new FormData();
         formData.append('imagem', file); // Nome do campo esperado no backend
 
-        axios.post('http://localhost:8081/usuarios/upload', formData, {
+        api.post('/usuarios/upload', formData, {
             headers: {
                 'Content-Type': 'multipart/form-data',
             },
@@ -51,7 +51,7 @@ function myUser() {
             isAdmin: isAdmin,
         };
 
-        axios.put(`http://localhost:8081/usuarios/edit/${id}`, values, {
+        api.put(`/usuarios/edit/${id}`, values, {
             withCredentials: true,
         })
             .then(() => {
@@ -70,7 +70,7 @@ function myUser() {
 
 
     useEffect(() => {
-        axios.get('http://localhost:8081/usuarios/me', { withCredentials: true })
+        api.get('/usuarios/me', { withCredentials: true })
             .then((res) => {
                 setName(res.data.name)
                 setEmail(res.data.email)

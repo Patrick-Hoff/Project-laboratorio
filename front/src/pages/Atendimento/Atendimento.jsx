@@ -1,3 +1,4 @@
+import api from '../../services/api'
 import { useEffect, useState, useContext, useRef } from 'react';
 import { UserContext } from '../../routes/UserContext'
 
@@ -5,7 +6,6 @@ import GenericModal from "../../components/Modal/Modal";
 import { Button } from "react-bootstrap";
 
 import { useParams, useNavigate, Link } from 'react-router-dom';
-import axios from 'axios';
 
 import { FaSearch } from 'react-icons/fa';
 import { ToastContainer, toast } from 'react-toastify';
@@ -125,7 +125,7 @@ function Atendimento() {
 
     const carregarPacientes = async () => {
         try {
-            const res = await axios.get('http://localhost:8081/pacientes', {
+            const res = await api.get('/pacientes', {
                 params: {
                     page: 1,
                     limit: 10,
@@ -143,7 +143,7 @@ function Atendimento() {
         try {
             if (!id) return;
 
-            const res = await axios.get(`http://localhost:8081/exames_atendimento?atendimento_id=${id}`);
+            const res = await api.get(`/exames_atendimento?atendimento_id=${id}`);
 
             const pacienteData = res.data.paciente;
             const medico = res.data.medico
@@ -189,7 +189,7 @@ function Atendimento() {
         e.preventDefault();
         try {
             if (!id) {
-                const res = await axios.post('http://localhost:8081/atendimentos/add', {
+                const res = await api.post('/atendimentos/add', {
                     paciente_id: paciente.id,
                     user: userData,
                     medico_id: medicoBusca.id,
@@ -212,7 +212,7 @@ function Atendimento() {
                     convenio_id: convenioBusca.id
                 }
 
-                const res = await axios.put(`http://localhost:8081/atendimentos/${id}/edit`, edit)
+                const res = await api.put(`/atendimentos/${id}/edit`, edit)
                 toast.success('Atendimento Atualizado com sucesso!')
                 carregarExamesPaciente()
             }
@@ -278,7 +278,7 @@ function Atendimento() {
                 return;
             }
 
-            const res = await axios.get('http://localhost:8081/exames', {
+            const res = await api.get('/exames', {
                 params: {
                     searchCod: cod,
                     searchNome: nome,
@@ -318,7 +318,7 @@ function Atendimento() {
                 resultado: "Pendente"
             }
 
-            await axios.post('http://localhost:8081/exames_atendimento/add', data)
+            await api.post('/exames_atendimento/add', data)
 
             toast.success("Exame adicionado com sucesso!")
             await carregarExamesPaciente()
@@ -348,7 +348,7 @@ function Atendimento() {
             })
 
             try {
-                const res = await axios.get(`http://localhost:8081/medicos?${params}`)
+                const res = await api.get(`/medicos?${params}`)
 
                 if (
                     res.data.data.length === 1 &&
@@ -384,7 +384,7 @@ function Atendimento() {
         }
         try {
 
-            const res = await axios.get(`http://localhost:8081/convenio`, {
+            const res = await api.get(`/convenio`, {
                 params: {
                     cod: convenioBusca.cod,
                     nome: convenioBusca.convenio,
@@ -447,7 +447,7 @@ function Atendimento() {
 
 
     function handleDelete(id_primary) {
-        axios.delete(`http://localhost:8081/exames_atendimento/${id_primary}/atendimento/${id}`)
+        api.delete(`/exames_atendimento/${id_primary}/atendimento/${id}`)
             .then(() => {
                 toast.success('Exame deletado com sucesso!')
                 carregarExamesPaciente()
@@ -458,7 +458,7 @@ function Atendimento() {
     }
 
     function handleDeleteAtendimento(id_att) {
-        axios.delete(`http://localhost:8081/atendimentos/${id_att}/remove`)
+        api.delete(`/atendimentos/${id_att}/remove`)
             .then(() => {
                 navigate('/')
             }).catch((error) => {
@@ -484,8 +484,8 @@ function Atendimento() {
             };
 
             setErrorPayment('')
-            const res = await axios.post(
-                `http://localhost:8081/pagamentos/realizar_pagamento/atendimentoid/${id}`,
+            const res = await api.post(
+                `/pagamentos/realizar_pagamento/atendimentoid/${id}`,
                 values
             );
             getPayment();
@@ -500,7 +500,7 @@ function Atendimento() {
     };
 
     const getPayment = async () => {
-        await axios.get(`http://localhost:8081/pagamentos/info_pagamentos/${id}`)
+        await api.get(`/pagamentos/info_pagamentos/${id}`)
             .then((res) => {
                 setTotalPago(res.data.valorPago[0].valor_pago || '0.00');
             }).catch((err) => {

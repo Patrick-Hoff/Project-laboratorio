@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import axios from 'axios';
+import api from '../../services/api'
 import { BiSolidCommentEdit } from "react-icons/bi";
 import { IoIosAddCircle } from "react-icons/io";
 import { ToastContainer, toast } from 'react-toastify';
@@ -30,7 +30,7 @@ function Usuarios() {
 
     const getUsuarios = async () => {
         try {
-            const res = await axios.get('http://localhost:8081/usuarios/searchUsers', {
+            const res = await api.get('/usuarios/searchUsers', {
                 params: {
                     page,
                     limit: 5,
@@ -74,7 +74,7 @@ function Usuarios() {
         };
 
         if (edit.id) {
-            axios.put(`http://localhost:8081/usuarios/edit/${edit.id}`, usuario,
+            api.put(`/usuarios/edit/${edit.id}`, usuario,
                 { withCredentials: true }
             )
                 .then(() => {
@@ -87,7 +87,7 @@ function Usuarios() {
                     console.error(error);
                 });
         } else {
-            axios.post('http://localhost:8081/usuarios/register', usuario,
+            api.post('/usuarios/register', usuario,
                 { withCredentials: true }
             )
                 .then(() => {

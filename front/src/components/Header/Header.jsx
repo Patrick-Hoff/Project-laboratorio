@@ -1,3 +1,4 @@
+import api from '../../services/api'
 import { Link } from 'react-router-dom'
 import { IoIosLogOut } from "react-icons/io";
 import { CiSettings } from "react-icons/ci";
@@ -9,13 +10,12 @@ import {
   FaUserMd,
   FaMoneyBillWave
 } from "react-icons/fa";
-import axios from 'axios'
 import { useState, useEffect } from 'react';
 import './style.css'
 
 async function logoutSistem() {
   try {
-    await axios.post('http://localhost:8081/usuarios/logout', {}, { withCredentials: true })
+    await api.post('/usuarios/logout', {}, { withCredentials: true })
     window.location.href = '/login'
   } catch (error) {
     console.error('Erro ao fazer logout: ' + error)
@@ -30,7 +30,7 @@ function Header() {
   const [user, setUser] = useState('')
 
   useEffect(() => {
-    axios.get('http://localhost:8081/usuarios/me', { withCredentials: true })
+    api.get('/usuarios/me', { withCredentials: true })
       .then((res) => {
         setIsAdmin(res.data.isAdmin)
         setUser(res.data.name)

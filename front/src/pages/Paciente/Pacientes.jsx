@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import axios from 'axios'
+import api from '../../services/api'
 import { BiSolidCommentEdit } from "react-icons/bi";
 import { FaDeleteLeft } from "react-icons/fa6";
 import { IoIosAddCircle } from "react-icons/io";
@@ -31,7 +31,7 @@ function Pacientes() {
 
     const getPacientes = async () => {
         try {
-            const res = await axios.get('http://localhost:8081/pacientes', {
+            const res = await api.get('/pacientes', {
                 params: {
                     page,
                     limit: 5,
@@ -73,7 +73,7 @@ function Pacientes() {
 
         if (edit.id) {
 
-            axios.put(`http://localhost:8081/pacientes/${edit.id}/edit`, paciente,
+            api.put(`/pacientes/${edit.id}/edit`, paciente,
                 { withCredentials: true }
             )
                 .then(() => {
@@ -84,7 +84,7 @@ function Pacientes() {
 
         } else {
 
-            axios.post('http://localhost:8081/pacientes', paciente,
+            api.post('/pacientes', paciente,
                 { withCredentials: true }
             )
                 .then(() => {
@@ -100,7 +100,7 @@ function Pacientes() {
 
     function handleDelete(id) {
 
-        axios.delete(`http://localhost:8081/pacientes/${id}/remove`,
+        api.delete(`/pacientes/${id}/remove`,
             { withCredentials: true }
         )
             .then(() => {

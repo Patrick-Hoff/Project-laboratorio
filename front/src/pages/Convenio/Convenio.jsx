@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import { FaArrowRight, FaArrowLeft } from "react-icons/fa";
-import axios from 'axios'
+import api from '../../services/api'
 import "./Convenio.css";
 
 export default function ConveniosPage() {
@@ -30,7 +30,7 @@ export default function ConveniosPage() {
 
     const getConvenio = async () => {
         try {
-            const res = await axios.get('http://localhost:8081/convenio', {
+            const res = await api.get('/convenio', {
                 params: {
                     cod: debouncedCod,
                     nome: debouncedNome,
@@ -65,7 +65,7 @@ export default function ConveniosPage() {
 
             if (!novoConvenio.cod || !novoConvenio.nome) return;
 
-            await axios.post('http://localhost:8081/convenio', novoConvenio)
+            await api.post('/convenio', novoConvenio)
             getConvenio()
             setSucess('Convênio criado com sucesso!')
 
@@ -78,7 +78,7 @@ export default function ConveniosPage() {
     const handleDelete = async (id) => {
         try {
 
-            const res = await axios.delete(`http://localhost:8081/convenio/${id}`)
+            const res = await api.delete(`/convenio/${id}`)
             setSucess(res.data.mensagem)
             getConvenio()
             setErro('')
@@ -100,7 +100,7 @@ export default function ConveniosPage() {
 
         try {
 
-            const res = await axios.put(`http://localhost:8081/convenio/${id}`, dadosEditados)
+            const res = await api.put(`/convenio/${id}`, dadosEditados)
             setSucess(res.data.mensagem)
             setEditandoId(null);
             getConvenio()

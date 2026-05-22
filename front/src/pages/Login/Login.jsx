@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom'
-import axios from 'axios'
+import api from '../../services/api'
 import { toast, ToastContainer } from 'react-toastify'
 import './Login.css';
 
@@ -14,7 +14,7 @@ function Form() {
         e.preventDefault()
 
         try {
-            const response = await axios.post('http://localhost:8081/usuarios/login', {
+            const response = await api.post('/usuarios/login', {
                 email,
                 password
             }, {

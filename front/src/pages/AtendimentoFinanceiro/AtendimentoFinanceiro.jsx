@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
 import "./AtendimentoFinanceiro.css";
-import axios from "axios"
+import api from '../../services/api'
 
 import { formatarData, formatarParaBRL, createCurrencyChangeHandler } from '../../utils/formatters';
 
@@ -27,7 +27,7 @@ export default function AtendimentoFinanceiro() {
 
     const getFinanceiro = async () => {
         try {
-            const res = await axios.get(`http://localhost:8081/pagamentos/info_pagamentos/${id}`)
+            const res = await api.get(`/pagamentos/info_pagamentos/${id}`)
             setAtendimento(res.data.resultAtendimento)
             setPagamentos(res.data.result)
             setValorPago(res.data.valorPago)
@@ -56,7 +56,7 @@ export default function AtendimentoFinanceiro() {
         e.preventDefault();
         try {
             setErrorPayment('')
-            await axios.put(`http://localhost:8081/pagamentos/atualizar_pagamento/${modalAjusteAberto.id}`, {
+            await api.put(`/pagamentos/atualizar_pagamento/${modalAjusteAberto.id}`, {
                 valor_pago: novoValor,
                 metodo_pagamento: formaPagamento
             });
@@ -69,7 +69,7 @@ export default function AtendimentoFinanceiro() {
 
     const deletePagamento = async () => {
         try {
-            await axios.delete(`http://localhost:8081/pagamentos/deletar_pagamento/${modalExcluirAberto}`)
+            await api.delete(`/pagamentos/deletar_pagamento/${modalExcluirAberto}`)
             getFinanceiro()
             setModalExcluirAberto(false)
             console.log('Pagamento excluido com sucesso!')

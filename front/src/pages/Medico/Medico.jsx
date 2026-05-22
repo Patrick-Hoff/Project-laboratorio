@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import axios from 'axios'
+import api from '../../services/api'
 import { BiSolidCommentEdit } from "react-icons/bi"
 import { FaDeleteLeft } from "react-icons/fa6"
 import { IoIosAddCircle } from "react-icons/io"
@@ -46,7 +46,7 @@ function Medico() {
                 limit
             })
 
-            const res = await axios.get(`http://localhost:8081/medicos?${params}`)
+            const res = await api.get(`/medicos?${params}`)
             setMedicos(res.data.data)
             setTotal(res.data.total)
         } catch (err) {
@@ -78,7 +78,7 @@ function Medico() {
     const handleDelete = async (id) => {
 
         try {
-            await axios.delete(`http://localhost:8081/medicos/${modalExcluir.id}`)
+            await api.delete(`/medicos/${modalExcluir.id}`)
             toast.success('Médico removido com sucesso!')
             setModalExcluir(false)
             getMedicos()
@@ -98,14 +98,14 @@ function Medico() {
 
         if (edit.id) {
             try {
-                await axios.put(`http://localhost:8081/medicos/${edit.id}`, data)
+                await api.put(`/medicos/${edit.id}`, data)
                 toast.success('Médico atualizado com sucesso!')
             } catch (err) {
                 console.log(err)
             }
         } else {
             try {
-                axios.post(`http://localhost:8081/medicos`, data)
+                api.post(`/medicos`, data)
                 toast.success('Médico criado com sucesso')
             } catch (err) {
                 console.log(err)

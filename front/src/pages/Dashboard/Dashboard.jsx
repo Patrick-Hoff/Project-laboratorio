@@ -1,6 +1,6 @@
 import './style.css';
+import api from '../../services/api'
 import { useEffect, useState } from 'react';
-import axios from 'axios'
 
 const Dashboard = () => {
 
@@ -13,8 +13,8 @@ const Dashboard = () => {
   useEffect(() => {
     const carregarDados = async () => {
       try {
-        const data = await axios.get('http://localhost:8081/dashboard')
-        const data_consulta = await axios.get('http://localhost:8081/agendamento?proximos=true')
+        const data = await api.get('/dashboard')
+        const data_consulta = await api.get('/agendamento?proximos=true')
         setAgendamento(data_consulta.data.data)
         if (data.data.quantidade_atendimentos < 10) {
           setConsultasHoje('0' + data.data.quantidade_atendimentos)
