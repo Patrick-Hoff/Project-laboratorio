@@ -13,7 +13,7 @@ const Logs = () => {
     const [dataInicio, setDataInicio] = useState('')
     const [dataFinal, setDataFinal] = useState('')
     const [type, setType] = useState('')
-a
+
     async function searchLog(e) {
         e.preventDefault();
 
