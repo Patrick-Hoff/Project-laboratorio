@@ -26,8 +26,8 @@ function Form() {
             window.dispatchEvent(new Event('tokenChanged'))
 
         } catch (err) {
-            toast.info(err.response.data.error)
-            console.log(err.response.data.error)
+            toast.info(err.response.data.err)
+            console.log(err.response.data.err)
         }
     }
 

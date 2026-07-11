@@ -122,7 +122,7 @@ function Usuarios() {
         setIsAdmin(isAdminValue === 'S'); // garante boolean
         setIsActive(isActive === 'S');
         if (profileImage) {
-            setProfileImage(`http://localhost:8081/uploads/${profileImage}`)
+            setProfileImage(`http://3.235.18.237:8081/uploads/${profileImage}`)
         } else {
             setProfileImage("https://img.icons8.com/nolan/1200/user-default.jpg")
         }

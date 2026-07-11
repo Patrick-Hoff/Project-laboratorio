@@ -8,8 +8,7 @@ export const UserProvider = ({ children }) => {
   const [userData, setUserData] = useState(null);
 
   useEffect(() => {
-    axios
-      .get('http://localhost:8081/usuarios/me', { withCredentials: true })
+    api.get('/usuarios/me', { withCredentials: true })
       .then((res) => {
         setUserData(res.data); // Armazena o usuário autenticado
       })
