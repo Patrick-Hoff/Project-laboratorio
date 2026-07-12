@@ -49,6 +49,8 @@ GROUP BY
     ea.exames_id AS id_exame,
     e.cod AS cod_exame,
     e.nome AS nome_exame,
+    ea.status AS status_exame,
+    ea.data_realizacao AS dataColeta,
     ec.valor AS valor
 FROM exames_atendimento ea
 JOIN exames e 
@@ -108,7 +110,7 @@ WHERE ea.atendimento_id = ?;
 
 // Criar novo registro de exame em um atendimento
 export const addExameAtendimento = (req, res) => {
-    const { atendimento_id, resultado } = req.body;
+    const { atendimento_id } = req.body;
     const exames_id = parseInt(req.body.exames_id);
 
     const getExame = 'SELECT dupExame FROM exames WHERE id = ?';
@@ -150,11 +152,11 @@ export const addExameAtendimento = (req, res) => {
 
         function inserirExame() {
             const insertExame = `
-                INSERT INTO exames_atendimento(atendimento_id, exames_id, resultado) 
-                VALUES (?, ?, ?)
+                INSERT INTO exames_atendimento(atendimento_id, exames_id) 
+                VALUES (?, ?)
             `;
 
-            db.query(insertExame, [atendimento_id, exames_id, resultado], (err) => {
+            db.query(insertExame, [atendimento_id, exames_id], (err) => {
                 if (err) {
                     return res.status(500).json({ error: 'Erro ao adicionar exame' });
                 }
@@ -168,24 +170,37 @@ export const addExameAtendimento = (req, res) => {
 };
 
 
-// Atualizar resultado de um exame vinculado a um atendimento
-export const updateExameAtendimento = (req, res) => {
-    const q = 'UPDATE exames_atendimento SET `atendimento_id` = ?, `exames_id` = ?, `resultado` = ? WHERE `id` = ?'
+// Atualizar status de um exame vinculado a um atendimento
+export const updateStatusLote = (req, res) => {
+    const { status, examesIds } = req.body;
 
-    const values = [
-        req.body.atendimento_id,
-        req.body.exames_id,
-        req.body.resultado,
-    ]
+    if (!status || !examesIds || examesIds.length === 0) {
+        return res.status(400).json({
+            messagem: "Dados inválidos"
+        })
+    }
 
-    db.query(q, [...values, req.params.id], (err) => {
+    const q = `
+        UPDATE exames_atendimento 
+        SET status = ? 
+        WHERE id IN (?)
+    `;
+
+    db.query(q, [status, examesIds], (err, result) => {
         if (err) {
-            console.log('Erro ao atualizar exame_atendimento: ', err)
-            return res.status(500).json(err)
+            return res.status(500).json({
+                message: "Erro ao atualizar o lote"
+            })
         }
-        return res.status(200).json('Exame_atendimento atualizado com sucesso')
-    })
+
+        return res.status(200).json({
+            messagem: "Status atualizado com sucesso",
+            affectedRows: result.affectedRows
+        });
+    });
 }
+
+
 
 // Deletar registro de exame_atendimento
 export const deleteExameAtendimento = (req, res) => {
