@@ -65,3 +65,226 @@
   border-radius: 6px;
   border: 1px solid #e0e0e0;
 }
+
+
+
+
+
+
+
+
+
+
+
+
+/* Logs novo layout do log */
+
+.log-card {
+  position: relative;
+  background: #ffffff;
+  border-radius: 12px;
+  padding: 1.25rem 1.5rem;
+  margin-bottom: 1rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08), 0 1px 2px rgba(0, 0, 0, 0.04);
+  border-left: 4px solid transparent;
+  transition: box-shadow 0.2s ease, transform 0.2s ease;
+}
+
+.log-card:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  transform: translateY(-1px);
+}
+
+.log-card--update {
+  border-left-color: #f59e0b;
+}
+
+.log-card--delete {
+  border-left-color: #ef4444;
+}
+
+.log-card--create {
+  border-left-color: #22c55e;
+}
+
+.log-badge {
+  display: inline-block;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  padding: 0.25rem 0.65rem;
+  border-radius: 999px;
+  margin-bottom: 0.85rem;
+}
+
+.log-badge--update {
+  background: #fef3c7;
+  color: #b45309;
+}
+
+.log-badge--delete {
+  background: #fee2e2;
+  color: #b91c1c;
+}
+
+.log-badge--create {
+  background: #dcfce7;
+  color: #15803d;
+}
+
+.log-content {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.log-field {
+  margin: 0;
+  font-size: 0.9rem;
+  color: #374151;
+  line-height: 1.4;
+}
+
+.log-field strong {
+  color: #111827;
+  font-weight: 600;
+  margin-right: 0.35rem;
+}
+
+/* Layout de diff (Update) */
+.log-diff {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.log-diff__before,
+.log-diff__after {
+  flex: 1 1 200px;
+  background: #f9fafb;
+  border-radius: 8px;
+  padding: 0.75rem 1rem;
+  min-width: 180px;
+}
+
+.log-diff__before {
+  background: #fef2f2;
+}
+
+.log-diff__after {
+  background: #f0fdf4;
+}
+
+.log-diff__label {
+  display: block;
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: #9ca3af;
+  margin-bottom: 0.4rem;
+}
+
+.log-diff__arrow {
+  font-size: 1.25rem;
+  color: #9ca3af;
+  flex-shrink: 0;
+}
+
+/* Responsividade */
+@media (max-width: 640px) {
+  .log-card {
+    padding: 1rem;
+    border-radius: 10px;
+  }
+
+  .log-diff {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .log-diff__arrow {
+    transform: rotate(90deg);
+    align-self: center;
+  }
+
+  .log-diff__before,
+  .log-diff__after {
+    min-width: 0;
+  }
+}
+
+.log-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.85rem;
+}
+
+.log-header .log-badge {
+  margin-bottom: 0;
+}
+
+.log-date {
+  font-size: 0.8rem;
+  color: #9ca3af;
+  font-weight: 500;
+}
+
+.log-footer {
+  margin-top: 1rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid #f3f4f6;
+}
+
+.log-user {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.85rem;
+  color: #6b7280;
+}
+
+.log-user strong {
+  color: #374151;
+  font-weight: 600;
+}
+
+.log-user__avatar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.75rem;
+  height: 1.75rem;
+  border-radius: 50%;
+  background: #e5e7eb;
+  color: #4b5563;
+  font-size: 0.75rem;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+@media (max-width: 640px) {
+  .log-header {
+    flex-wrap: wrap;
+    gap: 0.4rem;
+  }
+}
+
+.log-field--id {
+  color: #9ca3af;
+  font-size: 0.8rem;
+}
+
+.log-field--id strong {
+  color: #9ca3af;
+  font-weight: 600;
+}
+
+.log-user__id {
+  color: #b0b6c0;
+  font-size: 0.78rem;
+  margin-left: -0.15rem;
+}
