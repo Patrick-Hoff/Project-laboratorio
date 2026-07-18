@@ -56,30 +56,25 @@ CREATE TABLE exames (
   UNIQUE KEY cod (cod)
 ) ENGINE=InnoDB;
 
-CREATE TABLE logexame (
-  id_log INT NOT NULL AUTO_INCREMENT,
-  id_exame INT NOT NULL,
-  cod VARCHAR(5),
-  exame VARCHAR(50),
-  dupExame varchar(1),
-  data_alteracao DATETIME DEFAULT CURRENT_TIMESTAMP,
-  tipo_alteracao VARCHAR(20),
-  id_user INT NOT NULL,
-  PRIMARY KEY (id_log),
-  CONSTRAINT fk_logexame_user FOREIGN KEY (id_user) REFERENCES users(id)
-) ENGINE=InnoDB;
+CREATE TABLE IF NOT EXISTS `log` (
+  `logid` int NOT NULL AUTO_INCREMENT,
+  `log_date` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `entidade_tipo` enum('exame','paciente') NOT NULL,
+  `entidade_id` int NOT NULL,
+  `userid` int NOT NULL,
+  `alteracao` enum('Create','Update','Delete') NOT NULL,
+  `valor` json NOT NULL,
+  PRIMARY KEY (`logid`),
+  KEY `idx_log_date` (`log_date`),
+  KEY `idx_entidade` (`entidade_tipo`,`entidade_id`),
+  KEY `idx_userid` (`userid`),
+  KEY `idx_alteracao` (`alteracao`),
 
-CREATE TABLE logpaciente (
-  id_log INT NOT NULL AUTO_INCREMENT,
-  id_paciente INT NOT NULL,
-  idade VARCHAR(10),
-  paciente VARCHAR(50),
-  data_alteracao DATETIME DEFAULT CURRENT_TIMESTAMP,
-  tipo_alteracao VARCHAR(20),
-  id_user INT NOT NULL,
-  PRIMARY KEY (id_log),
-  CONSTRAINT fk_logpaciente_user FOREIGN KEY (id_user) REFERENCES users(id)
-) ENGINE=InnoDB;
+  CONSTRAINT `fk_log_user`
+  FOREIGN KEY (`userid`) REFERENCES `users` (`id`);
+
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
 
 CREATE TABLE IF NOT EXISTS convenio (
   id int NOT NULL AUTO_INCREMENT,
