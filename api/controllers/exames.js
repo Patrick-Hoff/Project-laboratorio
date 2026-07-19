@@ -61,18 +61,23 @@ export const addExame = (req, res) => {
 
         // LOG
         const logQuery = `
-            INSERT INTO logexame
-            (id_exame, cod, exame, dupExame, tipo_alteracao, id_user)
-            VALUES (?, ?, ?, ?, ?, ?)
+            INSERT INTO log
+            (entidade_tipo, entidade_id, userid, alteracao, valor)
+            VALUES (?, ?, ?, ?, ?)
         `
 
         const logValues = [
+            'exame',
             insertId,
-            req.body.cod,
-            req.body.nome,
-            req.body.dupExame,
-            'Insert',
-            req.userId
+            req.userId,
+            'Create',
+            JSON.stringify({
+                create: {
+                    cod: req.body.cod,
+                    nome: req.body.nome,
+                    dupExame: req.body.dupExame
+                }
+            })
         ]
 
         db.query(logQuery, logValues, (logErr) => {
