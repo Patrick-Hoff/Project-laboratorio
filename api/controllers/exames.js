@@ -93,57 +93,93 @@ export const addExame = (req, res) => {
     })
 }
 
-// Atualizar exame
+// Update exame
 export const updateExame = (req, res) => {
     const exameId = req.params.id;
 
-    // 1. Buscar dados antigos antes do update
-    const selectQuery = 'SELECT * FROM exames WHERE id = ?';
-    db.query(selectQuery, [exameId], (selectErr, selectResult) => {
-        if (selectErr) {
-            console.log('Erro ao buscar exame: ', selectErr);
-            return res.status(500).json(selectErr);
+    db.beginTransaction((transactionErr) => {
+        if (transactionErr) {
+            return res.status(500).json(transactionErr);
         }
 
-        if (selectResult.length === 0) {
-            return res.status(404).json('Exame não encontrado.');
-        }
+        const selectQuery = 'SELECT * FROM exames WHERE id = ?';
 
-        const oldExame = selectResult[0];
-
-        // 2. Atualizar o exame
-        const updateQuery = 'UPDATE exames SET `cod` = ?, `nome` = ?, dupExame = ? WHERE `id` = ?';
-        const values = [req.body.cod, req.body.nome, req.body.dupExame, exameId];
-
-        db.query(updateQuery, values, (updateErr) => {
-            if (updateErr) {
-                console.log('Erro ao atualizar o exame: ', updateErr);
-                return res.status(500).json(updateErr);
+        db.query(selectQuery, [exameId], (selectErr, selectResult) => {
+            if (selectErr) {
+                return db.rollback(() => {
+                    res.status(500).json(selectErr);
+                });
             }
 
-            // 3. Inserir dois logs: "Update - Antes" e "Update - Depois"
-            const logQuery = `
-                INSERT INTO logexame (id_exame, cod, exame, dupExame, tipo_alteracao, id_user)
-                VALUES (?, ?, ?, ?, ?, ?)
+            if (selectResult.length === 0) {
+                return db.rollback(() => {
+                    res.status(404).json("Exame não encontrado.");
+                });
+            }
+
+            const oldExame = selectResult[0];
+
+            const updateQuery = `
+                UPDATE exames
+                SET cod = ?, nome = ?, dupExame = ?
+                WHERE id = ?
             `;
 
-            const logAntes = [exameId, oldExame.cod, oldExame.nome, oldExame.dupExame, 'Update - Antes', req.userId];
-            const logDepois = [exameId, req.body.cod, req.body.nome, req.body.dupExame, 'Update - Depois', req.userId];
+            const updateValues = [
+                req.body.cod,
+                req.body.nome,
+                req.body.dupExame,
+                exameId
+            ];
 
-            // Inserir o log "antes"
-            db.query(logQuery, logAntes, (logErr1) => {
-                if (logErr1) {
-                    return console.error('Erro ao registrar log (antes):', logErr1);
-                    // Continua para tentar registrar o "depois"
+            db.query(updateQuery, updateValues, (updateErr) => {
+                if (updateErr) {
+                    return db.rollback(() => {
+                        res.status(500).json(updateErr);
+                    });
                 }
 
-                // Inserir o log "depois"
-                db.query(logQuery, logDepois, (logErr2) => {
-                    if (logErr2) {
-                        return console.error('Erro ao registrar log (depois):', logErr2);
+                const logQuery = `
+                    INSERT INTO log
+                    (entidade_tipo, entidade_id, userid, alteracao, valor)
+                    VALUES (?, ?, ?, ?, ?)
+                `;
+
+                const logValues = [
+                    'exame',
+                    exameId,
+                    req.userId,
+                    'Update',
+                    JSON.stringify({
+                        antes: {
+                            cod: oldExame.cod,
+                            nome: oldExame.nome,
+                            dupExame: oldExame.dupExame
+                        },
+                        depois: {
+                            cod: req.body.cod,
+                            nome: req.body.nome,
+                            dupExame: req.body.dupExame
+                        }
+                    })
+                ];
+
+                db.query(logQuery, logValues, (logErr) => {
+                    if (logErr) {
+                        return db.rollback(() => {
+                            res.status(500).json(logErr);
+                        });
                     }
 
-                    return res.status(200).json('Exame atualizado e log de antes/depois registrado.');
+                    db.commit((commitErr) => {
+                        if (commitErr) {
+                            return db.rollback(() => {
+                                res.status(500).json(commitErr);
+                            });
+                        }
+
+                        res.status(200).json("Exame atualizado com sucesso.");
+                    });
                 });
             });
         });
