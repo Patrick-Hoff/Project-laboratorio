@@ -12,70 +12,72 @@ const Logs = () => {
 
 
     // Dados ( MOCK EXAMES) temporarios
-    const [logExame, setLogExame] = useState([
-        {
-            logid: 1,
-            date: "05/05/2026",
-            valor: {
-                update: {
-                    alteracao: "Update"
-                },
-                antes: {
-                    exameid: 1,
-                    codigo: "HEMO",
-                    exame: "Hemograma",
-                    duplicar: "Sim"
-                },
-                depois: {
-                    exameid: 1,
-                    codigo: "HEMOG",
-                    exame: "Hemograma completo",
-                    duplicar: "Não"
-                },
-                user: {
-                    userid: 1,
-                    user: "Admin",
-                }
-            }
-        }, {
-            logid: 2,
-            date: "02/05/2026",
-            valor: {
-                update: {
-                    alteracao: "Delete"
-                },
-                delete: {
-                    exameid: 1,
-                    codigo: "HEMO",
-                    exame: "Hemograma",
-                    duplicar: "Sim"
-                },
-                user: {
-                    userid: 1,
-                    user: "Admin",
-                }
-            }
-        }, {
-            logid: 2,
-            date: "20/05/2026",
-            valor: {
-                update: {
-                    alteracao: "Create"
-                },
-                create: {
-                    exameid: 2,
-                    codigo: "HEMO",
-                    exame: "Hemograma",
-                    duplicar: "Não"
-                },
-                user: {
-                    userid: 1,
-                    user: "Admin",
-                }
-            }
-        }
-    ]);
+    // const [logExame, setLogExame] = useState([
+    //     {
+    //         logid: 1,
+    //         date: "05/05/2026",
+    //         valor: {
+    //             update: {
+    //                 alteracao: "Update"
+    //             },
+    //             antes: {
+    //                 exameid: 1,
+    //                 codigo: "HEMO",
+    //                 exame: "Hemograma",
+    //                 duplicar: "Sim"
+    //             },
+    //             depois: {
+    //                 exameid: 1,
+    //                 codigo: "HEMOG",
+    //                 exame: "Hemograma completo",
+    //                 duplicar: "Não"
+    //             },
+    //             user: {
+    //                 userid: 1,
+    //                 user: "Admin",
+    //             }
+    //         }
+    //     }, {
+    //         logid: 2,
+    //         date: "02/05/2026",
+    //         valor: {
+    //             update: {
+    //                 alteracao: "Delete"
+    //             },
+    //             delete: {
+    //                 exameid: 1,
+    //                 codigo: "HEMO",
+    //                 exame: "Hemograma",
+    //                 duplicar: "Sim"
+    //             },
+    //             user: {
+    //                 userid: 1,
+    //                 user: "Admin",
+    //             }
+    //         }
+    //     }, {
+    //         logid: 2,
+    //         date: "20/05/2026",
+    //         valor: {
+    //             update: {
+    //                 alteracao: "Create"
+    //             },
+    //             create: {
+    //                 exameid: 2,
+    //                 codigo: "HEMO",
+    //                 exame: "Hemograma",
+    //                 duplicar: "Não"
+    //             },
+    //             user: {
+    //                 userid: 1,
+    //                 user: "Admin",
+    //             }
+    //         }
+    //     }
+    // ]);
 
+    const [logExame, setLogExame] = useState([])
+    console.log(logExame)
     // Dados (MOCK PACIENTES ) temporarios
     const [logPaciente, setLogPaciente] = useState([
         {
@@ -141,26 +143,29 @@ const Logs = () => {
     const [dataFinal, setDataFinal] = useState('')
     const [type, setType] = useState('')
 
-    // async function searchLog(e) {
-    //     e.preventDefault();
+    async function searchLog(e) {
+        e.preventDefault();
 
-    //     if (!dataInicio || !dataFinal) {
-    //         toast.info('Adicione uma data no filtro')
-    //         return;
-    //     }
+        if (!dataInicio || !dataFinal) {
+            toast.info('Adicione uma data no filtro')
+            return;
+        }
 
-    //     try {
-    //         const response = await api.get(`/${page}/log`, {
-    //             params: {
-    //                 dataInicio,
-    //                 dataFinal,
-    //                 tipo: type
-    //             }
-    //         });
-    //         setLog(response.data);
-    //     } catch (error) {
-    //         setLog([]);
-    //     }
+        try {
+            const response = await api.get(`/${page}/log`, {
+                // params: {
+                //     dataInicio,
+                //     dataFinal,
+                //     tipo: type
+                // }
+            });
+            console.log(response.data)
+            setLogExame(response.data);
+        } catch (error) {
+            console.log(error)
+        }
+
+    }
 
     return (
         <div className="logsContainer">
@@ -172,8 +177,8 @@ const Logs = () => {
                 <h2 className="logsTitle">Logs da Aplicação</h2>
             )}
 
-            {/* <form onSubmit={searchLog} className="filtersSection"> */}
-            <form className="filtersSection">
+            <form onSubmit={searchLog} className="filtersSection">
+            {/* <form className="filtersSection"> */}
 
                 <div className="dateFilter">
                     <label>Data Inicial:</label>
@@ -218,7 +223,7 @@ const Logs = () => {
             <div className="logsContent">
                 {logExame.length === 0 || logPaciente.length === 0 ? (
                     <p>Nenhum log encontrado.</p>
-                ) : page === 'pacientes' ? (
+                ) : page === 'paciente' ? (
                     logPaciente.map((item, index) => (
                         <LogCard key={item.logid} item={item} entidadeTipo="paciente" />
                     ))
@@ -236,4 +241,4 @@ const Logs = () => {
     );
 };
 
-export default Logs;
+export default Logs

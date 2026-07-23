@@ -273,16 +273,6 @@
   }
 }
 
-.log-field--id {
-  color: #9ca3af;
-  font-size: 0.8rem;
-}
-
-.log-field--id strong {
-  color: #9ca3af;
-  font-weight: 600;
-}
-
 .log-user__id {
   color: #b0b6c0;
   font-size: 0.78rem;

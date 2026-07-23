@@ -2,9 +2,8 @@
 
 export const logFieldsConfig = {
     exame: {
-        idLabel: 'ID Exame',
-        idKey: 'exameid',
         fields: [
+            { key: 'exameid', label: 'ID Exame' },
             { key: 'codigo', label: 'Código' },
             { key: 'exame', label: 'Exame' },
             { key: 'duplicar', label: 'Duplicar exame' },

@@ -7,9 +7,6 @@ const LogCard = ({ item, entidadeTipo }) => {
 
     const renderFields = (data) => (
         <>
-            <p className="log-field log-field--id">
-                <strong>{config.idLabel}:</strong> #{data[config.idKey]}
-            </p>
             {config.fields.map((field) => (
                 <p className="log-field" key={field.key}>
                     <strong>{field.label}:</strong> {data[field.key]}
