@@ -58,10 +58,10 @@ export const addExame = (req, res) => {
             req.body.dupExame
         ]
 
-        db.query(query, values, (updateErr, result) => {
-            if (updateErr) {
+        db.query(query, values, (insertErr, result) => {
+            if (insertErr) {
                 return db.rollback(() => {
-                    res.status(500).json(updateErr)
+                    res.status(500).json(insertErr)
                 })
             }
 
@@ -81,9 +81,10 @@ export const addExame = (req, res) => {
                 'Create',
                 JSON.stringify({
                     create: {
-                        cod: req.body.cod,
-                        nome: req.body.nome,
-                        dupExame: req.body.dupExame
+                        exameid: insertId,
+                        codigo: req.body.cod,
+                        exame: req.body.nome,
+                        duplicar: req.body.dupExame
                     }
                 })
             ]
@@ -91,7 +92,7 @@ export const addExame = (req, res) => {
             db.query(logQuery, logValues, (logErr) => {
                 if (logErr) {
                     return db.rollback(() => {
-                        console.status(500).json(logErr)
+                        res.status(500).json(logErr)
                     })
                 }
             })
@@ -102,7 +103,6 @@ export const addExame = (req, res) => {
                         res.status(500).json(logErr)
                     });
                 }
-
                 res.status(200).json('Exame criado com sucesso.')
             })
         })
@@ -169,14 +169,16 @@ export const updateExame = (req, res) => {
                     'Update',
                     JSON.stringify({
                         antes: {
-                            cod: oldExame.cod,
-                            nome: oldExame.nome,
-                            dupExame: oldExame.dupExame
+                            exameid: oldExame.id,
+                            codigo: oldExame.cod,
+                            exame: oldExame.nome,
+                            duplicar: oldExame.dupExame
                         },
                         depois: {
-                            cod: req.body.cod,
-                            nome: req.body.nome,
-                            dupExame: req.body.dupExame
+                            exameid: oldExame.id,
+                            codigo: req.body.cod,
+                            exame: req.body.nome,
+                            duplicar: req.body.dupExame
                         }
                     })
                 ];
