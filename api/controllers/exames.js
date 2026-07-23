@@ -208,52 +208,77 @@ export const updateExame = (req, res) => {
 export const deleteExame = (req, res) => {
     const exameId = req.params.id;
 
-    // 1. Buscar dados do exame antes de deletar
-    const selectQuery = 'SELECT * FROM exames WHERE id = ?';
-    db.query(selectQuery, [exameId], (selectErr, selectResult) => {
-        if (selectErr) {
-            console.log('Erro ao buscar exame: ', selectErr);
-            return res.status(500).json(selectErr);
+    db.beginTransaction((transactionErr) => {
+        if (transactionErr) {
+            return db.rollback(() => {
+                res.status(500).json(transactionErr)
+            })
         }
 
-        if (selectResult.length === 0) {
-            return res.status(404).json('Exame não encontrado.');
-        }
-
-        const exame = selectResult[0];
-
-        // 2. Deletar o exame
-        const deleteQuery = 'DELETE FROM exames WHERE id = ?';
-        db.query(deleteQuery, [exameId], (deleteErr) => {
-            if (deleteErr) {
-                console.log('Erro ao deletar exame: ', deleteErr);
-                return res.status(500).json(deleteErr);
+        const selectQuery = 'SELECT * FROM exames WHERE id = ?';
+        db.query(selectQuery, [exameId], (selectErr, selectResult) => {
+            if (selectErr) {
+                return db.rollback(() => {
+                    res.status(500).json(selectErr)
+                })
             }
 
-            // 3. Registrar o log da exclusão
-            const logQuery = `
-                INSERT INTO logexame (id_exame, cod, exame, dupExame, tipo_alteracao, id_user)
-                VALUES (?, ?, ?, ?, 'Delete', ?)
-            `;
+            if (selectResult.length === 0) {
+                return res.status(404).json("Exame não encontrado.")
+            }
 
-            const logValues = [
-                exame.id,
-                exame.cod,
-                exame.nome,
-                exame.dupExame,
-                req.userId
-            ];
+            const exame = selectResult[0];
 
-            db.query(logQuery, logValues, (logErr) => {
-                if (logErr) {
-                    console.error('Erro ao registrar log de exclusão: ', logErr);
-                    // Continua mesmo que falhe o log
+            const deleteQuery = 'DELETE FROM exames WHERE id = ?';
+            db.query(deleteQuery, [exameId], (deleteErr) => {
+                if (deleteErr) {
+                    return db.rollback(() => {
+                        res.status(500).json(deleteErr);
+                    })
                 }
 
-                return res.status(200).json('Exame deletado com sucesso e log registrado.');
+                const logQuery = `
+                    INSERT INTO log
+                    (entidade_tipo, entidade_id, userid, alteracao, valor)
+                    VALUES (?, ?, ?, ?, ?)
+            `;
+
+                const logValues = [
+                    'exame',
+                    exameId,
+                    req.userId,
+                    'Delete',
+                    JSON.stringify({
+                        delete: {
+                            exameid: exameId,
+                            codigo: exame.cod,
+                            exame: exame.nome,
+                            duplicar: exame.dupExame
+                        }
+                    })
+                ];
+
+                db.query(logQuery, logValues, (logErr) => {
+                    if (logErr) {
+                        return db.rollback(() => {
+                            res.status(500).json(logErr)
+                        })
+                    }
+
+                    db.commit((commitErr) => {
+                        if (commitErr) {
+                            return db.rollback(() => {
+                                res.status(500).json(commitErr)
+                            })
+                        }
+
+                        res.status(200).json("Exame deletado com sucesso.")
+                    })
+                });
             });
         });
-    });
+    })
+
 };
 
 
