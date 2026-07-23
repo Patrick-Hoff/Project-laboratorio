@@ -40,57 +40,74 @@ export const getExames = (req, res) => {
 
 // Criar novo exame
 export const addExame = (req, res) => {
-    const q = `
+    db.beginTransaction((transactionErr) => {
+        if (transactionErr) {
+            if (transactionErr) {
+                return res.status(500).json(transactionErr);
+            }
+        }
+
+        const query = `
         INSERT INTO exames (cod, nome, dupExame)
         VALUES (?, ?, ?)
     `
 
-    const values = [
-        req.body.cod,
-        req.body.nome,
-        req.body.dupExame
-    ]
+        const values = [
+            req.body.cod,
+            req.body.nome,
+            req.body.dupExame
+        ]
 
-    db.query(q, values, (err, result) => {
-        if (err) {
-            console.error('Erro ao adicionar exame:', err)
-            return res.status(500).json(err)
-        }
+        db.query(query, values, (updateErr, result) => {
+            if (updateErr) {
+                return db.rollback(() => {
+                    res.status(500).json(updateErr)
+                })
+            }
 
-        const insertId = result.insertId
+            const insertId = result.insertId
 
-        // LOG
-        const logQuery = `
+            // LOG
+            const logQuery = `
             INSERT INTO log
             (entidade_tipo, entidade_id, userid, alteracao, valor)
             VALUES (?, ?, ?, ?, ?)
         `
 
-        const logValues = [
-            'exame',
-            insertId,
-            req.userId,
-            'Create',
-            JSON.stringify({
-                create: {
-                    cod: req.body.cod,
-                    nome: req.body.nome,
-                    dupExame: req.body.dupExame
+            const logValues = [
+                'exame',
+                insertId,
+                req.userId,
+                'Create',
+                JSON.stringify({
+                    create: {
+                        cod: req.body.cod,
+                        nome: req.body.nome,
+                        dupExame: req.body.dupExame
+                    }
+                })
+            ]
+
+            db.query(logQuery, logValues, (logErr) => {
+                if (logErr) {
+                    return db.rollback(() => {
+                        console.status(500).json(logErr)
+                    })
                 }
             })
-        ]
 
-        db.query(logQuery, logValues, (logErr) => {
-            if (logErr) {
-                console.error('Erro ao registrar log do exame:', logErr)
-            }
-        })
+            db.commit((commitErr) => {
+                if (commitErr) {
+                    return db.rollback(() => {
+                        res.status(500).json(logErr)
+                    });
+                }
 
-        return res.status(201).json({
-            message: 'Exame criado com sucesso',
-            id: insertId
+                res.status(200).json('Exame criado com sucesso.')
+            })
         })
     })
+
 }
 
 // Update exame
