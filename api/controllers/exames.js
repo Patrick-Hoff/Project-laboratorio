@@ -290,29 +290,29 @@ export const logExames = (req, res) => {
 
     // let query = 'SELECT * FROM logexame';
     let query = `
-    select
-	logexame.id_log,
-    logexame.id_exame,
-    logexame.cod,
-    logexame.exame,
-    logexame.dupExame,
-    logexame.data_alteracao,
-    logexame.tipo_alteracao,
-    users.id,
-    users.name
-    from logexame
-INNER JOIN users ON logexame.id_user = users.id`
+    SELECT
+        log.logid,
+        log.log_date,
+        log.entidade_tipo,
+        log.entidade_id,
+        log.alteracao,
+        log.valor,
+        users.id   AS userid,
+        users.name AS user
+    FROM log
+    INNER JOIN users ON log.userid = users.id
+`;
     let params = [];
     let conditions = [];
 
     if (dataInicio && dataFinal) {
-        conditions.push('data_alteracao BETWEEN ? AND ?');
+        conditions.push('log_date BETWEEN ? AND ?');
         params.push(`${dataInicio} 00:00:00`, `${dataFinal} 23:59:59`);
     }
 
     if (tipo) {
-        conditions.push('tipo_alteracao LIKE ?');
-        params.push(`${tipo}%`);
+        conditions.push('entidade_tipo = ?');
+        params.push(`${tipo}`);
     }
 
     if (conditions.length > 0) {
@@ -325,6 +325,36 @@ INNER JOIN users ON logexame.id_user = users.id`
             return res.status(500).json({ error: 'Erro no servidor' });
         }
 
-        return res.status(200).json(data);
+        const logsFormatados = data.map((row) => {
+            // se a coluna for JSON, o mysql2 já pode devolver objeto; se vier string, faz o parse
+            const valorJson = typeof row.valor === 'string'
+                ? JSON.parse(row.valor)
+                : row.valor;
+
+            return {
+                logid: row.logid,
+                date: formatarData(row.log_date),
+                valor: {
+                    update: {
+                        alteracao: row.alteracao // "Update" | "Create" | "Delete"
+                    },
+                    ...valorJson, // espalha antes/depois (update) OU create OU delete
+                    user: {
+                        userid: row.userid,
+                        user: row.user
+                    }
+                }
+            };
+        });
+
+        return res.status(200).json(logsFormatados);
     });
+
+    function formatarData(data) {
+        const d = new Date(data);
+        const dia = String(d.getDate()).padStart(2, '0');
+        const mes = String(d.getMonth() + 1).padStart(2, '0');
+        const ano = d.getFullYear();
+        return `${dia}/${mes}/${ano}`;
+    }
 };
