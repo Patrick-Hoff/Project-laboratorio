@@ -3,81 +3,14 @@ import './Logs.css';
 import { useParams } from 'react-router-dom';
 import api from '../../services/api'
 import { ToastContainer, toast } from 'react-toastify'
-import { formatarData } from '../../utils/formatters';
 import LogCard from '../../components/LogsCard/LogsCard';
 
 
 const Logs = () => {
     const { page } = useParams();
 
-
-    // Dados ( MOCK EXAMES) temporarios
-    // const [logExame, setLogExame] = useState([
-    //     {
-    //         logid: 1,
-    //         date: "05/05/2026",
-    //         valor: {
-    //             update: {
-    //                 alteracao: "Update"
-    //             },
-    //             antes: {
-    //                 exameid: 1,
-    //                 codigo: "HEMO",
-    //                 exame: "Hemograma",
-    //                 duplicar: "Sim"
-    //             },
-    //             depois: {
-    //                 exameid: 1,
-    //                 codigo: "HEMOG",
-    //                 exame: "Hemograma completo",
-    //                 duplicar: "Não"
-    //             },
-    //             user: {
-    //                 userid: 1,
-    //                 user: "Admin",
-    //             }
-    //         }
-    //     }, {
-    //         logid: 2,
-    //         date: "02/05/2026",
-    //         valor: {
-    //             update: {
-    //                 alteracao: "Delete"
-    //             },
-    //             delete: {
-    //                 exameid: 1,
-    //                 codigo: "HEMO",
-    //                 exame: "Hemograma",
-    //                 duplicar: "Sim"
-    //             },
-    //             user: {
-    //                 userid: 1,
-    //                 user: "Admin",
-    //             }
-    //         }
-    //     }, {
-    //         logid: 2,
-    //         date: "20/05/2026",
-    //         valor: {
-    //             update: {
-    //                 alteracao: "Create"
-    //             },
-    //             create: {
-    //                 exameid: 2,
-    //                 codigo: "HEMO",
-    //                 exame: "Hemograma",
-    //                 duplicar: "Não"
-    //             },
-    //             user: {
-    //                 userid: 1,
-    //                 user: "Admin",
-    //             }
-    //         }
-    //     }
-    // ]);
-
     const [logExame, setLogExame] = useState([])
-    console.log(logExame)
+
     // Dados (MOCK PACIENTES ) temporarios
     const [logPaciente, setLogPaciente] = useState([
         {
@@ -153,13 +86,12 @@ const Logs = () => {
 
         try {
             const response = await api.get(`/${page}/log`, {
-                // params: {
-                //     dataInicio,
-                //     dataFinal,
-                //     tipo: type
-                // }
+                params: {
+                    dataInicio,
+                    dataFinal,
+                    tipo: type
+                }
             });
-            console.log(response.data)
             setLogExame(response.data);
         } catch (error) {
             console.log(error)
@@ -178,8 +110,6 @@ const Logs = () => {
             )}
 
             <form onSubmit={searchLog} className="filtersSection">
-            {/* <form className="filtersSection"> */}
-
                 <div className="dateFilter">
                     <label>Data Inicial:</label>
                     <input
@@ -208,9 +138,9 @@ const Logs = () => {
                         onChange={(e) => setType(e.target.value)}
                     >
                         <option value="">Todas</option>
-                        <option value="INSERT">Insert</option>
-                        <option value="UPDATE">Update</option>
-                        <option value="DELETE">Delete</option>
+                        <option value="Create">Insert</option>
+                        <option value="Update">Update</option>
+                        <option value="Delete">Delete</option>
                     </select>
                 </div>
 
