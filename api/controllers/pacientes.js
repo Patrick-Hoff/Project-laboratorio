@@ -113,59 +113,87 @@ export const updatePaciente = (req, res) => {
 
     const pacienteId = req.params.id;
 
-    // 1. Buscar dados antigos antes do update
-    const selectQuery = 'SELECT * FROM pacientes WHERE id = ?'
-    db.query(selectQuery, [pacienteId], (selectErr, selectResult) => {
-        if (selectErr) {
-            console.log('Erro ao buscar paciente: ' + selectErr)
-            return res.status(500).json(selectErr)
+    db.beginTransaction((transactionErr) => {
+        if (transactionErr) {
+            return res.status(500).json(transactionErr);
         }
 
-        if (selectResult.length === 0) {
-            return res.status(404).json('Paciente não encontrado.')
-        }
+        const selectQuery = 'SELECT * FROM pacientes WHERE id = ?'
 
-        const oldPaciente = selectResult[0];
+        db.query(selectQuery, [pacienteId], (selectErr, selectResult) => {
+            if (selectErr) {
+                return db.rollback(() => {
+                    res.status(500).json(selectErr)
+                })
+            };
 
-        // 2. Atualiar o paciente
-        const q = 'UPDATE pacientes SET `nome` = ?, `idade` = ? WHERE `id` = ?'
-        const values = [
-            req.body.nome,
-            req.body.idade,
-            pacienteId,
-        ]
-
-        db.query(q, values, (updateErr) => {
-            if (updateErr) {
-                console.log('Erro ao atualizar o paciente: ', updateErr)
-                return res.status(500).json(updateErr)
+            if (selectResult.length === 0) {
+                return db.rollback(() => {
+                    res.status(500).json('Exame não encontrado.')
+                });
             }
 
-            const logQuery = `
-                INSERT INTO logpaciente (id_paciente, idade, paciente, tipo_alteracao, id_user)
+            const oldPaciente = selectResult[0];
+
+            const q = 'UPDATE pacientes SET `nome` = ?, `idade` = ? WHERE `id` = ?'
+            const values = [
+                req.body.nome,
+                req.body.idade,
+                pacienteId,
+            ]
+
+            db.query(q, values, (updateErr) => {
+                if (updateErr) {
+                    return db.rollback(() => {
+                        res.status(500).json(updateErr);
+                    });
+                }
+
+                const logQuery = `
+                INSERT INTO log (entidade_tipo, entidade_id, userid, alteracao, valor)
                 VALUES (?, ?, ?, ?, ?)
             `
 
-            const logAntes = [pacienteId, oldPaciente.idade, oldPaciente.nome, 'Update - Antes', req.userId]
-            const logDepois = [pacienteId, req.body.idade, req.body.nome, 'Update - Depois', req.userId]
 
-            // Inserir o log "antes"
-            db.query(logQuery, logAntes, (logErr1) => {
-                if (logErr1) {
-                    console.error('Erro ao registrar log (antes): ', logErr1)
-                }
+                const logValues = [
+                    'paciente',
+                    pacienteId,
+                    req.userId,
+                    'Update',
+                    JSON.stringify({
+                        antes: {
+                            pacienteid: oldPaciente.id,
+                            nome: oldPaciente.nome,
+                            nascimento: oldPaciente.idade
+                        },
+                        depois: {
+                            pacienteid: oldPaciente.id,
+                            nome: req.body.nome,
+                            nascimento: req.body.idade
+                        }
+                    })
+                ];
 
-                db.query(logQuery, logDepois, (logErr2) => {
-                    if (logErr2) {
-                        console.error('Erro ao registrar log (depois): ' + logErr2)
+                db.query(logQuery, logValues, (logErr) => {
+                    if (logErr) {
+                        return db.rollback(() => {
+                            res.status(500).json(logErr)
+                        })
                     }
-                    return res.status(200).json('Paciente atualizado e log de antes/depois registrado.');
+
+                    db.commit((commitErr) => {
+                        if (commitErr) {
+                            return db.rollback(() => {
+                                res.status(500).json(commitErr)
+                            })
+                        }
+
+                        res.status(200).json("Paciente atualizado com sucesso.")
+                    })
                 })
             })
         })
     })
-
-
 }
 
 // Deletar pacientes
