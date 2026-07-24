@@ -42,45 +42,69 @@ LIMIT ? OFFSET ?; `
 
 // Criar novo paciente no sistema
 export const addPacientes = (req, res) => {
-    const q = 'INSERT INTO pacientes(`nome`,`idade`) VALUES (?, ?)'
-
-    const values = [
-        req.body.nome,
-        req.body.idade,
-    ]
-
-    db.query(q, values, (err, result) => {
-        if (err) {
-            console.log('Erro ao adicionar novo paciente. ' + err)
-            return res.status(500).json(err)
+    db.beginTransaction((transactionErr) => {
+        if (transactionErr) {
+            return res.status(500).json(transactionErr);
         }
 
-        // Log para criar um novo paciente
-        const insertId = result.insertId
+        const query = 'INSERT INTO pacientes(`nome`,`idade`) VALUES (?, ?)'
 
-        const logQuery = `
-            INSERT INTO logpaciente (id_paciente, idade, paciente, tipo_alteracao, id_user)
+        const values = [
+            req.body.nome,
+            req.body.idade,
+        ]
+
+        db.query(query, values, (insertErr, result) => {
+            if (insertErr) {
+                return db.rollback(() => {
+                    res.status(500).json(insertErr)
+                })
+            }
+
+            const insertId = result.insertId
+
+            const logQuery = `
+            INSERT INTO log
+            (entidade_tipo, entidade_id, userid, alteracao, valor)
             VALUES (?, ?, ?, ?, ?)
         `
 
-        const logValues = [
-            insertId,
-            req.body.idade,
-            req.body.nome,
-            'Insert',
-            req.userId
-        ]
+            const logValues = [
+                'paciente',
+                insertId,
+                req.userId,
+                'Create',
+                JSON.stringify({
+                    create: {
+                        pacienteid: insertId,
+                        nome: req.body.nome,
+                        nascimento: req.body.idade
+                    }
+                })
+            ]
 
-        db.query(logQuery, logValues, (logErr) => {
-            if (logErr) {
-                console.error('Erro ao registrar paciente. ' + logErr)
-                console.log(insertId)
-            }
-            return res.status(200).json('Paciente criado com sucesso')
+            db.query(logQuery, logValues, (logErr) => {
+                if (logErr) {
+                    return db.rollback(() => {
+                        res.status(500).json(logErr)
+                    })
+                }
+            })
+
+            db.commit((commitErr) => {
+                if (commitErr) {
+                    return db.rollback(() => {
+                        res.status(500).json(commitErr)
+                    })
+                }
+
+                res.status(200).json('Paciente criado com sucesso.')
+            })
 
         })
 
     })
+
 }
 
 
