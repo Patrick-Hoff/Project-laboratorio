@@ -313,7 +313,7 @@ export const logExames = (req, res) => {
     }
 
     if (tipo) {
-        conditions.push('entidade_tipo = ?');
+        conditions.push('alteracao = ?');
         params.push(`${tipo}`);
     }
 
