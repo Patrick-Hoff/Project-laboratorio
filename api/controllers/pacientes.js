@@ -200,49 +200,73 @@ export const updatePaciente = (req, res) => {
 export const deletePaciente = (req, res) => {
     const pacienteId = req.params.id;
 
-    const selectQuery = `SELECT * FROM pacientes WHERE id = ?`
-
-    db.query(selectQuery, [pacienteId], (selectErr, selectResult) => {
-        if (selectErr) {
-            console.log('Erro ao buscar paciente: ' + selectErr)
-            return res.status(500).json(selectErr)
+    db.beginTransaction((transactionErr) => {
+        if (transactionErr) {
+            return db.rollback(() => {
+                res.status(500).json(transactionErr);
+            })
         }
 
-        if (selectResult.length === 0) {
-            return res.status(404).json('Paciente não encontrado.')
-        }
+        const selectQuery = `SELECT * FROM pacientes WHERE id = ?`
 
-        const paciente = selectResult[0];
-
-        // Deletar paciente
-        const q = 'DELETE FROM pacientes WHERE `id` = ?'
-
-        db.query(q, [req.params.id], (err) => {
-            if (err) {
-                console.log('Erro ao deletar paciente ', err)
-                return res.status(500).json(err)
+        db.query(selectQuery, [pacienteId], (selectErr, selectResult) => {
+            if (selectErr) {
+                return db.rollback(() => {
+                    res.status(500).json(selectErr)
+                })
             }
 
-            // Registrar o log de exclusão
-            const logQuery = `
-                INSERT INTO logpaciente (id_paciente, paciente, idade, tipo_alteracao, id_user)
-                VALUES ( ?, ?, ?, ?, ?)
+            if (selectResult.length === 0) {
+                return res.status(404).json('Paciente não encontrado.')
+            }
+
+            const paciente = selectResult[0];
+
+            const deleteQuery = 'DELETE FROM pacientes WHERE `id` = ?'
+
+            db.query(deleteQuery, [pacienteId], (deleteErr) => {
+                if (deleteErr) {
+                    return db.rollback(() => {
+                        res.status(500).json(deleteErr)
+                    })
+                }
+
+                const logQuery = `
+                    INSERT INTO log
+                    (entidade_tipo, entidade_id, userid, alteracao, valor)
+                    VALUES (?, ?, ?, ?, ?)
             `
 
-            const logValues = [
-                paciente.id,
-                paciente.nome,
-                paciente.idade,
-                'Delete',
-                req.userId
-            ]
+                const logValues = [
+                    'paciente',
+                    pacienteId,
+                    req.userId,
+                    'Delete',
+                    JSON.stringify({
+                        delete: {
+                            pacienteid: pacienteId,
+                            nome: paciente.nome,
+                            nascimento: paciente.idade,
+                        }
+                    })
+                ];
 
-            db.query(logQuery, logValues, (logErr) => {
-                if (logErr) {
-                    console.error('Erro ao regostrar log de exclusão: ' + logErr)
-                }
-                return res.status(200).json('Paciente deletado com sucesso.')
+                db.query(logQuery, logValues, (logErr) => {
+                    if (logErr) {
+                        return db.rollback(() => {
+                            res.status(500).json(logErr)
+                        })
+                    }
 
+                    db.commit((commitErr) => {
+                        if (commitErr) {
+                            return db.rollback(() => {
+                                res.status(500).json(commitErr)
+                            })
+                        }
+                        res.status(200).json('Paciente deletado com sucesso.')
+                    })
+                })
             })
         })
     })
