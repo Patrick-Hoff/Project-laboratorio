@@ -18,7 +18,4 @@ router.put('/:id/edit', verifyToken, updateExame)
 
 router.delete('/:id/remove', verifyToken, deleteExame)
 
-router.get('/log', logExames)
-
-
 export default router

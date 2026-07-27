@@ -21,7 +21,4 @@ router.put('/:id/edit', verifyToken, updatePaciente)
 // Deletar atendimento pelo ID
 router.delete('/:id/remove', verifyToken, deletePaciente)
 
-// Buscar todos os logs de pacientes
-router.get('/log', logPaciente)
-
 export default router

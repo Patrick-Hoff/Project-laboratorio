@@ -18,6 +18,7 @@ import agendamentoRoutes from './routes/agendamento.js'
 import medicosRoutes from './routes/medico.js'
 import convenioRoutes from './routes/convenio.js'
 import exameConveniosRoutes from './routes/exame_convenios.js'
+import logsGridRoutes from './routes/log.js'
 
 dotenv.config()
 
@@ -63,6 +64,7 @@ app.use('/agendamento', agendamentoRoutes)
 app.use('/medicos', medicosRoutes)
 app.use('/convenio', convenioRoutes)
 app.use('/exame_convenios', exameConveniosRoutes)
+app.use('/logsgrid', logsGridRoutes)
 
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument))
 
