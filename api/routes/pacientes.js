@@ -3,8 +3,7 @@ import { verifyToken } from '../middlewares/auth.js'
 import { getPacientes,
     addPacientes,
     updatePaciente,
-    deletePaciente,
-    logPaciente
+    deletePaciente
  } from '../controllers/pacientes.js'
 
 const router = express.Router()

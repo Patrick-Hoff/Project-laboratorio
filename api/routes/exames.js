@@ -4,8 +4,7 @@ import {
     getExames,
     addExame,
     updateExame,
-    deleteExame,
-    logExames
+    deleteExame
 } from '../controllers/exames.js'
 
 const router = express.Router()
