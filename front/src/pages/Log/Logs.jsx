@@ -9,75 +9,14 @@ import LogCard from '../../components/LogsCard/LogsCard';
 const Logs = () => {
     const { page } = useParams();
 
-    const [logExame, setLogExame] = useState([])
-
-    // Dados (MOCK PACIENTES ) temporarios
-    const [logPaciente, setLogPaciente] = useState([
-        {
-            logid: 1,
-            date: "05/05/2026",
-            valor: {
-                update: {
-                    alteracao: "Update"
-                },
-                antes: {
-                    pacienteid: 1,
-                    nome: "Mario",
-                    nascimento: "12/05/1999",
-                },
-                depois: {
-                    pacienteid: 1,
-                    nome: "Victor",
-                    nascimento: "12/05/1999",
-                },
-                user: {
-                    userid: 1,
-                    user: "Admin",
-                }
-            }
-        }, {
-            logid: 2,
-            date: "02/05/2026",
-            valor: {
-                update: {
-                    alteracao: "Delete"
-                },
-                delete: {
-                    pacienteid: 1,
-                    nome: "Victor",
-                    nascimento: "12/05/1999",
-                },
-                user: {
-                    userid: 1,
-                    user: "Admin",
-                }
-            }
-        }, {
-            logid: 2,
-            date: "20/05/2026",
-            valor: {
-                update: {
-                    alteracao: "Create"
-                },
-                create: {
-                    pacienteid: 2,
-                    nome: "Victor",
-                    nascimento: "12/05/1999",
-                },
-                user: {
-                    userid: 1,
-                    user: "Admin",
-                }
-            }
-        }
-    ])
+    const [log, setLog] = useState([])
 
     const [dataInicio, setDataInicio] = useState('')
     const [dataFinal, setDataFinal] = useState('')
     const [type, setType] = useState('')
 
     async function searchLog(e) {
-        e.preventDefault();
+        if (e) e.preventDefault();
 
         if (!dataInicio || !dataFinal) {
             toast.info('Adicione uma data no filtro')
@@ -85,25 +24,28 @@ const Logs = () => {
         }
 
         try {
-            const response = await api.get(`/${page}/log`, {
-                params: {
-                    dataInicio,
-                    dataFinal,
-                    tipo: type
-                }
-            });
-            setLogExame(response.data);
+            const response = await api.get(`/logsgrid/${page}`,
+                {
+                    withCredentials: true,
+                    params: {
+                        dataInicio,
+                        dataFinal,
+                        tipo: type
+                    }
+                });
+
+            setLog(response.data);
+            console.log(response)
         } catch (error) {
             console.log(error)
         }
-
     }
 
     return (
         <div className="logsContainer">
-            {page === 'exames' ? (
+            {page === 'exame' ? (
                 <h2 className="logsTitle">Logs de Exames</h2>
-            ) : page === 'pacientes' ? (
+            ) : page === 'paciente' ? (
                 <h2 className="logsTitle">Logs de Pacientes</h2>
             ) : (
                 <h2 className="logsTitle">Logs da Aplicação</h2>
@@ -151,19 +93,19 @@ const Logs = () => {
             </form>
 
             <div className="logsContent">
-                {logExame.length === 0 || logPaciente.length === 0 ? (
+
+                {log.length === 0 ? (
                     <p>Nenhum log encontrado.</p>
-                ) : page === 'paciente' ? (
-                    logPaciente.map((item, index) => (
-                        <LogCard key={item.logid} item={item} entidadeTipo="paciente" />
-                    ))
-                ) : page === 'exames' ? (
-                    logExame.map((item) => (
-                        <LogCard key={item.logid} item={item} entidadeTipo="exame" />
-                    ))
                 ) : (
-                    <p>Log não encontrado</p>
+                    log.map((item) => (
+                        <LogCard
+                            key={item.logid}
+                            item={item}
+                            entidadeTipo={page}
+                        />
+                    ))
                 )}
+
             </div>
 
             <ToastContainer />
