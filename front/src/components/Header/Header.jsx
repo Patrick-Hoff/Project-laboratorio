@@ -89,8 +89,8 @@ function Header() {
               >
                 <li><Link to="/atendimentos">Atendimentos</Link></li>
                 <li><Link to="/atendimento">Novo Atendimento</Link></li>
-                <li><Link to="/pacientes">Pacientes</Link></li>
-                <li><Link to="/exames">Exames</Link></li>
+                <li><Link to="/pacientes">Paciente</Link></li>
+                <li><Link to="/exames">Exame</Link></li>
                 <li>
                   <FaUserMd className="iconLink" />
                   <Link to="/medico">Médicos</Link>
@@ -163,12 +163,12 @@ function Header() {
 
                     <li>
                       <FaFileAlt className="iconLink" />
-                      <Link to="/search-logs/pacientes">Log Pacientes</Link>
+                      <Link to="/search-logs/paciente">Log Pacientes</Link>
                     </li>
 
                     <li>
                       <FaFileAlt className="iconLink" />
-                      <Link to="/search-logs/exames">Log Exames</Link>
+                      <Link to="/search-logs/exame">Log Exames</Link>
                     </li>
                   </>
                 )}
