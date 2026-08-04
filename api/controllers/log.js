@@ -27,12 +27,12 @@ export const logsGrid = (req, res) => {
     params.push(`${logPage}`);
 
     if (dataInicio && dataFinal) {
-        conditions.push('log_date BETWEEN ? AND ?');
+        conditions.push('log.log_date BETWEEN ? AND ?');
         params.push(`${dataInicio} 00:00:00`, `${dataFinal} 23:59:59`);
     }
 
     if (tipo) {
-        conditions.push('alteracao = ?');
+        conditions.push('log.alteracao = ?');
         params.push(`${tipo}`);
     }
 
@@ -57,10 +57,10 @@ export const logsGrid = (req, res) => {
                 date: formatarData(row.log_date),
                 valor: {
                     update: {
-                        alteracao: row.alteracao // "Update" | "Create" | "Delete"
+                        alteracao: row.alteracao
                     },
-                    ...valorJson, // espalha antes/depois (update) OU create OU delete
-                    userid: {
+                    ...valorJson,
+                    user: {
                         userid: row.userid,
                         user: row.user
                     }
