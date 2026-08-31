@@ -8,10 +8,16 @@ import { FaArrowRight, FaArrowLeft } from "react-icons/fa";
 import GenericModal from '../../components/Modal/Modal'
 import Input from '../../components/Input/Input'
 
+// Hooks
+import { useUsuarios } from '../../hooks/usuarios/useUsuarios';
+import { useCriarUsuario } from '../../hooks/usuarios/useCriarUsuario';
+import { useEditarUsuario } from '../../hooks/usuarios/useEditarUsuario';
+
+import { useDebounce } from 'use-debounce';
+
 import '../../styles/shared.css'
 
 function Usuarios() {
-    const [usuarios, setUsuarios] = useState([]);
     const [name, setName] = useState('');
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
@@ -21,38 +27,46 @@ function Usuarios() {
     const [edit, setEdit] = useState({});
     const [modalShow, setModalShow] = useState(false);
     const [page, setPage] = useState(1);
-    const [total, setTotal] = useState(0);
 
+    // Search
     const [searchId, setSearchId] = useState('');
     const [searchName, setSearchName] = useState('');
     const [searchEmail, setSearchEmail] = useState('');
 
+    // Debouced
+    const [searchIdDebouced] = useDebounce(searchId, 600);
+    const [searchNameDebouced] = useDebounce(searchName, 600);
+    const [searchemailDebouced] = useDebounce(searchEmail, 600);
 
-    const getUsuarios = async () => {
-        try {
-            const res = await api.get('/usuarios/searchUsers', {
-                params: {
-                    page,
-                    limit: 5,
-                    searchId,
-                    searchName,
-                    searchEmail
-                },
-            });
-            setUsuarios(res.data.data);
-            setTotal(res.data.total);
-        } catch (error) {
-            console.log(error);
-        }
-    }
+    // Listar usuários
+    const {
+        data,
+        isLoading,
+        error: errorBuscarUsuarios
+    } = useUsuarios({
+        searchId: searchIdDebouced,
+        searchName: searchNameDebouced,
+        searchEmail: searchemailDebouced
+    })
+
+    const usuarios = data?.data ?? [];
+    const total = data?.total ?? [];
+
+    // Criar usuário
+    const {
+        mutate: criarUsuario,
+        error: errorCriarUsuario
+    } = useCriarUsuario()
+
+    // Editar usuário
+    const {
+        mutate: editarUsuario,
+        error: errorEditarUsuario,
+    } = useEditarUsuario();
 
     useEffect(() => {
         setPage(1);
     }, [searchId, searchName, searchEmail]);
-
-    useEffect(() => {
-        getUsuarios();
-    }, [page, searchId, searchName, searchEmail]);
 
     function nextPage() {
         setPage(prev => prev + 1);
@@ -74,35 +88,42 @@ function Usuarios() {
         };
 
         if (edit.id) {
-            api.put(`/usuarios/edit/${edit.id}`, usuario,
-                { withCredentials: true }
-            )
-                .then(() => {
-                    toast.success('Usuário editado com sucesso!');
-                    resetForm();
-                    getUsuarios();
-                })
-                .catch(error => {
-                    toast.error('Erro ao editar usuário!');
-                    console.error(error);
-                });
+
+            editarUsuario({
+                id: edit.id,
+                usuario,
+            }, {
+                onSuccess: () => {
+                    toast.success('Usuário editado com sucesso!')
+                    resetForm()
+                },
+
+                onError: () => {
+                    toast.error(
+                        'Erro ao editar usuário!'
+                    )
+                }
+            });
         } else {
-            api.post('/usuarios/register', usuario,
-                { withCredentials: true }
-            )
-                .then(() => {
-                    toast.success('Usuário cadastrado com sucesso!');
-                    getUsuarios();
-                    setModalShow(false);
+
+            criarUsuario(usuario, {
+                onSuccess: () => {
+                    toast.success(
+                        'Usuário cadastrado com sucesso!'
+                    )
+                    setModalShow(false)
                     resetForm();
-                })
-                .catch(error => {
-                    toast.error('Erro ao cadastrar usuário!');
-                    console.error(error);
-                });
+                },
+
+                onError: () => {
+                    toast.error(
+                        'Erro ao cadastrar usuário!'
+                    )
+                }
+
+            });
         }
     }
-
 
     function resetForm() {
         setModalShow(false);
@@ -177,7 +198,19 @@ function Usuarios() {
                     </tr>
                 </thead>
                 <tbody>
-                    {usuarios.length > 0 ? (
+                    {isLoading ? (
+                        <tr>
+                            <td colSpan="4" style={{ textAlign: 'center' }}>
+                                Carregando usuários...
+                            </td>
+                        </tr>
+                    ) : errorBuscarUsuarios ? (
+                        <tr>
+                            <td colSpan="4" style={{ textAlign: 'center' }}>
+                                Erro ao carregar usuários: {error.message}
+                            </td>
+                        </tr>
+                    ) : total > 0 ? (
                         usuarios.map((usuario) => (
                             <tr key={usuario.id} onDoubleClick={() => handleEdit(usuario.id, usuario.name, usuario.email, usuario.isAdmin, usuario.isActive, usuario.profileImage)}>
                                 <td>{usuario.id}</td>
@@ -191,7 +224,7 @@ function Usuarios() {
                         ))
                     ) : (
                         <tr>
-                            <td colSpan="5" style={{ textAlign: 'center' }}>
+                            <td colSpan="4" style={{ textAlign: 'center' }}>
                                 Nenhum usuário cadastrado.
                             </td>
                         </tr>
