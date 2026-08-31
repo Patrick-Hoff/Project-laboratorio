@@ -11,48 +11,66 @@ import Input from "../../components/Input/Input"
 
 import { formatarDataBR } from '../../utils/formatters';
 
+import { usePacientes } from '../../hooks/pacientes/usePacientes';
+import { useCriarPaciente } from '../../hooks/pacientes/useCriarPaciente';
+import { useEditarPaciente } from '../../hooks/pacientes/useEditarPaciente';
+import { useDeletarPaciente } from '../../hooks/pacientes/useDeletarPaciente';
+
+import { useDebounce } from 'use-debounce';
+
 import '../../styles/shared.css'
 
-
 function Pacientes() {
-
-    const [pacientes, setPacientes] = useState([])
 
     const [idade, setIdade] = useState('')
     const [nome, setNome] = useState('')
     const [edit, setEdit] = useState([])
     const [modalShow, setModalShow] = useState(false)
     const [page, setPage] = useState(1)
-    const [total, setTotal] = useState(0);
 
+    // Search
     const [searchId, setSearchId] = useState('')
     const [searchNome, setSearchNome] = useState('')
 
+    // Debounced
+    const [searchIdDebounced] = useDebounce(searchId, 600);
+    const [searchNomeDebounced] = useDebounce(searchNome, 600);
 
-    const getPacientes = async () => {
-        try {
-            const res = await api.get('/pacientes', {
-                params: {
-                    page,
-                    limit: 5,
-                    searchId,
-                    searchNome,
-                }
-            })
-            setPacientes(res.data.data)
-            setTotal(res.data.total)
-        } catch (error) {
-            console.log(error)
-        }
-    }
+    // Listar pacientes
+    const {
+        data,
+        isLoading,
+        error: errorBuscarPacientes
+    } = usePacientes({
+        page,
+        searchId: searchIdDebounced,
+        searchNome: searchNomeDebounced
+    });
+
+    const pacientes = data?.data ?? [];
+    const total = data?.total ?? [];
+
+    // Criar novo paciente
+    const {
+        mutate: criarPaciente,
+        error: errorCriarPaciente
+    } = useCriarPaciente();
+
+    // Editar pacientes
+    const {
+        mutate: editarPaciente,
+        error: errorEditarPaciente,
+    } = useEditarPaciente();
+
+    // Deletar Paciente
+    const {
+        mutate: deletarPaciente,
+        error: errorDeletarPaciente,
+    } = useDeletarPaciente();
 
     useEffect(() => {
         setPage(1)
     }, [searchId, searchNome])
-
-    useEffect(() => {
-        getPacientes()
-    }, [page, searchId, searchNome])
 
 
     function nextPage() {
@@ -73,40 +91,53 @@ function Pacientes() {
 
         if (edit.id) {
 
-            api.put(`/pacientes/${edit.id}/edit`, paciente,
-                { withCredentials: true }
-            )
-                .then(() => {
+            editarPaciente({
+                id: edit.id,
+                paciente,
+            }, {
+                onSuccess: () => {
                     toast.success('Paciente editado com sucesso!')
                     resetForm()
-                    getPacientes()
-                })
+                },
+
+                onError: () => {
+                    toast.error(
+                        'Erro ao editar paciente!'
+                    )
+                }
+            });
+
 
         } else {
 
-            api.post('/pacientes', paciente,
-                { withCredentials: true }
-            )
-                .then(() => {
-                    toast.success('Paciente cadastrado com sucesso!')
-                    getPacientes()
+            criarPaciente(paciente, {
+                onSuccess: () => {
+                    toast.success(
+                        'Paciente cadastrado com sucesso!'
+                    )
                     setModalShow(false)
-                    resetForm()
-                })
+                    resetForm();
+                },
 
+                onError: () => {
+                    toast.error(
+                        'Erro ao cadastrar paciente!'
+                    )
+                }
+            });
         }
-
     }
 
     function handleDelete(id) {
 
-        api.delete(`/pacientes/${id}/remove`,
-            { withCredentials: true }
-        )
-            .then(() => {
+        deletarPaciente(id, {
+            onSuccess: () => {
                 toast.success('Paciente deletado com sucesso!')
-                getPacientes()
-            })
+            },
+            onError: () => {
+                toast.success('Erro ao deletar paciente!')
+            }
+        })
 
     }
 
@@ -163,15 +194,51 @@ function Pacientes() {
                     </tr>
                 </thead>
                 <tbody>
-                    {pacientes.length > 0 ? (
+                    {isLoading ? (
+                        <tr>
+                            <td colSpan="4" style={{ textAlign: 'center' }}>
+                                Carregando pacientes...
+                            </td>
+                        </tr>
+                    ) : errorBuscarPacientes ? (
+                        <tr>
+                            <td colSpan="4" style={{ textAlign: 'center' }}>
+                                Erro ao carregar pacientes: {error.message}
+                            </td>
+                        </tr>
+                    ) : total > 0 ? (
                         pacientes.map((paciente) => (
-                            <tr key={paciente.id} onDoubleClick={() => handleEdit(paciente.id, paciente.nome, paciente.idade)}>
+                            <tr
+                                key={paciente.id}
+                                onDoubleClick={() =>
+                                    handleEdit(
+                                        paciente.id,
+                                        paciente.nome,
+                                        paciente.idade
+                                    )
+                                }
+                            >
                                 <td>{paciente.id}</td>
                                 <td>{paciente.nome}</td>
                                 <td>{formatarDataBR(paciente.idade)}</td>
                                 <td className="icon">
-                                    <span><BiSolidCommentEdit onClick={() => handleEdit(paciente.id, paciente.nome, paciente.idade)} /></span>
-                                    <span><FaDeleteLeft onClick={() => handleDelete(paciente.id)} /></span>
+                                    <span>
+                                        <BiSolidCommentEdit
+                                            onClick={() =>
+                                                handleEdit(
+                                                    paciente.id,
+                                                    paciente.nome,
+                                                    paciente.idade
+                                                )
+                                            }
+                                        />
+                                    </span>
+
+                                    <span>
+                                        <FaDeleteLeft
+                                            onClick={() => handleDelete(paciente.id)}
+                                        />
+                                    </span>
                                 </td>
                             </tr>
                         ))
@@ -183,6 +250,7 @@ function Pacientes() {
                         </tr>
                     )}
                 </tbody>
+
             </table>
 
             <div className="pagination">

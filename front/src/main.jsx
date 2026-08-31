@@ -4,10 +4,16 @@ import { UserProvider } from './routes/UserContext';
 import App from './App';
 import './index.css';
 
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
+
+const queryClient = new QueryClient();
+
 createRoot(document.getElementById('root')).render(
   <BrowserRouter>
     <UserProvider>
-      <App />
+      <QueryClientProvider client={queryClient}>
+        <App />
+      </QueryClientProvider>
     </UserProvider>
   </BrowserRouter>
 );
