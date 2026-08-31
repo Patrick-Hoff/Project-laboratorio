@@ -13,57 +13,76 @@ import '../../styles/shared.css'
 import GenericModal from "../../components/Modal/Modal";
 import Input from "../../components/Input/Input";
 
+// Import Hooks
+import { useExames } from "../../hooks/exames/useExames";
+import { useCriarExame } from "../../hooks/exames/useCriarExame";
+import { useEditarExame } from "../../hooks/exames/useEditarExame"
+import { useDeletarExame } from "../../hooks/exames/useDeletarExame";
+
+import { useDebounce } from "use-debounce";
 
 function Exames() {
-    const [exames, setExames] = useState([]);
+    // const [exames, setExames] = useState([]);
     const [modalShow, setModalShow] = useState(false);
     const [cod, setCod] = useState('')
     const [nome, setNome] = useState('')
     const [dupExame, setDupExame] = useState(false)
     const [edit, setEdit] = useState([])
 
+    const [page, setPage] = useState(1)
+
+    // Search
     const [searchId, setSearchId] = useState('')
     const [searchCod, setSearchCod] = useState('')
     const [searchNome, setSearchNome] = useState('')
 
-    const [page, setPage] = useState(1)
+    // Debounced
+    const [searchIdDebouced] = useDebounce(searchId, 600)
+    const [searchCodDebouced] = useDebounce(searchCod, 600)
+    const [searchNomeDebouced] = useDebounce(searchNome, 600)
 
-    const [total, setTotal] = useState(0);
+    // Listar exames
+    const {
+        data,
+        isLoading,
+        error: errorBuscarExames
+    } = useExames({
+        page,
+        searchId: searchIdDebouced,
+        searchCod: searchCodDebouced,
+        searchNome: searchNomeDebouced
+    });
 
-    const getExames = async () => {
-        try {
-            const res = await api.get(`/exames`, {
-                params: {
-                    page,
-                    limit: 5,
-                    searchId,
-                    searchCod,
-                    searchNome
-                }
-            });
+    const total = data?.total ?? [];
+    const exames = data?.data ?? [];
 
-            setExames(res.data.data);
-            setTotal(res.data.total);
-        } catch (error) {
-            console.log(error);
-        }
-    };
+    // Criar novo exame
+    const {
+        mutate: criarExame,
+        error: errorCriarExame
+    } = useCriarExame();
+
+    // Editar exame
+    const {
+        mutate: editarExame,
+        error: errorEditarExame
+    } = useEditarExame()
+
+    // Deletar exame
+    const {
+        mutate: deletarExame,
+        error: errorDeletarExame,
+    } = useDeletarExame();
 
     useEffect(() => {
         setPage(1);
     }, [searchId, searchCod, searchNome]);
-
-    useEffect(() => {
-        getExames();
-    }, [page, searchId, searchCod, searchNome]);
-
 
     function resetForm() {
         setModalShow(false)
         setCod('')
         setNome('')
         setEdit({})
-        getExames()
         setCod('')
         setNome('')
         setDupExame(true)
@@ -89,50 +108,56 @@ function Exames() {
 
         if (edit?.id) {
 
-            api.put(`/exames/${edit.id}/edit`, exame,
-                { withCredentials: true }
-
-            )
-                .then(() => {
+            editarExame({
+                id: edit.id,
+                exame,
+            }, {
+                onSuccess: () => {
                     toast.success('Exame editado com sucesso!')
                     resetForm()
-                    getExames()
-                })
+                },
+
+                onError: (err) => {
+                    if (err.response?.status === 500) {
+                        toast.error('O código do exame deve ser único.')
+                    } else {
+                        toast.error('Erro ao editar exame')
+                    }
+                }
+            })
 
         } else {
 
-            api.post(
-                '/exames',
-                exame,
-                { withCredentials: true }
-            )
-                .then(() => {
+            criarExame(exame, {
+                onSuccess: () => {
                     toast.success('Exame criado com sucesso!')
                     resetForm()
-                    getExames()
-                })
-                .catch((err) => {
+                },
+
+                onError: (err) => {
                     if (err.response?.status === 500) {
                         toast.error('O código do exame deve ser único.')
                     } else {
                         toast.error('Erro ao criar exame')
                     }
-                })
+                }
+            })
         }
     }
 
     function handleDelete(id) {
-        api.delete(`/exames/${id}/remove`,
-            { withCredentials: true }
-        )
-            .then(() => {
-                toast.success('Exame deletado com sucesso!')
-                getExames()
-            }).catch((error) => {
-                toast.error('Erro ao deletar exame!', error)
-            })
-    }
 
+        deletarExame(id, {
+            onSuccess: () => {
+                toast.success('Exame deletado com sucesso!')
+            },
+
+            onError: () => {
+                toast.error('Erro ao deletar exame!')
+            }
+        })
+
+    }
 
 
     function handleEdit(id, cod, nome, dupExame) {
@@ -142,10 +167,6 @@ function Exames() {
         setDupExame(dupExame === 'S')
         setModalShow(true);
     }
-
-
-    const listaParaMostrar = exames;
-
 
     return (
         <section className="container">
@@ -188,13 +209,22 @@ function Exames() {
                             <th></th>
                         </tr>
                     </thead>
+
                     <tbody>
-                        {exames.length === 0 ? (
+                        {isLoading ? (
                             <tr>
-                                <td colSpan="4">Nenhum exame registrado...</td>
+                                <td colSpan="4" style={{ textAlign: 'center' }}>
+                                    Carregando exames...
+                                </td>
                             </tr>
-                        ) : listaParaMostrar.length > 0 ? (
-                            listaParaMostrar.map((item, index) => (
+                        ) : errorBuscarExames ? (
+                            <tr>
+                                <td colSpan="4" style={{ textAlign: 'center' }}>
+                                    Erro ao carregar exames: {error.message}
+                                </td>
+                            </tr>
+                        ) : total > 0 ? (
+                            exames.map((item, index) => (
                                 <tr key={index} onDoubleClick={() => handleEdit(item.id, item.cod, item.nome, item.dupExame)}>
                                     <td>{item.id}</td>
                                     <td>{item.cod}</td>
@@ -211,7 +241,9 @@ function Exames() {
                             ))
                         ) : (
                             <tr>
-                                <td colSpan="4">Nenhum exame encontrado...</td>
+                                <td colSpan="4" style={{ textAlign: 'center' }}>
+                                    Nenhum exame cadastrado.
+                                </td>
                             </tr>
                         )}
                     </tbody>
@@ -285,7 +317,7 @@ function Exames() {
                 </form>
 
             </GenericModal>
-            <ToastContainer />
+            <ToastContainer limit={3}/>
         </section>
     );
 }
