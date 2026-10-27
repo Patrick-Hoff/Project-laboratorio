@@ -14,9 +14,16 @@ import '../../styles/shared.css'
 import GenericModal from '../../components/Modal/Modal'
 import Input from '../../components/Input/Input'
 
+import { useDebounce } from 'use-debounce';
+
+// Hooks
+import { useMedicos } from '../../hooks/medicos/useMedicos'
+import { useCriarMedico } from '../../hooks/medicos/useCriarMedico'
+import { useEditarMedico } from '../../hooks/medicos/useEditarMedico'
+import { useDeletarMedico } from '../../hooks/medicos/useDeletarMedico'
+
 function Medico() {
 
-    const [medicos, setMedicos] = useState([])
 
     const [nome, setNome] = useState('')
     const [crm, setCrm] = useState('')
@@ -24,40 +31,52 @@ function Medico() {
 
     const [edit, setEdit] = useState({})
     const [modalShow, setModalShow] = useState(false)
-    const [modalExcluir, setModalExcluir] = useState(false)
-
+    const [modalExcluir, setModalExcluir] = useState(null)
 
     const [page, setPage] = useState(1)
-    const [total, setTotal] = useState(0)
 
+    // Search
     const [searchNome, setSearchNome] = useState('')
     const [searchCrm, setSearchCrm] = useState('')
 
+    // Debouced
+    const [searchNomeDebouced] = useDebounce(searchNome, 600)
+    const [searchCrmDebouced] = useDebounce(searchCrm, 600)
+
+
     const limit = 5
 
+    // Listar medicos
+    const {
+        data,
+        isLoading,
+        error: errorBuscarMedicos
+    } = useMedicos({
+        page,
+        nome: searchNomeDebouced,
+        crm: searchCrmDebouced
+    });
 
-    const getMedicos = async () => {
-        try {
+    const medicos = data?.data ?? [];
+    const total = data?.total ?? [];
 
-            const params = new URLSearchParams({
-                nome: searchNome,
-                crm: searchCrm,
-                page,
-                limit
-            })
+    // Criar medico
+    const {
+        mutate: criarMedico,
+        error: errorCriarMedico
+    } = useCriarMedico();
 
-            const res = await api.get(`/medicos?${params}`)
-            setMedicos(res.data.data)
-            setTotal(res.data.total)
-        } catch (err) {
-            console.log(err)
-        }
-    }
+    // Editar medico
+    const {
+        mutate: editarMedico,
+        error: errorEditarMedico,
+    } = useEditarMedico();
 
-    useEffect(() => {
-        getMedicos()
-    }, [page, searchNome, searchCrm])
-
+    // Deletar Medico
+    const {
+        mutate: deletarMedico,
+        error: errorDeletarMedico,
+    } = useDeletarMedico();
 
     const resetForm = () => {
         setModalShow(false)
@@ -75,44 +94,61 @@ function Medico() {
         setModalShow(true)
     }
 
-    const handleDelete = async (id) => {
-
-        try {
-            await api.delete(`/medicos/${modalExcluir.id}`)
-            toast.success('Médico removido com sucesso!')
-            setModalExcluir(false)
-            getMedicos()
-        } catch (err) {
-            console.log(err)
-        }
+    const handleDelete = (id) => {
+        deletarMedico(id, {
+            onSuccess: () => {
+                toast.success('Médico removido com sucesso!')
+                setModalExcluir(null)
+            },
+            onError: (err) => {
+                toast.error(err.response?.data?.message ?? 'Erro ao deletar médico!')
+                setModalExcluir(null)
+            }
+        })
     }
 
     const handleSubmit = async (e) => {
         e.preventDefault()
 
-        const data = {
+        const medico = {
             nome: nome,
             crm: crm,
             estado: estado
         }
 
         if (edit.id) {
-            try {
-                await api.put(`/medicos/${edit.id}`, data)
-                toast.success('Médico atualizado com sucesso!')
-            } catch (err) {
-                console.log(err)
-            }
+            editarMedico({
+                id: edit.id,
+                medico,
+            }, {
+                onSuccess: () => {
+                    toast.success('Médico editado com sucesso!')
+                    resetForm()
+                },
+
+                onError: () => {
+                    toast.error(
+                        'Erro ao editar médico!'
+                    )
+                }
+            });
         } else {
-            try {
-                api.post(`/medicos`, data)
-                toast.success('Médico criado com sucesso')
-            } catch (err) {
-                console.log(err)
-            }
+            criarMedico(medico, {
+                onSuccess: () => {
+                    toast.success(
+                        'Médico cadastrado com sucesso!'
+                    )
+                    setModalShow(false)
+                    resetForm();
+                },
+
+                onError: () => {
+                    toast.error(
+                        'Erro ao cadastrar médico!'
+                    )
+                }
+            });
         }
-        resetForm()
-        getMedicos()
     }
 
     const nextPage = () => {
@@ -172,7 +208,20 @@ function Medico() {
                 </thead>
 
                 <tbody>
-                    {medicos.length > 0 ? (
+
+                    {isLoading ? (
+                        <tr>
+                            <td colSpan="4" style={{ textAlign: 'center' }}>
+                                Carregando medicos...
+                            </td>
+                        </tr>
+                    ) : errorBuscarMedicos ? (
+                        <tr>
+                            <td colSpan="4" style={{ textAlign: 'center' }}>
+                                Erro ao carregar medicos: {error.message}
+                            </td>
+                        </tr>
+                    ) : total > 0 ? (
                         medicos.map((medico) => (
                             <tr key={medico.id}>
                                 <td>{medico.id}</td>
@@ -184,15 +233,15 @@ function Medico() {
                                         <BiSolidCommentEdit onClick={() => handleEdit(medico)} />
                                     </span>
                                     <span>
-                                        <FaDeleteLeft onClick={() => setModalExcluir({ id: medico.id })} />
+                                        <FaDeleteLeft onClick={() => setModalExcluir(medico.id)} />
                                     </span>
                                 </td>
                             </tr>
                         ))
                     ) : (
                         <tr>
-                            <td colSpan="5" style={{ textAlign: 'center' }}>
-                                Nenhum médico cadastrado.
+                            <td colSpan="4" style={{ textAlign: 'center' }}>
+                                Nenhum medico cadastrado.
                             </td>
                         </tr>
                     )}
@@ -215,21 +264,21 @@ function Medico() {
 
             {/* Modal delete */}
             <GenericModal
-                show={modalExcluir}
-                onClose={() => setModalExcluir(false)}
+                show={modalExcluir !== null}
+                onClose={() => setModalExcluir(null)}
                 title="Deseja realmente excluir este médico?"
             >
                 <div className='container-button-modal'>
                     <button
                         className='btn-modal btn-cancelar'
-                        onClick={() => setModalExcluir(false)}
+                        onClick={() => setModalExcluir(null)}
                     >
                         Cancelar
                     </button>
 
                     <button
                         className='btn-modal btn-excluir'
-                        onClick={handleDelete}
+                        onClick={() => handleDelete(modalExcluir)}
                     >
                         Excluir
                     </button>
