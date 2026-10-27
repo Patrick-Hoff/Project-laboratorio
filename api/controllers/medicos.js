@@ -137,8 +137,7 @@ export const updateMedico = (req, res) => {
 }
 
 export const deleteMedico = (req, res) => {
-
-    const { id } = req.params;
+    const { id } = req.params
 
     const queryDelete = `
         DELETE FROM medicos
@@ -147,20 +146,19 @@ export const deleteMedico = (req, res) => {
 
     db.query(queryDelete, [id], (err, result) => {
         if (err) {
-            return res.status(500).json({
-                erro: "Erro interno no servidor"
-            })
+            if (err.errno === 1451) {
+                return res.status(409).json({
+                    message: 'Médico possui atendimentos vinculados e não pode ser excluído.'
+                })
+            }
+            console.error(err)
+            return res.status(500).json({ message: 'Erro ao excluir médico.' })
         }
 
         if (result.affectedRows === 0) {
-            return res.status(404).json({
-                erro: "Médico não encontrado"
-            })
+            return res.status(404).json({ message: 'Médico não encontrado.' })
         }
 
-        res.status(200).json({
-            mensagem: "Medico deletado com sucesso"
-        })
+        res.json({ message: 'Médico removido com sucesso.' })
     })
-
 }
