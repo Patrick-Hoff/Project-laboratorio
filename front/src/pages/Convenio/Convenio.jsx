@@ -1,10 +1,13 @@
-import React, { useState, useEffect, useRef } from "react";
-import { FaArrowRight, FaArrowLeft } from "react-icons/fa";
-import api from '../../services/api'
+import React, { useState, useEffect } from "react";
 import "./Convenio.css";
 
+// Import Hooks
+import { useConvenios } from "../../hooks/convenios/useConvenios";
+import { useCriarConvenio } from "../../hooks/convenios/useCriarConvenio";
+import { useEditarConvenio } from "../../hooks/convenios/useEditarConvenio";
+import { useDeletarConvenio } from "../../hooks/convenios/useDeletarConvenio";
+
 export default function ConveniosPage() {
-    const [convenios, setConvenios] = useState([]);
 
     const [novoConvenio, setNovoConvenio] = useState({
         cod: "",
@@ -22,34 +25,37 @@ export default function ConveniosPage() {
     const [searchConvenioCod, setSearchConvenioCod] = useState('')
     const [searchConvenio, setSearchConvenio] = useState('')
     const [page, setPage] = useState(1)
-    const [limit, setLimit] = useState(10)
-    const [total, setTotal] = useState(10)
+    const [limit] = useState(10)
 
     const [erro, setErro] = useState('')
-    const [sucess, setSucess] = useState('')
+    const [success, setSuccess] = useState('')
 
-    const getConvenio = async () => {
-        try {
-            const res = await api.get('/convenio', {
-                params: {
-                    cod: debouncedCod,
-                    nome: debouncedNome,
-                    page: page,
-                    limit: limit
-                }
-            })
-            setConvenios(res.data.data)
-            setTotal(res.data.total)
+    // Listar convenios
+    const {
+        data,
+        isLoading,
+        error: errorBuscarConvenios
+    } = useConvenios({
+        cod: debouncedCod,
+        nome: debouncedNome,
+        page: page,
+        limit: limit
+    });
 
-        } catch (err) {
-            console.log(err)
-        }
-    }
+    const total = data?.total ?? 0;
+    const convenios = data?.data ?? [];
+    const totalPages = Math.max(1, Math.ceil(total / limit));
 
-    useEffect(() => {
-        getConvenio()
-    }, [page, limit, debouncedCod, debouncedNome])
+    // Criar convenio
+    const { mutate: criarConvenio } = useCriarConvenio();
 
+    // Editar convenio
+    const { mutate: editarConvenio } = useEditarConvenio();
+
+    // Deletar convenio
+    const { mutate: deletarConvenio } = useDeletarConvenio();
+
+    // Debounce da pesquisa
     useEffect(() => {
         const timer = setTimeout(() => {
             setDebouncedCod(searchConvenioCod);
@@ -60,32 +66,49 @@ export default function ConveniosPage() {
         return () => clearTimeout(timer)
     }, [searchConvenioCod, searchConvenio])
 
-    const handleAdd = async () => {
-        try {
+    // Limpa as mensagens depois de 9 segundos
+    useEffect(() => {
+        if (!erro && !success) return;
 
-            if (!novoConvenio.cod || !novoConvenio.nome) return;
+        const timer = setTimeout(() => {
+            setErro('');
+            setSuccess('')
+        }, 9000);
 
-            await api.post('/convenio', novoConvenio)
-            getConvenio()
-            setSucess('Convênio criado com sucesso!')
+        return () => clearTimeout(timer);
+    }, [erro, success]);
 
-        } catch (err) {
-            setErro(err.response.data.error)
-        }
-        setNovoConvenio({ cod: "", nome: "" });
+    const handleAdd = () => {
+        if (!novoConvenio.cod || !novoConvenio.nome) return;
+
+        criarConvenio(novoConvenio, {
+            onSuccess: () => {
+                setErro('')
+                setSuccess('Convênio criado com sucesso!')
+                setNovoConvenio({ cod: "", nome: "" });
+            },
+
+            onError: (err) => {
+                setSuccess('')
+                setErro(err.response?.data?.error ?? 'Erro ao criar convênio')
+            }
+        })
     };
 
-    const handleDelete = async (id) => {
-        try {
+    const handleDelete = (id) => {
+        if (!window.confirm('Deseja realmente excluir este convênio?')) return
 
-            const res = await api.delete(`/convenio/${id}`)
-            setSucess(res.data.mensagem)
-            getConvenio()
-            setErro('')
+        deletarConvenio(id, {
+            onSuccess: (res) => {
+                setErro('')
+                setSuccess(res?.data?.mensagem ?? 'Convênio excluído com sucesso!')
+            },
 
-        } catch (err) {
-            setErro(err.response.data.error)
-        }
+            onError: (err) => {
+                setSuccess('')
+                setErro(err.response?.data?.error ?? 'Erro ao excluir convênio')
+            }
+        })
     };
 
     const iniciarEdicao = (convenio) => {
@@ -96,36 +119,30 @@ export default function ConveniosPage() {
         });
     };
 
-    const salvarEdicao = async (id) => {
+    const salvarEdicao = (id) => {
+        editarConvenio({
+            id,
+            convenio: dadosEditados
+        }, {
+            onSuccess: (res) => {
+                setErro('')
+                setSuccess(res?.data?.mensagem ?? 'Convênio editado com sucesso!')
+                setEditandoId(null);
+            },
 
-        try {
-
-            const res = await api.put(`/convenio/${id}`, dadosEditados)
-            setSucess(res.data.mensagem)
-            setEditandoId(null);
-            getConvenio()
-        } catch (err) {
-            console.log(err)
-        }
+            onError: (err) => {
+                setSuccess('')
+                setErro(err.response?.data?.error ?? 'Erro ao editar convênio')
+            }
+        })
     };
 
     const cancelarEdicao = () => {
         setEditandoId(null);
     };
 
-    useEffect(() => {
-        if (!erro && !sucess) return;
-
-        const timer = setTimeout(() => {
-            setErro('');
-            setSucess('')
-        }, 9000);
-
-        return () => clearTimeout(timer);
-    }, [erro, sucess]);
-
     function nextPage() {
-        setPage(prev => prev + 1)
+        if (page < totalPages) setPage(prev => prev + 1)
     }
 
     function prevPage() {
@@ -137,14 +154,15 @@ export default function ConveniosPage() {
             <div className="card">
                 <h1>Cadastro de Convênios</h1>
 
-                {erro && <p className="error">{error}</p>}
-                {sucess && <p className="sucess">{sucess}</p>}
+                {erro && <p className="error">{erro}</p>}
+                {success && <p className="success">{success}</p>}
 
                 {/* ===== FORMULÁRIO ===== */}
                 <div className="form-section">
                     <input
                         type="text"
                         placeholder="Código do convênio"
+                        maxLength="10"
                         value={novoConvenio.cod}
                         onChange={(e) =>
                             setNovoConvenio({
@@ -157,6 +175,7 @@ export default function ConveniosPage() {
                     <input
                         type="text"
                         placeholder="Nome do convênio"
+                        maxLength="100"
                         value={novoConvenio.nome}
                         onChange={(e) =>
                             setNovoConvenio({
@@ -176,6 +195,7 @@ export default function ConveniosPage() {
                             type="text"
                             placeholder="🔎 Pesquisar por código..."
                             className="search-input"
+                            value={searchConvenioCod}
                             onChange={(e) => setSearchConvenioCod(e.target.value)}
                         />
                     </div>
@@ -185,6 +205,7 @@ export default function ConveniosPage() {
                             type="text"
                             placeholder="🔎 Pesquisar por nome..."
                             className="search-input"
+                            value={searchConvenio}
                             onChange={(e) => setSearchConvenio(e.target.value)}
                         />
                     </div>
@@ -192,10 +213,14 @@ export default function ConveniosPage() {
 
                 {/* ===== LISTA ===== */}
                 <div className="lista">
-                    {convenios.length === 0 ? (
-                        <p style={{ textAlign: "center", color: "#777" }}>
-                            Nenhum convênio encontrado.
+                    {isLoading ? (
+                        <p style={{ textAlign: 'center' }}>Carregando convênios...</p>
+                    ) : errorBuscarConvenios ? (
+                        <p style={{ textAlign: 'center' }}>
+                            Erro ao carregar convênios: {errorBuscarConvenios.message}
                         </p>
+                    ) : convenios.length === 0 ? (
+                        <p style={{ textAlign: 'center' }}>Nenhum convênio cadastrado.</p>
                     ) : (
                         convenios.map((convenio) => (
                             <div key={convenio.id} className="convenio-item">
@@ -205,6 +230,7 @@ export default function ConveniosPage() {
                                             <input
                                                 className="edit-input"
                                                 type="text"
+                                                maxLength="10"
                                                 value={dadosEditados.cod}
                                                 onChange={(e) =>
                                                     setDadosEditados({
@@ -217,6 +243,7 @@ export default function ConveniosPage() {
                                             <input
                                                 className="edit-input"
                                                 type="text"
+                                                maxLength="100"
                                                 value={dadosEditados.nome}
                                                 onChange={(e) =>
                                                     setDadosEditados({
@@ -272,19 +299,15 @@ export default function ConveniosPage() {
 
                 {/* ===== PAGINAÇÃO ===== */}
                 <div className="pagination">
-                    <button
-                        onClick={page > 1 ? prevPage : null}
-                    >
+                    <button onClick={prevPage} disabled={page <= 1}>
                         Anterior
                     </button>
 
                     <span>
-                        Página {page} de {Math.ceil(total / limit)}
+                        Página {page} de {totalPages}
                     </span>
 
-                    <button
-                        onClick={page >= Math.ceil(total / limit) ? null : nextPage}
-                    >
+                    <button onClick={nextPage} disabled={page >= totalPages}>
                         Próxima
                     </button>
                 </div>
